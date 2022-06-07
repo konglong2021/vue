@@ -69,7 +69,7 @@
               </b-pagination>
             </div>
           </div>
-          <h3 class="text-center" v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
+          <h3 class="text-center" v-if="items.length === 0">មិនមានទិន្នន័យសម្រាប់ថ្ងៃនេះទេ</h3>
           <h4 style="display: none; font-weight: 900;">ទឹកប្រាក់សរុបប្រចាំថ្ងៃ : {{calculate(items) + "($)"}}</h4>
         </div>
       </b-container>
@@ -211,16 +211,17 @@ export default {
               let reportItem =[];
 
               let itemData = lastArray[i];
+              console.log(lastArray[i]);
               let productItem = self.products.find(product => product.id === itemData.product_id);
               if(productItem){
                 reportItem["product_id"] = productItem.id;
                 reportItem["name"] = (productItem["en_name"] + " " + productItem["kh_name"]);
 
-                reportItem["sale_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
+                reportItem["sale_qty"] = parseInt(itemData.qty) > 0 ? parseInt(itemData.qty) : 0;
                 reportItem["sale_price"] = itemData.sellprice ? parseFloat(itemData.sellprice) : 0;
                 reportItem["sub_total_sale_price"] = parseFloat(itemData.o_total) > 0 ? parseFloat(itemData.o_total) : 0;
 
-                reportItem["import_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
+                reportItem["import_qty"] = parseInt(itemData.quantity) > 0 ? parseInt(itemData.quantity) : 0;
                 reportItem["import_price"] = itemData.unitprice ? parseFloat(itemData.unitprice) : 0;
                 reportItem["sub_total_import_price"] = parseFloat(itemData.p_total) > 0 ? parseFloat(itemData.p_total) : 0;
               }

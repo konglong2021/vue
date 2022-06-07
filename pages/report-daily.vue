@@ -42,9 +42,9 @@
           <div class="spinner-grow text-muted"></div>
         </div>
         <div v-if="!isLoading">
-          <b-table striped hover :items="items" :fields="fields"></b-table>
+          <b-table v-if="items.length > 0" striped hover :items="items" :fields="fields"></b-table>
           <h4 style="display: none; font-weight: 900;">ទឹកប្រាក់សរុបប្រចាំថ្ងៃ : {{calculate(items) + "($)"}}</h4>
-          <h3 v-if="items.length === 0 && !dateFilter">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
+          <h3 v-if="items.length === 0" class="text-center">មិនមានទិន្នន័យសម្រាប់ថ្ងៃនេះទេ</h3>
         </div>
       </b-container>
     </div>
@@ -75,6 +75,8 @@ export default {
           customersList: [],
           warehouses: [{text: "ជ្រើសរើស ឃ្លាំងទំនិញ", value: null}],
           warehouse: null,
+          orders: [],
+          purchases: [],
         }
     },
     methods:{
@@ -160,49 +162,63 @@ export default {
           vm.$toast.error("getting data error ").goAway(2000);
         });
         },
-      async getAllOrderData($dateFilter){
-        if($dateFilter){
+      async getListOrders($dateFilter){
+        if($dateFilter) {
           let self = this;
-          self.items = [];
-          let lastDayOfCurrentMonth = self.getLastDayOfMonth().getDate();
-          self.isLoading = true;
-          self.getFullDate();
-          await self.$axios.post('/api/stock/detail' , {"from": self.getFullDate("01"), "to": self.getFullDate(lastDayOfCurrentMonth)}, {dateFilter: $dateFilter}).then(function (response) {
-              self.isLoading = false;
-              if(response && response.hasOwnProperty("data")){
-                let orders = response.data.order;
-                let purchases = response.data.purchase;
-                let lastArray;
-                if(purchases.length > orders.length){
-                  lastArray = purchases.map((item, i) => Object.assign({}, item, orders[i]));
-                }
-                else if(purchases.length < orders.length){
-                  lastArray = orders.map((item, i) => Object.assign({}, item, purchases[i]));
-                }
-                for(let i=0; i < lastArray.length; i++){
-                  let reportItem =[];
-
-                  let itemData = lastArray[i];
-                  let productItem = self.products.find(product => product.id === itemData.product_id);
-                  if(productItem){
-                    reportItem["product_id"] = productItem.id;
-                    reportItem["name"] = (productItem["en_name"] + " " + productItem["kh_name"]);
-
-                    reportItem["sale_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
-                    reportItem["sale_price"] = itemData.sellprice ? parseFloat(itemData.sellprice) : 0;
-                    reportItem["sub_total_sale_price"] = itemData.o_total ? parseFloat(itemData.o_total) : 0;
-
-                    reportItem["import_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
-                    reportItem["import_price"] = itemData.unitprice ? parseFloat(itemData.unitprice) : 0;
-                    reportItem["sub_total_import_price"] = itemData.p_total ? parseFloat(itemData.p_total) : 0;
-                  }
-                  self.items.push(reportItem);
-                }
-              }
+          await self.$axios.get('/api/today').then(function (response) {
+            if (response && response.hasOwnProperty("data") && response.data.data && response.data.data.length > 0) {
+              self.orders = self.cloneObject(response.data.data);
+            }
           }).catch(function (error) {
-              console.log(error);
-              self.$toast.error("getting data error ").goAway(2000);
+            console.log(error);
+            self.$toast.error("getting data error ").goAway(2000);
           });
+        }
+      },
+      async getListPurchases($dateFilter){
+        if($dateFilter) {
+          let self = this;
+          await self.$axios.get('/api/saletoday').then(function (response) {
+            if (response && response.hasOwnProperty("data")) {
+              self.purchases = self.cloneObject(response.data);
+            }
+          }).catch(function (error) {
+            console.log(error);
+            self.$toast.error("getting data error ").goAway(2000);
+          });
+        }
+      },
+      async getAllOrderData(){
+        let $currentDay = this.getFullDate();
+        this.getListOrders($currentDay);
+        this.getListPurchases($currentDay);
+        let lastArray = [];
+        if(this.purchases.length > this.orders.length){
+          lastArray = this.purchases.map((item, i) => Object.assign({}, item, this.orders[i]));
+        }
+        else if(this.purchases.length < this.orders.length){
+          lastArray = this.orders.map((item, i) => Object.assign({}, item, this.purchases[i]));
+        }
+        if(lastArray && lastArray.length > 0){
+          for(let i=0; i < lastArray.length; i++){
+            let reportItem =[];
+
+            let itemData = lastArray[i];
+            let productItem = this.products.find(product => product.id === itemData.product_id);
+            if(productItem){
+              reportItem["product_id"] = productItem.id;
+              reportItem["name"] = (productItem["en_name"] + " " + productItem["kh_name"]);
+
+              reportItem["sale_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
+              reportItem["sale_price"] = itemData.sellprice ? parseFloat(itemData.sellprice) : 0;
+              reportItem["sub_total_sale_price"] = itemData.o_total ? parseFloat(itemData.o_total) : 0;
+
+              reportItem["import_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
+              reportItem["import_price"] = itemData.unitprice ? parseFloat(itemData.unitprice) : 0;
+              reportItem["sub_total_import_price"] = itemData.p_total ? parseFloat(itemData.p_total) : 0;
+            }
+            this.items.push(reportItem);
+          }
         }
       },
       filterDataCustomerList(itemId){
@@ -241,13 +257,14 @@ export default {
         let month = (today.getMonth() + 1); //January is 0!
         return new Date(2008, month, 0);
       },
-      getFullDate($day){
+      getFullDate(){
         let today = new Date();
+        let dd = today.getDate();
+        let day = (dd < 10) ? ("0" + dd) : dd;
         let mm = (today.getMonth() + 1); //January is 0!
         let month = (mm < 10) ? ("0" + mm) : mm;
         let yyyy = today.getFullYear();
-
-        return (yyyy + "-" + month + "-" + $day);
+        return (yyyy + "-" + month + "-" + day);
       },
       calculatePrice($list){
         let totalSalePrice = [];
@@ -266,9 +283,7 @@ export default {
         let totalSale = totalSalePrice.reduce(function(total, num) {
             return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
           , 0);
-        console.log(parseFloat(totalSale) , parseFloat(totalImport));
         const lastPrice = (parseFloat(totalSale) - parseFloat(totalImport));
-        console.log(lastPrice);
         return parseFloat(lastPrice.toFixed(2));
       },
       calculateImportPrice($list){
@@ -297,10 +312,8 @@ export default {
       this.getProductList();
       this.getCustomerList();
       this.getWareHouseList();
-      if(this.dateFilter){
-        console.log(this.dateFilter);
-        this.getAllOrderData(this.dateFilter);
-      }
+      this.getAllOrderData();
+
     }
 }
 </script>
