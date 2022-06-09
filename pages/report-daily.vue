@@ -1,62 +1,62 @@
 <template>
   <b-container fluid class="bv-example-row main-page-content">
-    <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;border-bottom: 2px solid #e9edf2!important;">
-      <b-container>
-        <b-row style="padding-top: 35px;">
-          <b-col lg="4">
-            <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
-              <div class="card-body">
-                <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculatePrice(items) }} ($)</h4>
-                <div>
-                  ប្រាក់ចំនេញ សម្រាប់ថ្ងៃនេះ
-                </div>
-              </div>
-            </div>
-          </b-col>
-          <b-col lg="4">
-            <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
-              <div class="card-body">
-                <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculateImportPrice(items) }} ($)</h4>
-                <div>
-                  ប្រាក់ដើម សម្រាប់ថ្ងៃនេះ
-                </div>
-              </div>
-            </div>
-          </b-col>
-          <b-col lg="4">
-            <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
-              <div class="card-body">
-                <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculateSalePrice (items) }} ($)</h4>
-                <div>
-                  ប្រាក់លក់សរុប សម្រាប់ថ្ងៃនេះ
-                </div>
-              </div>
-            </div>
-          </b-col>
-        </b-row>
-      </b-container>
+    <div class="content-loading" v-if="isLoading">
+      <div class="spinner-grow text-muted"></div>
     </div>
-    <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">
-      <b-container>
-        <div style="display:inline-block;width:100%; margin-bottom: 20px;">
-          <div class="form-row-content-detail full-with">
-            <div class="form-column-label">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
-            <div class="form-column-input width-50-percentage">
-              <b-form-input type="date"></b-form-input>
+    <div v-if="!isLoading">
+      <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;border-bottom: 2px solid #e9edf2!important;">
+        <b-container>
+          <b-row style="padding-top: 35px;">
+            <b-col lg="4">
+              <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
+                <div class="card-body">
+                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculatePrice(items) }} ($)</h4>
+                  <div>
+                    ប្រាក់ចំនេញ សម្រាប់ថ្ងៃនេះ
+                  </div>
+                </div>
+              </div>
+            </b-col>
+            <b-col lg="4">
+              <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
+                <div class="card-body">
+                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculateImportPrice(items) }} ($)</h4>
+                  <div>
+                    ប្រាក់ដើម សម្រាប់ថ្ងៃនេះ
+                  </div>
+                </div>
+              </div>
+            </b-col>
+            <b-col lg="4">
+              <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
+                <div class="card-body">
+                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculateSalePrice (items) }} ($)</h4>
+                  <div>
+                    ប្រាក់លក់សរុប សម្រាប់ថ្ងៃនេះ
+                  </div>
+                </div>
+              </div>
+            </b-col>
+          </b-row>
+        </b-container>
+      </div>
+      <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">
+        <b-container>
+          <div style="display:inline-block;width:100%; margin-bottom: 20px;">
+            <div class="form-row-content-detail full-with">
+              <div class="form-column-label">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
+              <div class="form-column-input width-50-percentage">
+                <b-form-input type="date" v-model="dateFilter" v-on:change="changeFilterDate(dateFilter)"></b-form-input>
+              </div>
             </div>
           </div>
-        </div>
-        <div>
-          <div class="content-loading" v-if="isLoading">
-            <div class="spinner-grow text-muted"></div>
-          </div>
-          <div v-if="!isLoading">
+          <div>
             <b-table v-if="items.length > 0" striped hover :items="items" :fields="fields"></b-table>
             <h4 style="display: none; font-weight: 900;">ទឹកប្រាក់សរុបប្រចាំថ្ងៃ : {{calculate(items) + "($)"}}</h4>
             <h3 v-if="items.length === 0" class="text-center">មិនមានទិន្នន័យសម្រាប់ថ្ងៃនេះទេ</h3>
           </div>
-        </div>
-      </b-container>
+        </b-container>
+      </div>
     </div>
   </b-container>
 </template>
@@ -86,7 +86,7 @@ export default {
           warehouse: null,
           orders: [],
           purchases: [],
-          dateFilter: null
+          dateFilter: this.getFullDate()
         }
     },
     methods:{
@@ -127,8 +127,8 @@ export default {
           });
       },
       showModal(){
-            this.$refs['brand-form-modal'].show();
-        },
+        this.$refs['brand-form-modal'].show();
+      },
       async getProductList(){
         let vm = this;
         vm.products = [];
@@ -172,64 +172,59 @@ export default {
           vm.$toast.error("getting data error ").goAway(2000);
         });
         },
-      async getListOrders($dateFilter){
-        if($dateFilter) {
-          let self = this;
-          await self.$axios.get('/api/today').then(function (response) {
-            if (response && response.hasOwnProperty("data") && response.data.data && response.data.data.length > 0) {
-              self.orders = self.cloneObject(response.data.data);
-            }
-          }).catch(function (error) {
-            console.log(error);
-            self.$toast.error("getting data error ").goAway(2000);
-          });
-        }
-      },
-      async getListPurchases($dateFilter){
-        if($dateFilter) {
-          let self = this;
-          await self.$axios.get('/api/saletoday').then(function (response) {
-            if (response && response.hasOwnProperty("data")) {
-              self.purchases = self.cloneObject(response.data);
-            }
-          }).catch(function (error) {
-            console.log(error);
-            self.$toast.error("getting data error ").goAway(2000);
-          });
-        }
-      },
-      async getAllOrderData(){
-        let $currentDay = this.getFullDate();
-        this.getListOrders($currentDay);
-        this.getListPurchases($currentDay);
-        let lastArray = [];
-        if(this.purchases.length > this.orders.length){
-          lastArray = this.purchases.map((item, i) => Object.assign({}, item, this.orders[i]));
-        }
-        else if(this.purchases.length < this.orders.length){
-          lastArray = this.orders.map((item, i) => Object.assign({}, item, this.purchases[i]));
-        }
-        if(lastArray && lastArray.length > 0){
-          for(let i=0; i < lastArray.length; i++){
-            let reportItem =[];
-
-            let itemData = lastArray[i];
-            let productItem = this.products.find(product => product.id === itemData.product_id);
-            if(productItem){
-              reportItem["product_id"] = productItem.id;
-              reportItem["name"] = (productItem["en_name"] + " " + productItem["kh_name"]);
-
-              reportItem["sale_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
-              reportItem["sale_price"] = itemData.sellprice ? parseFloat(itemData.sellprice) : 0;
-              reportItem["sub_total_sale_price"] = itemData.o_total ? parseFloat(itemData.o_total) : 0;
-
-              reportItem["import_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
-              reportItem["import_price"] = itemData.unitprice ? parseFloat(itemData.unitprice) : 0;
-              reportItem["sub_total_import_price"] = itemData.p_total ? parseFloat(itemData.p_total) : 0;
-            }
-            this.items.push(reportItem);
+      async getListPurchases($apiLink, $dateFilter){
+        let self = this;
+        await self.$axios.get('/api/' + $apiLink + ($dateFilter ? $dateFilter : "")).then(function (response) {
+          if (response && response.hasOwnProperty("data")) {
+            self.purchases = self.cloneObject(response.data);
           }
-        }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
+      },
+      async getAllOrderData($filterDate){
+        let self = this;
+        let lastArray = [];
+        self.items = [];
+        self.isLoading = true;
+        await self.$axios.get('/api/buysell/' + $filterDate).then(function (response) {
+          if (response && response.hasOwnProperty("data") && response.data) {
+            self.isLoading = false;
+            let orders = self.cloneObject(response.data.order);
+            let purchases = self.cloneObject(response.data.purchase);
+            if(purchases.length > orders.length){
+              lastArray = purchases.map((item, i) => Object.assign({}, item, orders[i]));
+            }
+            else if(purchases.length < orders.length){
+              lastArray = orders.map((item, i) => Object.assign({}, item, purchases[i]));
+            }
+            if(lastArray && lastArray.length > 0){
+              for(let i=0; i < lastArray.length; i++){
+                let reportItem =[];
+
+                let itemData = lastArray[i];
+                let productItem = self.products.find(product => product.id === itemData.product_id);
+                if(productItem){
+                  reportItem["product_id"] = productItem.id;
+                  reportItem["name"] = (productItem["en_name"] + " " + productItem["kh_name"]);
+
+                  reportItem["sale_qty"] = itemData.qty ? parseInt(itemData.qty) : 0;
+                  reportItem["sale_price"] = itemData.sellprice ? parseFloat(itemData.sellprice) : 0;
+                  reportItem["sub_total_sale_price"] = itemData.o_total ? parseFloat(itemData.o_total) : 0;
+
+                  reportItem["import_qty"] = itemData.quantity ? parseInt(itemData.quantity) : 0;
+                  reportItem["import_price"] = itemData.unitprice ? parseFloat(itemData.unitprice) : 0;
+                  reportItem["sub_total_import_price"] = itemData.p_total ? parseFloat(itemData.p_total) : 0;
+                }
+                self.items.push(reportItem);
+              }
+            }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
       },
       filterDataCustomerList(itemId){
         if(this.customersList && this.customersList.length > 0){
@@ -315,6 +310,9 @@ export default {
         return totalSalePrice.reduce(function(total, num) {
             return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
           , 0);
+      },
+      changeFilterDate(filterDate){
+        this.getAllOrderData(filterDate);
       }
 },
 
@@ -322,7 +320,8 @@ export default {
       this.getProductList();
       this.getCustomerList();
       this.getWareHouseList();
-      this.getAllOrderData();
+      console.log(this.getFullDate());
+      this.getAllOrderData(this.getFullDate());
 
     }
 }
