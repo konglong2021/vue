@@ -577,3 +577,7 @@ body {
 .card-border-class-active{
   border-left-color: #ed0b4c!important
 }
+
+.width-163-px{
+  width: 163px !important;
+}
