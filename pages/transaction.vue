@@ -551,16 +551,16 @@
                       itemOrderDetail["kh_name"] = productData["kh_name"] ;
                       itemOrderDetail["product_id"] = productData["id"] ;
                       itemOrderDetail["qty"] = parseInt(orderDetailItem.quantity);
-                      itemOrderDetail["sale_price"] = productData["price"] ;
+                      itemOrderDetail["sale_price"] = parseFloat(orderDetailItem["sellprice"]) ;
                       itemOrderDetail["order_id"] = orderDetailItem.order_id;
                       itemOrderDetail["tr_id"] = orderDetailItem.order_id;
                       let subtotal = 0;
                       if(orderItem["discount"] > 0){
-                        let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(productData["price"]));
+                        let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                         subtotal = totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem);
                       }
                       else {
-                        subtotal = (parseInt(orderDetailItem.quantity) * parseFloat(productData["price"]));
+                        subtotal = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                       }
                       itemOrderDetail["subtotal"] = subtotal;
                       itemOrder[orderItem.id].push(itemOrderDetail);

@@ -111,5 +111,6 @@ export default {
   "label_date_purchase":"ថ្ងៃខែនាំចូល",
   "label_purchase_by":"នាំចូលដោយ",
   "label_supplier_name":"ឈ្មោះអ្នកផ្គត់ផ្គង់",
-  "label_import_price":"តម្លៃនាំចូល"
+  "label_import_price":"តម្លៃនាំចូល",
+  "label_paid": "បានសង"
 };

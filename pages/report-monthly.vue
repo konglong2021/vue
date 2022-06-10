@@ -98,7 +98,7 @@ export default {
       category: {},
       products: [],
       isLoading: false,
-      dateFilter: new Date().toISOString().slice(0, 10),
+      dateFilter: null,
       customers: [],
       customersList: [],
       warehouses: [{text: "ជ្រើសរើស ឃ្លាំងទំនិញ", value: null}],
@@ -107,7 +107,16 @@ export default {
       filterMonth: parseInt(this.getCurrentMonth()),
     }
   },
-  watch : {},
+  watch: {
+    products: {
+      handler: function(products) {
+        if(products.length > 0){
+          let defaultDateFilter = {"from": this.getFilterDateFistDayOfMonth(), "to": this.getFilterDateLastDayOfMonth()};
+          this.getAllOrderData(this.dateFilter ? this.dateFilter : defaultDateFilter);
+        }
+      }
+    }
+  },
   computed:{
     rows() {
       return this.items.length;
@@ -153,7 +162,7 @@ export default {
     showModal(){
       this.$refs['brand-form-modal'].show();
     },
-    async getProductList(){
+    /*async getProductList(){
       let vm = this;
       vm.products = [];
 
@@ -194,6 +203,24 @@ export default {
         console.log(error);
         vm.$toast.error("getting data error ").goAway(2000);
       });
+    },*/
+
+    async getProductList(){
+      let vm = this;
+      vm.products = [];
+      vm.productOptions= [];
+
+      await vm.$axios.get('/api/product').then(function (response) {
+        if(response && response.hasOwnProperty("data")){
+          if(response.data && response.data.length > 0) {
+            vm.totalRows = response.data.length;
+            vm.products = vm.cloneObject(response.data);
+          }
+        }
+      }).catch(function (error) {
+        console.log(error);
+        vm.$toast.error("getting data error ").goAway(2000);
+      });
     },
     async getAllOrderData($dateFilter){
       if($dateFilter){
@@ -211,7 +238,6 @@ export default {
               let reportItem =[];
 
               let itemData = lastArray[i];
-              console.log(lastArray[i]);
               let productItem = self.products.find(product => product.id === itemData.product_id);
               if(productItem){
                 reportItem["product_id"] = productItem.id;
@@ -344,6 +370,23 @@ export default {
 
       let dateFilter = {"from": (yyyy + "-" + mm + "-" + startDay), "to": ( yyyy + "-" + mm + "-" + lastDay)};
       this.getAllOrderData(dateFilter);
+    },
+    getFilterDateFistDayOfMonth(){
+      let today = new Date();
+      let mm = (today.getMonth() + 1); //January is 0!
+      let month = (mm < 10) ? ("0" + mm) : mm;
+      let yyyy = today.getFullYear();
+
+      return (yyyy + "-" + month + "-" + "01");
+    },
+    getFilterDateLastDayOfMonth(){
+      let today = new Date();
+      let yyyy = today.getFullYear();
+      let mm = (today.getMonth() + 1); //January is 0!
+      let month = (mm < 10) ? ("0" + mm) : mm;
+      let day = this.getLastDayOfMonth().getDate();
+
+      return (yyyy + "-" + month + "-" + day);
     }
   },
   mounted() {

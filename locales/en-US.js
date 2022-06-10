@@ -111,5 +111,6 @@ export default {
   "label_date_purchase":"Purchase Date",
   "label_purchase_by":"Purchase by",
   "label_supplier_name":"Supplier Name",
-  "label_import_price":"Import Price"
+  "label_import_price":"Import Price",
+  "label_paid": "បានសង"
 };
