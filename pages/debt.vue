@@ -343,7 +343,7 @@ export default {
 
         const totalGrandTotalArray = grandTotalArray.reduce(function(total, num) {
           return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
-          }, 0);
+        }, 0);
 
         const totalPaidArray = paidArray.reduce(function(total, num) {
             return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2) }
