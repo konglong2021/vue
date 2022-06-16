@@ -46,99 +46,95 @@
               <span class="margin-span-btn">{{$t('stock_in')}}</span>
               <i class="fa fa-plus" aria-hidden="true"></i>
             </b-button>
+            <b-button href="#" size="sm" variant="primary" title="Transfer product to new stock" @click="showTransferStock()">
+              <i class="fa fa-truck" aria-hidden="true"></i>
+              <span class="margin-span-btn">{{$t('stock_transfer')}}</span>
+            </b-button>
             <div style="display: inline-block; width: 13%; float: right; margin-right: 10px; margin-bottom: 10px">
               <b-form-select  class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
             </div>
           </div>
-          <div class="display-inline-block full-with" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
-            <div class="display-inline-block content-field-purchase float-left" >
-              <p class="text-danger" v-if="suppliers.length === 0 || products.length === 0">
-                មិនអាចបញ្ចូលទំនិញក្នុងស្តុកបានទេ ព្រោះ
-                <span v-if="suppliers.length === 0">មិនមានបញ្ចូលទិន្នន័យអ្នកផ្គត់ផ្គង់់, </span>
-                <span v-if="products.length === 0">មិនមានបញ្ចូលទិន្នន័យទំនិញ, </span>
-                សូមបង្កើត
-                <span v-if="suppliers.length === 0">ទិន្នន័យអ្នកផ្គត់ផ្គង់់</span>
-                <span v-if="products.length === 0">ទិន្នន័យទំនិញ</span>
-              </p>
-              <div>
-                <label class="label-with">{{$t('title_supplier')}}</label>
-                <b-form-select :disabled="suppliers.length === 0" class="form-control select-content-inline" v-model="purchase.supplier" :options="suppliers"></b-form-select>
-              </div>
-              <div class="margin-bottom-20">
-                <label class="label-with">{{ $t('title_warehouse') }}</label>
-                <b-form-select :disabled="warehouses.length === 0" class="form-control select-content-inline" v-model="purchase.warehouse" :options="warehouses"></b-form-select>
-              </div>
-              <div class="display-inline-block">
-                <b-button
-                  href="#" size="sm" variant="primary"
-                  title="Add product to stock"
-                  :disabled="(warehouses.length === 0 && suppliers.length === 0) || products.length === 0"
-                  @click="showExistingProductModal()">
-                  {{$t('title_add_product_to_stock')}}
-                </b-button>
-                <b-button
-                  v-show="purchase.supplier && purchase.warehouse && this.items.length > 0"
-                  href="#" size="sm" variant="success"
-                  title="Save stock" @click="submitPurchase()">
-                  {{$t('save_purchase')}}
-                </b-button>
-                <b-button
-                  href="#" size="sm" variant="danger"
-                  title="Discard stock" @click="discardPurchase()">
-                  {{$t('title_discard_add_stock')}}
-                </b-button>
-              </div>
-            </div>
-            <div class="display-inline-block content-field-purchase float-right">
-              <div>
-                <label class="label-with">ពន្ធ</label>
-                <b-form-select class="form-control select-content-inline" v-model="purchase.vat" :options="vats"></b-form-select>
-              </div>
-              <div class="margin-bottom-20">
-                <label class="label-with">Batch</label>
-                <b-form-input class="form-control select-content-inline display-inline-block" v-model="purchase.batch"></b-form-input>
-              </div>
-            </div>
-          </div>
-          <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
-            <h4 class="font-700">{{$t('product_list')}}</h4>
-            <b-table :items="items"
-              :fields="fields" stacked="md"
-              show-empty small
-            >
-              <template #cell(actions)="row">
-                <b-button size="sm" title="Adjust product select" variant="success" @click="adjustProductAdd(row.item, row.index, $event.target)">
-                  <i class="fa fa-edit"></i>
-                </b-button>
-                <b-button size="sm" variant="primary" title="Remove product select from list"  @click="showRemoveProductSelect(row.item, row.index, $event.target)" class="mr-1">
-                  <i class="fa fa-trash-o"></i>
-                </b-button>
-              </template>
-              <!-- check this url : https://bootstrap-vue.org/docs/components/table#tables -->
-            </b-table>
-          </div>
-          <div class="full-content">
-            <div class="content-loading" v-if="loadingFields.stockLoading || loadingFields.productListLoading">
-              <div class="spinner-grow text-muted"></div>
-            </div>
-            <b-table
-              class="content-table-scroll"
-              v-if="!loadingFields.stockLoading && isShowStockTable"
-              sticky-header="true"
-              :items="stockItems"
-              :fields="stockFields"
-              head-variant="light"
-            >
-              <template #cell(image)="row">
-                <div class="pro-img">
+          <div class="display-inline-block full-with">
+            <div class="display-inline-block full-with" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
+              <div class="display-inline-block content-field-purchase float-left" >
+                <p class="text-danger" v-if="suppliers.length === 0 || products.length === 0">
+                  មិនអាចបញ្ចូលទំនិញក្នុងស្តុកបានទេ ព្រោះ
+                  <span v-if="suppliers.length === 0">មិនមានបញ្ចូលទិន្នន័យអ្នកផ្គត់ផ្គង់់, </span>
+                  <span v-if="products.length === 0">មិនមានបញ្ចូលទិន្នន័យទំនិញ, </span>
+                  សូមបង្កើត
+                  <span v-if="suppliers.length === 0">ទិន្នន័យអ្នកផ្គត់ផ្គង់់</span>
+                  <span v-if="products.length === 0">ទិន្នន័យទំនិញ</span>
+                </p>
+                <div>
+                  <label class="label-with">{{$t('title_supplier')}}</label>
+                  <b-form-select :disabled="suppliers.length === 0" class="form-control select-content-inline" v-model="purchase.supplier" :options="suppliers"></b-form-select>
                 </div>
-              </template>
-            </b-table>
+                <div class="margin-bottom-20">
+                  <label class="label-with">{{ $t('title_warehouse') }}</label>
+                  <b-form-select :disabled="warehouses.length === 0" class="form-control select-content-inline" v-model="purchase.warehouse" :options="warehouses"></b-form-select>
+                </div>
+                <div class="display-inline-block">
+                  <b-button
+                    href="#" size="sm" variant="primary"
+                    title="Add product to stock"
+                    :disabled="(warehouses.length === 0 && suppliers.length === 0) || products.length === 0"
+                    @click="showExistingProductModal()">
+                    {{$t('title_add_product_to_stock')}}
+                  </b-button>
+                  <b-button
+                    v-show="purchase.supplier && purchase.warehouse && this.items.length > 0"
+                    href="#" size="sm" variant="success"
+                    title="Save stock" @click="submitPurchase()">
+                    {{$t('save_purchase')}}
+                  </b-button>
+                  <b-button
+                    href="#" size="sm" variant="danger"
+                    title="Discard stock" @click="discardPurchase()">
+                    {{$t('title_discard_add_stock')}}
+                  </b-button>
+                </div>
+              </div>
+            </div>
+            <transfer-stock v-model="stockTransfer" :warehouseOption="warehouseOption" :products="products"></transfer-stock>
+            <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
+              <h4 class="font-700">{{$t('product_list')}}</h4>
+              <b-table :items="items"
+                       :fields="fields" stacked="md"
+                       show-empty small
+              >
+                <template #cell(actions)="row">
+                  <b-button size="sm" title="Adjust product select" variant="success" @click="adjustProductAdd(row.item, row.index, $event.target)">
+                    <i class="fa fa-edit"></i>
+                  </b-button>
+                  <b-button size="sm" variant="primary" title="Remove product select from list"  @click="showRemoveProductSelect(row.item, row.index, $event.target)" class="mr-1">
+                    <i class="fa fa-trash-o"></i>
+                  </b-button>
+                </template>
+                <!-- check this url : https://bootstrap-vue.org/docs/components/table#tables -->
+              </b-table>
+            </div>
+            <div class="full-content" v-if="stockTransfer && stockTransfer.show === false">
+              <div class="content-loading" v-if="loadingFields.stockLoading || loadingFields.productListLoading">
+                <div class="spinner-grow text-muted"></div>
+              </div>
+              <b-table
+                class="content-table-scroll"
+                v-if="!loadingFields.stockLoading && isShowStockTable"
+                sticky-header="true"
+                :items="stockItems"
+                :fields="stockFields"
+                head-variant="light"
+              >
+                <template #cell(image)="row">
+                  <div class="pro-img">
+                  </div>
+                </template>
+              </b-table>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
     <add-new-product-modal v-model="newProductModal" @checkingProductAdd="checkingProductAdd($event)" /> <!--no need to import it will automatically rendering it -->
     <b-modal id="modal-create-supplier" ref="supplier-form-modal" size="lg"
              @hidden="onResetSupplier" :cancel-title="$t('label_cancel_button')"
@@ -287,7 +283,8 @@
   export default {
     data() {
       return {
-        newProductModal: {showModal:false},
+        stockTransfer: { show:false },
+        newProductModal: { showModal:false },
         purchaseModal:{show: false},
         loadingFields: {productListLoading: false, supplierListLoading: false, warehouseListLoading: false, stockLoading: true},
         items: [],
@@ -385,6 +382,7 @@
         searchInput: null,
         excelImportFile: null,
         warehouseList : [],
+        warehouseOption: []
       };
     },
     watch:{
@@ -392,6 +390,10 @@
         handler(val){
         },
         deep:true
+      },
+      stockTransfer: {
+        handler(val){
+        }
       }
     },
     methods: {
@@ -621,6 +623,7 @@
                 warehouseItem.value = data[index]["id"];
                 vm.warehouses.unshift(warehouseItem);
                 vm.warehouseList.unshift(data[index]);
+                vm.warehouseOption.push({text: (data[index]["name"] + " " + data[index]["address"]), value: data[index]["id"]});
               }
             }
           }
@@ -661,6 +664,10 @@
       showModal(){
         this.newProductModal.showModal = true;
       },
+      showTransferStock(){
+        this.stockTransfer.show = true;
+      },
+
       showSupplierModal(){
         this.$refs['supplier-form-modal'].show();
         this.supplier ={};
@@ -915,6 +922,7 @@
       this.getProductList();
       this.getAllWarehouse();
       this.showStockTable();
+      this.stockTransfer.show = false;
     }
   }
 </script>

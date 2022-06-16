@@ -153,6 +153,9 @@
                 vm.items.unshift(response.data.warehouse);
               }
             }
+            vm.$nextTick(() => {
+              vm.$refs['warehouse-form-modal'].hide();
+            });
           }).catch(function (error) {
             console.log(error);
             vm.$toast.error("Getting data error").goAway(3000);
@@ -172,6 +175,9 @@
                 }
               }
             }
+            vm.$nextTick(() => {
+              vm.$refs['warehouse-form-modal'].hide();
+            });
           }).catch(function (error) {
             console.log(error);
             vm.$toast.error("Getting data error").goAway(3000);

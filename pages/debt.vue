@@ -97,7 +97,7 @@
                   :fields="fields"
                   striped hover
                 ></b-table>
-                <h3 class="text-danger">សរុបទឹកប្រាក់ត្រូវសង : {{ calulateTotal () + "($)"}}</h3>
+                <h3 class="text-danger">សរុបទឹកប្រាក់ត្រូវសង : {{ calulateTotal (transactions) + "($)"}}</h3>
               </div>
             </div>
           </b-container>
@@ -108,6 +108,7 @@
 </template>
 <script>
 import {ValidationProvider} from "vee-validate";
+import {getTypeOf} from "static/js/amcharts/plugins/export/libs/jszip/jszip";
 
 export default {
   middleware: "local-auth",
@@ -125,7 +126,8 @@ export default {
         { key: 'customer', label: this.$t('label_customer_name')},
         {key: 'invoice_id', label: this.$t('label_number_invoice')},
         {key: 'paid', label: this.$t('label_paid')},
-        {key : 'grandtotal', label: this.$t('label_grand_total')}
+        {key : 'grandtotal', label: this.$t('label_grand_total')},
+        // {key : 'status', label: this.$t('label_status')}
       ],
       customer_select : null,
       customerOptions: [],
@@ -147,19 +149,61 @@ export default {
         self.transactions = [];
         if(response.data.hasOwnProperty("data")){
           self.transactionList = self.cloneObject(response.data.data);
-          let dataResponse = response.data.data;
-          for(let index=0; index < dataResponse.length; index++){
-            let item = dataResponse[index];
-            let dataItem = [];
-            dataItem["order_id"] =  item["order_id"];
-            dataItem["customer"] = item["customer"]["name"];
-            dataItem["invoice_id"] = item["order"]["invoice_id"];
-            dataItem["paid"] = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
-            dataItem["grandtotal"] = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
-            dataItem["receive"] = parseFloat(item["order"]["receive"]);
+          let dataResponse = self.cloneObject(response.data.data);
 
-            self.transactions.push(dataItem);
+          for(let index=0; index < dataResponse.length; index++){
+            let item = self.cloneObject(dataResponse[index]);
+            let dataItem = {"order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0};
+
+
+            if(self.transactions && self.transactions.length > 0){
+              let itemAlreadyAdd = self.transactions.find(order=> order.order_id === item.order_id);
+
+              if(!itemAlreadyAdd){
+                dataItem.order_id =  item["order_id"];
+                dataItem.customer = item["customer"]["name"];
+                dataItem.invoice_id = item["order"]["invoice_id"];
+                dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
+                dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+                self.transactions.push(dataItem);
+              }
+              else if(itemAlreadyAdd) {
+                if(
+                  parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["order"]["grandtotal"])
+                  && (parseFloat(itemAlreadyAdd["paid"]) < parseFloat(item["paid"]))
+                ){
+                  let indexItem = self.transactions.indexOf(itemAlreadyAdd);
+                  self.transactions.splice(indexItem, 1);
+
+                  dataItem.order_id =  item["order_id"];
+                  dataItem.customer = item["customer"]["name"];
+                  dataItem.invoice_id = item["order"]["invoice_id"];
+                  dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
+                  dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+                  if(parseFloat(item["order"]["grandtotal"]) > parseFloat(item["paid"])){
+                    self.transactions.push(dataItem);
+                  }
+                }
+                else if(parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["order"]["grandtotal"])
+                  && (parseFloat(itemAlreadyAdd["paid"]) === parseFloat(item["paid"]))
+                  && (parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["paid"]))
+                ){
+                  let indexItem = self.transactions.indexOf(itemAlreadyAdd);
+                  self.transactions.splice(indexItem, 1);
+                }
+              }
+            }
+            else {
+              dataItem.order_id =  item["order_id"];
+              dataItem.customer = item["customer"]["name"];
+              dataItem.invoice_id = item["order"]["invoice_id"];
+              dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
+              dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+              self.transactions.push(dataItem);
+            }
           }
+          self.transactions.sort(self.compare);
+          console.log(self.transactions);
         }
       }).catch(function (error) {
         self.$toast.error("getting data error ").goAway(2000);
@@ -244,23 +288,28 @@ export default {
         if(self.payment > 0){
           let newTransactions = [];
           let payment = self.payment;
-          self.transactions.sort(self.compare);
+
           for (let index=0; index < self.transactions.length; index++) {
-            let transaction = self.cloneObject(self.transactions[index]);
             let order_id = self.transactions[index]["order_id"];
-            let newTransactionItem = [];
+            let grandtotal = parseFloat(self.transactions[index]["grandtotal"]);
+            let paid = parseFloat(self.transactions[index]["paid"]);
+
+            let newTransactionItem = {"order_id": null, "paid": 0, "pay_method": "Cash"};
+            newTransactionItem["order_id"] = order_id;
+            newTransactionItem["pay_method"] = self.paymentMethod;
 
             if(payment > 0){
-              let orderPayment = (parseFloat(payment) >= parseFloat(self.transactions[index].grandtotal)) ? parseFloat(self.transactions[index].grandtotal) : parseFloat(payment);
-              transaction.paid = parseFloat(self.transactions[index].paid) > 0 ? (parseFloat(self.transactions[index].paid) + (orderPayment > 0 ? orderPayment : 0)).toFixed(2) : (orderPayment > 0 ? orderPayment.toFixed(2) : 0);
-              payment = (parseFloat(payment) >= parseFloat(self.transactions[index].grandtotal)) ? (parseFloat(payment) - parseFloat(self.transactions[index].grandtotal)) : 0;
+              let orderPayment = ((paid > 0) ? (grandtotal - paid) : grandtotal);
+              let calculatePaid = (paid > 0 ? orderPayment.toFixed(2) : (orderPayment > 0 ? (parseFloat(payment) > grandtotal ? orderPayment.toFixed(2) : parseFloat(payment)) : 0));
+              let total = parseFloat(calculatePaid).toFixed(2);
+              console.log(typeof(total));
+              newTransactionItem.paid = total;
+              payment = (parseFloat(payment) - (parseFloat(payment) > 0 ? orderPayment : 0)).toFixed(2);
             }
-            newTransactionItem["order_id"] = order_id;
-            newTransactionItem["paid"] = transaction.paid;
-            newTransactionItem["pay_method"] = self.paymentMethod;
-            newTransactions.push({"order_id": order_id, "paid": transaction.paid, pay_method : self.paymentMethod});
+            if(parseFloat(newTransactionItem.paid) > 0){
+              newTransactions.push(newTransactionItem);
+            }
           }
-          console.log(newTransactions);
           self.isSubmit = true;
           if(newTransactions && newTransactions.length > 0){
             await self.$axios.post('/api/transaction', {transactions: newTransactions }).then(function (response) {
@@ -275,42 +324,32 @@ export default {
       }
     },
     compare(a, b) {
-      if (parseFloat(a.grandtotal) > parseFloat(b.grandtotal))
-        return -1;
-      if (parseFloat(a.grandtotal) < parseFloat(b.grandtotal))
-        return 1;
+      if (parseFloat(a.grandtotal) > parseFloat(b.grandtotal)) return 1;
+      if (parseFloat(a.grandtotal) < parseFloat(b.grandtotal)) return -1;
       return 0;
     },
-    calulateTotal(){
-      if(this.transactions && this.transactions.length > 0){
+    calulateTotal(transactions){
+      if(transactions && transactions.length > 0){
         let paidArray = [];
         let receiveArray = [];
         let grandTotalArray = [];
 
-        Object.entries(this.transactions).forEach(([key, val]) => {
-          paidArray.push(parseFloat(val.paid));
-        });
-        Object.entries(this.transactions).forEach(([key, val]) => {
-          receiveArray.push(parseFloat(val.receive));
-        });
-
-        Object.entries(this.transactions).forEach(([key, val]) => {
+        Object.entries(transactions).forEach(([key, val]) => {
           grandTotalArray.push(parseFloat(val.grandtotal));
         });
-
-        const totalPaidArray = paidArray.reduce(function(total, num) {
-            return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
-          , 0);
-
-        const totalReceiveArray = receiveArray.reduce(function(total, num) {
-            return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
-          , 0);
+        Object.entries(transactions).forEach(([key, val]) => {
+          paidArray.push(parseFloat(val.paid));
+        });
 
         const totalGrandTotalArray = grandTotalArray.reduce(function(total, num) {
-            return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
+          return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
+        }, 0);
+
+        const totalPaidArray = paidArray.reduce(function(total, num) {
+            return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2) }
           , 0);
 
-        const totalNeedPayment = parseFloat(totalGrandTotalArray) - (parseFloat(totalPaidArray) + parseFloat(totalReceiveArray));
+        const totalNeedPayment = (parseFloat(totalGrandTotalArray) - parseFloat(totalPaidArray));
         return totalNeedPayment.toFixed(2);
       }
     }
