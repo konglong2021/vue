@@ -73,6 +73,7 @@
     width: 100%;
     padding-top: 10px;
     padding-left: 16px;
+    padding-right: 16px;
     border-radius: 5px;
     display: inline-block;
     background-color: #fff;

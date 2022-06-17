@@ -112,5 +112,7 @@ export default {
   "label_purchase_by":"នាំចូលដោយ",
   "label_supplier_name":"ឈ្មោះអ្នកផ្គត់ផ្គង់",
   "label_import_price":"តម្លៃនាំចូល",
-  "label_paid": "បានសង"
+  "label_paid": "បានសង",
+  "label_status":"ស្ថានភាព",
+  "stock_transfer":"ផ្ទេរទំនិញ",
 };

@@ -1,11 +1,11 @@
 .main-screen {
-    background: url(/images/home-menu-bg-overlay.svg), linear-gradient(to right bottom, #77717e, #c9a8a9);
-    background-size: cover;
-    height: 100vh;
+  background: url(/images/home-menu-bg-overlay.svg), linear-gradient(to right bottom, #77717e, #c9a8a9);
+  background-size: cover;
+  height: 100vh;
   font-family: Arial, "Khmer OS Bokor", sans-serif;
 }
 .clearboth{
-    clear: both;
+  clear: both;
 }
 .main-page-content{
   font-family: Arial, "Khmer OS Bokor", sans-serif;
@@ -44,7 +44,9 @@ body {
 .width-40-percentage{
   width: 40%;
 }
-
+.width-59-percentage{
+  width: 59%;
+}
 .width-48-percentage{
   width: 48%;
 }
@@ -56,6 +58,10 @@ body {
   width: 50%;
 }
 
+.width-49-percentage{
+  width: 49%;
+}
+
 .width-45-percentage{
   width: 45%;
 }
@@ -63,12 +69,43 @@ body {
 .width-30-percentage{
   width: 30%;
 }
+.width-32-percentage{
+  width: 32%;
+}
 
 .width-35-percentage{
   width: 35%;
 }
+
+.width-58-percentage{
+  width: 58%;
+}
+
 .max-width-60-percentage{
   max-width: 60%;
+}
+
+.width-66-percentage{
+  width: 66%;
+}
+
+.width-67-percentage{
+  width: 67%;
+}
+
+.width-70-percentage{
+  width: 70%;
+}
+
+.width-68-percentage{
+  width: 68%;
+}
+
+.width-69-percentage{
+  width: 69%;
+}
+.width-75-percentage{
+  width: 75%;
 }
 
 .margin-top-25{
@@ -134,7 +171,9 @@ body {
   height: auto !important;
   padding: 3px !important;
 }
-
+.width-63-percentage{
+  width: 63%;
+}
 .label-with{
   width: 30%;
 }
@@ -180,6 +219,13 @@ body {
   width: 40%;
 }
 
+.width-74-percentage{
+  width: 74%;
+}
+
+.margin-bottom-50{
+  margin-bottom: 50px;
+}
 .margin-bottom-20{
   margin-bottom: 20px;
 }
@@ -239,7 +285,9 @@ body {
 .width-3-percentage{
   width: 3%
 }
-
+.width-33-percentage{
+  width: 33%
+}
 
 
 
@@ -520,9 +568,16 @@ body {
 .min-height-43-px{
   min-height: 43px;
 }
+.min-height-40-px{
+  min-height: 40px;
+}
 .content-multiple-select{
   margin: 0;
   padding: 0;
+}
+
+.font-size-22{
+  font-size: 22px;
 }
 .content-multiple-select .multiselect__placeholder{
   color: #000000;
@@ -580,4 +635,11 @@ body {
 
 .width-163-px{
   width: 163px !important;
+}
+
+.color-info{
+  color: #17a2b8;
+}
+.color-success{
+  color: #28a745;
 }

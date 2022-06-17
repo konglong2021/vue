@@ -46,7 +46,7 @@
               <span class="margin-span-btn">{{$t('stock_in')}}</span>
               <i class="fa fa-plus" aria-hidden="true"></i>
             </b-button>
-            <b-button href="#" size="sm" variant="primary" title="Transfer product to new stock" @click="showTransferStock()">
+            <b-button v-if="stockTransfer.show === false" href="#" size="sm" variant="primary" title="Transfer product to new stock" @click="showTransferStock()">
               <i class="fa fa-truck" aria-hidden="true"></i>
               <span class="margin-span-btn">{{$t('stock_transfer')}}</span>
             </b-button>
@@ -95,7 +95,7 @@
                 </div>
               </div>
             </div>
-            <transfer-stock v-model="stockTransfer" :warehouseOption="warehouseOption" :products="products"></transfer-stock>
+            <transfer-stock v-model="stockTransfer" :warehouseOption="warehouseOption" :products="productListOptionForTransfer" :productList="productListForTransfer"></transfer-stock>
             <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
               <h4 class="font-700">{{$t('product_list')}}</h4>
               <b-table :items="items"
@@ -382,7 +382,9 @@
         searchInput: null,
         excelImportFile: null,
         warehouseList : [],
-        warehouseOption: []
+        warehouseOption: [],
+        productListForTransfer: [],
+        productListOptionForTransfer: []
       };
     },
     watch:{
@@ -397,17 +399,61 @@
       }
     },
     methods: {
+      async getListProductForTransferStock($warehouse){
+        let self = this;
+        self.productListForTransfer = [];
+        self.productListOptionForTransfer = [];
+
+        await self.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))).then(function (response) {
+          if(response && response.hasOwnProperty("data")){
+            let dataResponse = response.data;
+            if(dataResponse && dataResponse.length > 0){
+              self.totalRows = response.data.length;
+
+              for(let i=0; i < dataResponse.length; i++){
+                let productList = dataResponse[i].product;
+                if(productList && productList.length > 0){
+                  for(let index=0; index < productList.length; index++){
+                    let productOptionItem =  { name: '', value: null};
+                    productOptionItem.name = (productList[index].en_name + " - " + productList[index].kh_name + " (" + productList[index].code + ")");
+                    productOptionItem.value = productList[index].id;
+
+                    self.productListForTransfer.unshift(productList[index]);
+                    self.productListOptionForTransfer.unshift(productOptionItem);
+                  }
+                }
+                else if(productList && productList.hasOwnProperty("id")){
+                  let productOptionItem =  { name: '', value: null};
+                  productOptionItem.name = (productList.en_name + " - " + productList.kh_name + " (" + productList.code + ")");
+                  productOptionItem.value = productList.id;
+
+                  self.productListForTransfer.unshift(productList);
+                  self.productListOptionForTransfer.unshift(productOptionItem);
+                }
+              }
+            }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
+      },
+      generateImageUrlDisplay(img){
+        if (typeof window !== "undefined") {
+          return window.location.protocol + "//" + window.location.hostname + ":8000/" + "storage/img/" + img;
+        }
+      },
       selectedWarehouse(warehouse){
         if(warehouse){
           this.showStockTable(warehouse);
         }
       },
-      showStockTable(){
+      showStockTable($warehouse){
         this.isShowStockTable = true;
         let vm = this;
         vm.stockItems = [];
         vm.loadingFields.stockLoading = true;
-        vm.$axios.get('/api/stockbywarehouse/' + vm.$store.$cookies.get('storeItem'))
+        vm.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')))
           .then(function (response) {
             if(response.data){
               vm.loadingFields.stockLoading = false;
@@ -919,6 +965,7 @@
       }
     },
     mounted() {
+      this.getListProductForTransferStock();
       this.getProductList();
       this.getAllWarehouse();
       this.showStockTable();

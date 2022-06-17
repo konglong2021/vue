@@ -13,8 +13,8 @@
           </div>
         </div>
       </div>
-      <div class="content-product content-order-list">
-        <div class="content-container-with-border-bottom">
+      <div class="content-product content-order-list display-inline-block overflow-hidden">
+        <div class="content-container-with-border-bottom display-inline-block full-with">
           <b-container>
             <b-row style="padding-top: 35px;">
               <b-col lg="4">
@@ -50,7 +50,7 @@
             </b-row>
           </b-container>
         </div>
-        <div class="content-container-no-border-bottom">
+        <div class="content-container-no-border-bottom display-inline-block full-with">
           <b-container style="margin-top: 20px;">
             <div class="display-inline-block full-with float-left" style="padding-bottom: 15px;">
               <div class="float-left" style="width: 50%">
@@ -88,7 +88,7 @@
             <div class="content-loading" v-if="isLoading">
               <div class="spinner-grow text-muted"></div>
             </div>
-            <div v-if="!isLoading">
+            <div v-if="!isLoading" class="display-inline-block full-with">
               <div v-if="transactions && transactions.length > 0">
                 <b-table
                   style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"
@@ -99,6 +99,7 @@
                 ></b-table>
                 <h3 class="text-danger">សរុបទឹកប្រាក់ត្រូវសង : {{ calulateTotal (transactions) + "($)"}}</h3>
               </div>
+              <div class="display-inline-block full-with" v-if="transactions && transactions.length === 0"><h2 class="text-center color-info">មិនមានទិន្នន័យអ្នកជំពាក់ទេ</h2></div>
             </div>
           </b-container>
         </div>
@@ -145,16 +146,17 @@ export default {
   methods: {
     async getListAllDebt($customerId){
       let self = this;
+      self.isLoading = true;
       await self.$axios.get('/api/transaction' + ($customerId ? "/" + $customerId : "")).then(function (response) {
         self.transactions = [];
         if(response.data.hasOwnProperty("data")){
+          self.isLoading = false;
           self.transactionList = self.cloneObject(response.data.data);
           let dataResponse = self.cloneObject(response.data.data);
 
           for(let index=0; index < dataResponse.length; index++){
             let item = self.cloneObject(dataResponse[index]);
             let dataItem = {"order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0};
-
 
             if(self.transactions && self.transactions.length > 0){
               let itemAlreadyAdd = self.transactions.find(order=> order.order_id === item.order_id);
@@ -194,16 +196,17 @@ export default {
               }
             }
             else {
-              dataItem.order_id =  item["order_id"];
-              dataItem.customer = item["customer"]["name"];
-              dataItem.invoice_id = item["order"]["invoice_id"];
-              dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
-              dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
-              self.transactions.push(dataItem);
+              if(!item["order"]["status"] || (item["order"]["status"] && item["order"]["status"] === 0)){
+                dataItem.order_id =  item["order_id"];
+                dataItem.customer = item["customer"]["name"];
+                dataItem.invoice_id = item["order"]["invoice_id"];
+                dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
+                dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+                self.transactions.push(dataItem);
+              }
             }
           }
           self.transactions.sort(self.compare);
-          console.log(self.transactions);
         }
       }).catch(function (error) {
         self.$toast.error("getting data error ").goAway(2000);
@@ -302,8 +305,7 @@ export default {
               let orderPayment = ((paid > 0) ? (grandtotal - paid) : grandtotal);
               let calculatePaid = (paid > 0 ? orderPayment.toFixed(2) : (orderPayment > 0 ? (parseFloat(payment) > grandtotal ? orderPayment.toFixed(2) : parseFloat(payment)) : 0));
               let total = parseFloat(calculatePaid).toFixed(2);
-              console.log(typeof(total));
-              newTransactionItem.paid = total;
+              newTransactionItem.paid = parseFloat(total);
               payment = (parseFloat(payment) - (parseFloat(payment) > 0 ? orderPayment : 0)).toFixed(2);
             }
             if(parseFloat(newTransactionItem.paid) > 0){
@@ -314,7 +316,7 @@ export default {
           if(newTransactions && newTransactions.length > 0){
             await self.$axios.post('/api/transaction', {transactions: newTransactions }).then(function (response) {
               self.$toast.success( "Submit data successfully").goAway(2000);
-              console.log(response);
+              self.getListAllDebt();
             }).catch(function (error) {
               self.$toast.error("getting data error ").goAway(2000);
               console.log(error);

@@ -112,5 +112,7 @@ export default {
   "label_purchase_by":"Purchase by",
   "label_supplier_name":"Supplier Name",
   "label_import_price":"Import Price",
-  "label_paid": "បានសង"
+  "label_paid": "Paid",
+  "label_status":"status",
+  "stock_transfer":"Stock Transfer",
 };

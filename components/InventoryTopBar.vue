@@ -16,7 +16,12 @@
         </li>
         <li class="menu-text-item">
           <a href="/purchases">
-            <span><i class="fa fa-balance-scale" aria-hidden="true"></i> ប្រតិបត្តការបញ្ចូលក្នុងស្តុក</span>
+            <span><i class="fa fa-recycle" aria-hidden="true"></i>  ប្រតិបត្តការបញ្ចូលក្នុងស្តុក</span>
+          </a>
+        </li>
+        <li class="menu-text-item">
+          <a href="/transfer">
+            <span><i class="fa fa-truck" aria-hidden="true"></i>  ផ្ទេរស្តុក</span>
           </a>
         </li>
         <li class="menu-text-item">
