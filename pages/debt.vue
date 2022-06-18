@@ -242,6 +242,7 @@ export default {
               let itemAlreadyAdd = self.transactions.find(order=> order.order_id === item.order_id);
                let ArrayTransactionOrder = dataResponse.filter(order=> order.order_id === item.order_id);
                let totalPaidArray = [];
+               console.log(ArrayTransactionOrder);
 
                Object.entries(ArrayTransactionOrder).forEach(([key, val]) => {
                  totalPaidArray.push(parseFloat(val.paid));
@@ -249,6 +250,8 @@ export default {
                const totalAllPaidOfOrderId = totalPaidArray.reduce(function(total, num) {
                  return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
                }, 0);
+
+               console.log(totalAllPaidOfOrderId);
 
               if(!itemAlreadyAdd){
                 let created_at = new Date(item["created_at"]);
@@ -282,18 +285,21 @@ export default {
                   dataItem.invoice_id = item["order"]["invoice_id"];
                   dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
                   dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
-                  if(item["order"].invoice_id === itemAlreadyAdd.invoice_id && parseFloat(item["paid"]) > parseFloat(itemAlreadyAdd.paid)){
-                    let indexToRemove = self.transactions.indexOf(itemAlreadyAdd);
-                    self.transactions.splice(indexToRemove, 1);
-
-                    dataItem.grandTotalByOrderId = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+                  if(item["order"].invoice_id === itemAlreadyAdd.invoice_id){
+                    if(parseFloat(item["paid"]) > parseFloat(itemAlreadyAdd.paid) && parseFloat(itemAlreadyAdd.paid) === 0){
+                      let indexToRemove = self.transactions.indexOf(itemAlreadyAdd);
+                      self.transactions.splice(indexToRemove, 1);
+                    }
+                    if(parseFloat(item["paid"]) > parseFloat(itemAlreadyAdd.paid)){
+                       dataItem.grandTotalByOrderId = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+                    }
                     self.transactions.push(dataItem);
-                  }
+                 }
                 }
               }
             }
             else {
-              if(!item["order"]["status"] || (item["order"]["status"] && item["order"]["status"] === 0)){
+              if(!item["order"]["status"] || (item["order"]["status"] && parseInt(item["order"]["status"]) === 0)){
                 let created_at = new Date(item["created_at"]);
                 let dd = created_at.getDate();
                 let mm = created_at.getMonth() + 1;
