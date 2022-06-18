@@ -68,13 +68,13 @@
               </div>
               <div class="display-inline-block float-left" style="width: 49%;" >
                 <div class="display-inline-block float-right" style="margin-bottom: 10px;">
-                  <label class="font-weight-bold font-size-16">បញ្ចូលចំនួនលុយត្រូវសង : </label>
+                  <label class="font-weight-bold font-size-16">បញ្ចូលប្រភេទការសង : </label>
                   <b-form-select class="form-control input-content min-height-43-px display-inline-block width-163-px" style="width: auto;" v-model="paymentMethod" :options="paymentMethodOption"></b-form-select>
                 </div>
                 <div class="display-inline-block float-right" v-if="paymentMethod">
                   <div class="display-inline-block" v-if="customer_select">
                     <label class="font-weight-bold font-size-16">បញ្ចូលចំនួនលុយត្រូវសង : </label>
-                    <b-form-input type="number" class="form-control min-height-43-px display-inline-block width-163-px" style="width: auto;" v-model="payment"></b-form-input>
+                    <b-form-input type="number" class="form-control min-height-43-px display-inline-block width-163-px" style="width: auto;" v-model="payment" v-on:change="checkToEnableBtn()"></b-form-input>
                     <span class="text-danger" v-if="checkingPaymentInput() && payment > 0 && isSubmit === false">មិនអាចបញ្ចូលចំនួនលើស</span>
                   </div>
                 </div>
@@ -91,7 +91,9 @@
             <div v-if="!isLoading" class="display-inline-block full-with">
               <div v-if="transactions && transactions.length > 0">
                 <b-table
-                  style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"
+                  style="max-height: calc(100vh - 500px) !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; "
+                  sticky-header="true"
+                  head-variant="light"
                   table-class="table-product-detail"
                   :items="transactions"
                   :fields="fields"
@@ -235,10 +237,19 @@ export default {
 
           for(let index=0; index < dataResponse.length; index++){
             let item = self.cloneObject(dataResponse[index]);
-            let dataItem = {date:null, "order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0};
+            let dataItem = {"order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0, "grandTotalByOrderId": 0};
 
             if(self.transactions && self.transactions.length > 0){
               let itemAlreadyAdd = self.transactions.find(order=> order.order_id === item.order_id);
+               let ArrayTransactionOrder = dataResponse.filter(order=> order.order_id === item.order_id);
+               let totalPaidArray = [];
+
+               Object.entries(ArrayTransactionOrder).forEach(([key, val]) => {
+                 totalPaidArray.push(parseFloat(val.paid));
+               });
+               const totalAllPaidOfOrderId = totalPaidArray.reduce(function(total, num) {
+                 return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
+               }, 0);
 
               if(!itemAlreadyAdd){
                 let created_at = new Date(item["created_at"]);
@@ -253,12 +264,12 @@ export default {
                 dataItem.invoice_id = item["order"]["invoice_id"];
                 dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
                 dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+                dataItem.grandTotalByOrderId = dataItem.grandtotal;
                 self.transactions.push(dataItem);
               }
               else if(itemAlreadyAdd) {
                 if(
-                  parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["order"]["grandtotal"])
-                  && (parseFloat(itemAlreadyAdd["paid"]) < parseFloat(item["paid"]))
+                  parseFloat(itemAlreadyAdd["grandtotal"]) > parseFloat(totalAllPaidOfOrderId)
                 ){
                   let indexItem = self.transactions.indexOf(itemAlreadyAdd);
                   self.transactions.splice(indexItem, 1);
@@ -275,16 +286,13 @@ export default {
                   dataItem.invoice_id = item["order"]["invoice_id"];
                   dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
                   dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
-                  if(parseFloat(item["order"]["grandtotal"]) > parseFloat(item["paid"])){
+                  if(item["order"].invoice_id === itemAlreadyAdd.invoice_id && parseFloat(item["paid"]) > parseFloat(itemAlreadyAdd.paid)){
+                    let indexToRemove = self.transactions.indexOf(itemAlreadyAdd);
+                    self.transactions.splice(indexToRemove, 1);
+
+                    dataItem.grandTotalByOrderId = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
                     self.transactions.push(dataItem);
                   }
-                }
-                else if(parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["order"]["grandtotal"])
-                  && (parseFloat(itemAlreadyAdd["paid"]) === parseFloat(item["paid"]))
-                  && (parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["paid"]))
-                ){
-                  let indexItem = self.transactions.indexOf(itemAlreadyAdd);
-                  self.transactions.splice(indexItem, 1);
                 }
               }
             }
@@ -302,12 +310,12 @@ export default {
                 dataItem.invoice_id = item["order"]["invoice_id"];
                 dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
                 dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+                dataItem.grandTotalByOrderId = dataItem.grandtotal;
                 self.transactions.push(dataItem);
               }
             }
           }
           self.transactions.sort(self.compare);
-          //self.transactionsAlreadyPaid = self.filterDateTransaction(self.transactionList);
         }
       }).catch(function (error) {
         self.$toast.error("getting data error ").goAway(2000);
@@ -386,6 +394,10 @@ export default {
         return totalNeedPayment.toFixed(2) < parseFloat(this.payment).toFixed(2);
       }
     },
+    checkToEnableBtn(){
+      this.submit = (this.paymentMethod === null || this.payment === 0);
+      console.log( this.submit);
+    },
     async submitPayment(){
       let self = this;
       if(self.transactions && self.transactions.length > 0){
@@ -403,7 +415,8 @@ export default {
             newTransactionItem["pay_method"] = self.paymentMethod;
 
             if(payment > 0){
-              let orderPayment = ((paid > 0) ? (grandtotal - paid) : grandtotal);
+              let orderItemPayment = ((paid > 0) ? ((grandtotal - paid) > parseFloat(payment) ? (payment) : (grandtotal - paid)) : grandtotal);
+              let orderPayment = parseFloat(orderItemPayment);
               let calculatePaid = (paid > 0 ? orderPayment.toFixed(2) : (orderPayment > 0 ? (parseFloat(payment) > grandtotal ? orderPayment.toFixed(2) : parseFloat(payment)) : 0));
               let total = parseFloat(calculatePaid).toFixed(2);
               newTransactionItem.paid = parseFloat(total);
@@ -413,10 +426,14 @@ export default {
               newTransactions.push(newTransactionItem);
             }
           }
-          self.isSubmit = true;
           if(newTransactions && newTransactions.length > 0){
             await self.$axios.post('/api/transaction', {transactions: newTransactions }).then(function (response) {
               self.$toast.success( "Submit data successfully").goAway(2000);
+              self.customer_select = null;
+              self.payment = 0;
+              self.paymentMethod = null;
+              self.isSubmit = false;
+
               self.getListAllDebt();
             }).catch(function (error) {
               self.$toast.error("getting data error ").goAway(2000);
@@ -434,11 +451,11 @@ export default {
     calulateTotal(transactions){
       if(transactions && transactions.length > 0){
         let paidArray = [];
-        let receiveArray = [];
         let grandTotalArray = [];
-
         Object.entries(transactions).forEach(([key, val]) => {
-          grandTotalArray.push(parseFloat(val.grandtotal));
+          if(val && val.hasOwnProperty('grandTotalByOrderId')){
+            grandTotalArray.push(parseFloat(val.grandTotalByOrderId));
+          }
         });
         Object.entries(transactions).forEach(([key, val]) => {
           paidArray.push(parseFloat(val.paid));
@@ -447,12 +464,10 @@ export default {
         const totalGrandTotalArray = grandTotalArray.reduce(function(total, num) {
           return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
         }, 0);
-
         const totalPaidArray = paidArray.reduce(function(total, num) {
-            return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2) }
-          , 0);
-
-        const totalNeedPayment = (parseFloat(totalGrandTotalArray) - parseFloat(totalPaidArray));
+            return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
+        }, 0);
+        const totalNeedPayment = (totalGrandTotalArray - totalPaidArray);
         return totalNeedPayment.toFixed(2);
       }
       else {
