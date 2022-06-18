@@ -238,7 +238,6 @@ export default {
           for(let index=0; index < dataResponse.length; index++){
             let item = self.cloneObject(dataResponse[index]);
             let dataItem = {"order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0, "grandTotalByOrderId": 0};
-
             if(self.transactions && self.transactions.length > 0){
               let itemAlreadyAdd = self.transactions.find(order=> order.order_id === item.order_id);
                let ArrayTransactionOrder = dataResponse.filter(order=> order.order_id === item.order_id);
@@ -271,9 +270,6 @@ export default {
                 if(
                   parseFloat(itemAlreadyAdd["grandtotal"]) > parseFloat(totalAllPaidOfOrderId)
                 ){
-                  let indexItem = self.transactions.indexOf(itemAlreadyAdd);
-                  self.transactions.splice(indexItem, 1);
-
                   let created_at = new Date(item["created_at"]);
                   let dd = created_at.getDate();
                   let mm = created_at.getMonth() + 1;
