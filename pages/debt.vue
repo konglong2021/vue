@@ -22,7 +22,7 @@
                   <div class="card-body">
                     <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">3333</h4>
                     <div>
-                      ទឹកប្រាក់ដែលបានទូទាត់ សម្រាប់ខែនេះ
+                      ទឹកប្រាក់ដែលត្រូវទូទាត់សរុប សម្រាប់ខែនេះ
                     </div>
                   </div>
                 </div>
@@ -32,7 +32,7 @@
                   <div class="card-body">
                     <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">2222</h4>
                     <div>
-                      ទឹកប្រាក់ដែលត្រូវទូទាត់ ទាំងអស់ សម្រាប់ខែនេះ
+                      ទឹកប្រាក់ទូទាត់រួច សម្រាប់ខែនេះ
                     </div>
                   </div>
                 </div>
@@ -40,7 +40,7 @@
               <b-col lg="4">
                 <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
                   <div class="card-body">
-                    <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">3333</h4>
+                    <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculateRest(transactions)}}</h4>
                     <div>
                       ទឹកប្រាក់នៅសល់ ដែលត្រូវទូទាត់ សម្រាប់ខែនេះ
                     </div>
@@ -124,11 +124,12 @@ export default {
       isLoading: false,
       items : [],
       fields: [
+        {key : 'date', label: this.$t('label_date')},
         { key: 'customer', label: this.$t('label_customer_name')},
         {key: 'invoice_id', label: this.$t('label_number_invoice')},
         {key: 'paid', label: this.$t('label_paid')},
         {key : 'grandtotal', label: this.$t('label_grand_total')},
-        // {key : 'status', label: this.$t('label_status')}
+        //
       ],
       customer_select : null,
       customerOptions: [],
@@ -140,10 +141,88 @@ export default {
       total: 0,
       isSubmit: false,
       paymentMethodOption: [{text: "បង់លុយសុទ្ធ", value: "Cash"}, {text: "វេរតាម ធនាគារ ABA", value: "transfer_aba"}],
-      paymentMethod: null
+      paymentMethod: null,
+      transactionsAlreadyPaid: []
     }
   },
   methods: {
+    filterDateTransaction(transactionList){
+      let newTransactions = [];
+      for(let index=0; index < transactionList.length; index++){
+        let item = this.cloneObject(transactionList[index]);
+        let dataItem = {date:null, "order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0};
+
+        if(transactionList && transactionList.length > 0){
+          let itemAlreadyAdd = transactionList.find(order=> order.order_id === item.order_id);
+
+          if(!itemAlreadyAdd){
+            let created_at = new Date(item["created_at"]);
+            let dd = created_at.getDate();
+            let mm = created_at.getMonth() + 1;
+            let day = (dd < 10) ? ('0' + dd) : dd;
+            let month = (mm < 10) ? ('0' + mm) : mm;
+            let yyyy = created_at.getFullYear();
+            dataItem.date=   (day + "/" + month + "/" + yyyy);
+            dataItem.order_id =  item["order_id"];
+            dataItem.customer = item["customer"]["name"];
+            dataItem.invoice_id = item["order"]["invoice_id"];
+            dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
+            dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+            newTransactions.push(dataItem);
+          }
+          else if(itemAlreadyAdd) {
+            if(
+                    parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["order"]["grandtotal"])
+                    && (parseFloat(itemAlreadyAdd["paid"]) < parseFloat(item["paid"]))
+            ){
+              let indexItem = newTransactions.indexOf(itemAlreadyAdd);
+              newTransactions.splice(indexItem, 1);
+
+              let created_at = new Date(item["created_at"]);
+              let dd = created_at.getDate();
+              let mm = created_at.getMonth() + 1;
+              let day = (dd < 10) ? ('0' + dd) : dd;
+              let month = (mm < 10) ? ('0' + mm) : mm;
+              let yyyy = created_at.getFullYear();
+              dataItem.date=   (day + "/" + month + "/" + yyyy);
+              dataItem.order_id =  item["order_id"];
+              dataItem.customer = item["customer"]["name"];
+              dataItem.invoice_id = item["order"]["invoice_id"];
+              dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
+              dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+              if(parseFloat(item["order"]["grandtotal"]) > parseFloat(item["paid"])){
+                newTransactions.push(dataItem);
+              }
+            }
+            else if(parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["order"]["grandtotal"])
+                    && (parseFloat(itemAlreadyAdd["paid"]) === parseFloat(item["paid"]))
+                    && (parseFloat(itemAlreadyAdd["grandtotal"]) === parseFloat(item["paid"]))
+            ){
+              let indexItem = newTransactions.indexOf(itemAlreadyAdd);
+              newTransactions.splice(indexItem, 1);
+            }
+          }
+        }
+        else {
+          if(item["order"]["status"] && item["order"]["status"] === 1){
+            let created_at = new Date(item["created_at"]);
+            let dd = created_at.getDate();
+            let mm = created_at.getMonth() + 1;
+            let day = (dd < 10) ? ('0' + dd) : dd;
+            let month = (mm < 10) ? ('0' + mm) : mm;
+            let yyyy = created_at.getFullYear();
+            dataItem.date=   (day + "/" + month + "/" + yyyy);
+            dataItem.order_id =  item["order_id"];
+            dataItem.customer = item["customer"]["name"];
+            dataItem.invoice_id = item["order"]["invoice_id"];
+            dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
+            dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
+            newTransactions.push(dataItem);
+          }
+        }
+      }
+      return newTransactions;
+    },
     async getListAllDebt($customerId){
       let self = this;
       self.isLoading = true;
@@ -156,12 +235,19 @@ export default {
 
           for(let index=0; index < dataResponse.length; index++){
             let item = self.cloneObject(dataResponse[index]);
-            let dataItem = {"order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0};
+            let dataItem = {date:null, "order_id": null,"customer": null,"invoice_id": null,"paid": 0,"grandtotal": 0};
 
             if(self.transactions && self.transactions.length > 0){
               let itemAlreadyAdd = self.transactions.find(order=> order.order_id === item.order_id);
 
               if(!itemAlreadyAdd){
+                let created_at = new Date(item["created_at"]);
+                let dd = created_at.getDate();
+                let mm = created_at.getMonth() + 1;
+                let day = (dd < 10) ? ('0' + dd) : dd;
+                let month = (mm < 10) ? ('0' + mm) : mm;
+                let yyyy = created_at.getFullYear();
+                dataItem.date=   (day + "/" + month + "/" + yyyy);
                 dataItem.order_id =  item["order_id"];
                 dataItem.customer = item["customer"]["name"];
                 dataItem.invoice_id = item["order"]["invoice_id"];
@@ -177,6 +263,13 @@ export default {
                   let indexItem = self.transactions.indexOf(itemAlreadyAdd);
                   self.transactions.splice(indexItem, 1);
 
+                  let created_at = new Date(item["created_at"]);
+                  let dd = created_at.getDate();
+                  let mm = created_at.getMonth() + 1;
+                  let day = (dd < 10) ? ('0' + dd) : dd;
+                  let month = (mm < 10) ? ('0' + mm) : mm;
+                  let yyyy = created_at.getFullYear();
+                  dataItem.date=   (day + "/" + month + "/" + yyyy);
                   dataItem.order_id =  item["order_id"];
                   dataItem.customer = item["customer"]["name"];
                   dataItem.invoice_id = item["order"]["invoice_id"];
@@ -197,6 +290,13 @@ export default {
             }
             else {
               if(!item["order"]["status"] || (item["order"]["status"] && item["order"]["status"] === 0)){
+                let created_at = new Date(item["created_at"]);
+                let dd = created_at.getDate();
+                let mm = created_at.getMonth() + 1;
+                let day = (dd < 10) ? ('0' + dd) : dd;
+                let month = (mm < 10) ? ('0' + mm) : mm;
+                let yyyy = created_at.getFullYear();
+                dataItem.date=   (day + "/" + month + "/" + yyyy);
                 dataItem.order_id =  item["order_id"];
                 dataItem.customer = item["customer"]["name"];
                 dataItem.invoice_id = item["order"]["invoice_id"];
@@ -207,6 +307,7 @@ export default {
             }
           }
           self.transactions.sort(self.compare);
+          //self.transactionsAlreadyPaid = self.filterDateTransaction(self.transactionList);
         }
       }).catch(function (error) {
         self.$toast.error("getting data error ").goAway(2000);
@@ -354,6 +455,40 @@ export default {
         const totalNeedPayment = (parseFloat(totalGrandTotalArray) - parseFloat(totalPaidArray));
         return totalNeedPayment.toFixed(2);
       }
+      else {
+        return 0;
+      }
+    },
+    calculateRest(transactions){
+      if(transactions && transactions.length > 0){
+        let paidArray = [];
+        let receiveArray = [];
+        let grandTotalArray = [];
+
+        Object.entries(transactions).forEach(([key, val]) => {
+          grandTotalArray.push(parseFloat(val.grandtotal));
+        });
+        Object.entries(transactions).forEach(([key, val]) => {
+          paidArray.push(parseFloat(val.paid));
+        });
+
+        const totalGrandTotalArray = grandTotalArray.reduce(function(total, num) {
+          return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
+        }, 0);
+
+        const totalPaidArray = paidArray.reduce(function(total, num) {
+                  return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2) }
+                , 0);
+
+        const totalNeedPayment = (parseFloat(totalGrandTotalArray) - parseFloat(totalPaidArray));
+        return totalNeedPayment.toFixed(2);
+      }
+      else {
+        return 0;
+      }
+    },
+    calculatePaid(){
+
     }
   },
   mounted() {

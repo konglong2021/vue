@@ -115,4 +115,5 @@ export default {
   "label_paid": "បានសង",
   "label_status":"ស្ថានភាព",
   "stock_transfer":"ផ្ទេរទំនិញ",
+  "label_date":"ថ្ងៃខែ",
 };

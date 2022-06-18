@@ -115,4 +115,5 @@ export default {
   "label_paid": "Paid",
   "label_status":"status",
   "stock_transfer":"Stock Transfer",
+  "label_date":"Date",
 };
