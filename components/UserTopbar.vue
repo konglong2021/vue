@@ -11,7 +11,7 @@
       <ul class="list-menu-text">
         <li class="menu-text-item">
           <a href="/users">
-            <span><i class="fa fa-users" aria-hidden="true"></i>{{ $t('label_menu_title_user') }}</span>
+            <span><i class="fa fa-users" aria-hidden="true"></i> {{ $t('label_menu_title_user') }}</span>
           </a>
         </li>
         <li class="menu-text-item">
@@ -26,7 +26,7 @@
         </li>
         <li class="menu-text-item">
           <a href="/customer">
-            <span> <i class="fa fa-user" aria-hidden="true"></i>{{ $t('label_menu_title_customer') }}</span>
+            <span> <i class="fa fa-user" aria-hidden="true"></i> {{ $t('label_menu_title_customer') }}</span>
           </a>
         </li>
       </ul>

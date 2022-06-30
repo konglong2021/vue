@@ -43,7 +43,7 @@
           </div>
           <div v-if="!isLoading">
             <div v-if="items">
-              <b-table-simple v-if="items.length > 0" class="table-transaction">
+              <b-table-simple style="display: none;" v-if="items.length > 0" class="table-transaction">
                 <b-thead class="table-header" style="padding-right: 15px;">
                   <b-tr style="display: inline-block;width: 99.5%;overflow: hidden;">
                     <b-th class="width-8-percentage" >{{ $t('label_date_sale') }}</b-th>
@@ -123,6 +123,31 @@
                   </b-tr>
                 </b-tbody>
               </b-table-simple>
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive" >
+                    <b-table id="my-table-stock" class="table table-striped table-bordered content-table-scroll-stock"
+                             v-if="items"
+                             sticky-header="true"
+                             :items="items"
+                             :fields="itemsFields"
+                             head-variant="light"
+                    >
+                      <template #cell(actions)="row">
+                        <b-button size="sm" title="View data" class="btn-no-background" @click="viewOrderData(row.item)">
+                          <i class="fa fa-eye"></i>
+                        </b-button>
+                        <b-button size="sm" title="Edit order data" class="btn-no-background" @click="UpdateOrderData(row.item,  $event.target)">
+                          <i class="fa fa-edit"></i>
+                        </b-button>
+                        <b-button size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemoveOrder(row.item)">
+                          <i class="fa fa-trash"></i>
+                        </b-button>
+                      </template>
+                    </b-table>
+                  </div>
+                </div>
+              </div>
               <h3 v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
               <div class="content-detail">
                 <h5 v-if="product_select">ចំនួនលក់សរុបទាំងអស់ : {{ sumAllSaleProduct(items) }}</h5>
@@ -132,66 +157,72 @@
                 <h2 style="margin-bottom: 35px;">អំពី ការលក់ </h2>
                 <h4 v-if="product_select">ចំនួនលក់សរុបទំនិញទាំងអស់ : {{ sumAllSaleProduct(items) }}</h4>
                 <h4 v-if="product_select">ទឹកប្រាក់សរុបទាំងអស់ : {{ sumAllPriceSaleProduct(items) + "$"}}</h4>
-                <table style="display: inline-block;width: 100%;overflow: hidden;">
-                  <thead style="display: inline-block;width: 100%;overflow: hidden; ">
-                    <tr style="display: inline-block;width: 100%;overflow: hidden;">
-                      <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_date_sale')}}</th>
-                      <th style="width: 8%; display: inline-block; overflow: hidden;" >{{$t('label_sale_by')}}</th>
-                      <th style="width: 10%; display: inline-block; overflow: hidden;" >{{$t('label_customer_name')}}</th>
-                      <th style="width: 12%; display: inline-block; overflow: hidden;" >{{$t('label_number_invoice')}}</th>
+                <div class="card">
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="content-table-scroll-stock" style="display: inline-block;width: 100%;overflow: hidden;">
+                        <thead style="display: inline-block;width: 100%;overflow: hidden; ">
+                          <tr style="display: inline-block;width: 100%;overflow: hidden;">
+                            <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_date_sale')}}</th>
+                            <th style="width: 8%; display: inline-block; overflow: hidden;" >{{$t('label_sale_by')}}</th>
+                            <th style="width: 10%; display: inline-block; overflow: hidden;" >{{$t('label_customer_name')}}</th>
+                            <th style="width: 12%; display: inline-block; overflow: hidden;" >{{$t('label_number_invoice')}}</th>
 
-                      <th style="width: 13%; display: inline-block; overflow: hidden;" >{{$t('label_product_name')}}</th>
-                      <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_quantity')}}</th>
-                      <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_sale_price')}} ($)</th>
+<!--                            <th style="width: 13%; display: inline-block; overflow: hidden;" >{{$t('label_product_name')}}</th>-->
+<!--                            <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_quantity')}}</th>-->
+<!--                            <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_sale_price')}} ($)</th>-->
 
-                      <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_discount')}}</th>
-                      <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_vat')}}</th>
-                      <th style="width: 11%; display: inline-block; overflow: hidden;" >{{$t('label_sub_total')}} ($)</th>
-                      <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_grand_total')}} ($)</th>
-                    </tr>
-                  </thead>
-                  <tbody style="display: inline-block;width: 100%;overflow: hidden;">
-                    <tr style="display: inline-block;width: 100%;overflow: hidden; padding-bottom: 15px; padding-top: 5px;" v-for="item in items" v-bind:key="item.order_id">
-                      <td style="width: 9%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >{{ (item.date !== undefined ? item.date : "") }}</b>
-                      </td>
-                      <td style="width: 8%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >{{ (item.sale_by !== undefined ? item.sale_by : "") }}</b>
-                      </td>
-                      <td style="width: 10%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >{{ (item.customer !== undefined ? item.customer : "") }}</b>
-                      </td>
-                      <td style="width: 12%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >{{ (item.invoice_id !== undefined ? item.invoice_id : "") }}</b>
-                      </td>
+                            <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_discount')}}</th>
+                            <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_vat')}}</th>
+                            <th style="width: 11%; display: inline-block; overflow: hidden;" >{{$t('label_sub_total')}} ($)</th>
+                            <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_grand_total')}} ($)</th>
+                          </tr>
+                        </thead>
+                        <tbody style="display: inline-block;width: 100%;overflow: hidden;">
+                          <tr style="display: inline-block;width: 100%;overflow: hidden; padding-bottom: 15px; padding-top: 5px;" v-for="item in items" v-bind:key="item.order_id">
+                            <td style="width: 9%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >{{ (item.date !== undefined ? item.date : "") }}</b>
+                            </td>
+                            <td style="width: 8%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >{{ (item.sale_by !== undefined ? item.sale_by : "") }}</b>
+                            </td>
+                            <td style="width: 10%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >{{ (item.customer !== undefined ? item.customer : "") }}</b>
+                            </td>
+                            <td style="width: 12%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >{{ (item.invoice_id !== undefined ? item.invoice_id : "") }}</b>
+                            </td>
 
-                      <td style="width: 13%; display: inline-block; overflow: hidden;" >
-                        <span>{{ item.name !== undefined ? item.name : "" }}</span>
-                      </td>
-                      <td style="width: 5%; display: inline-block; overflow: hidden;" >
-                        <span>{{ item.qty !== undefined ? item.qty : "" }}</span>
-                      </td>
-                      <td style="width: 9%; display: inline-block; overflow: hidden;" >
-                        <span >{{ item.sale_price !== undefined ? item.sale_price + "$" : ""}}</span>
-                      </td>
+<!--                            <td style="width: 13%; display: inline-block; overflow: hidden;" >-->
+<!--                              <span>{{ item.name !== undefined ? item.name : "" }}</span>-->
+<!--                            </td>-->
+<!--                            <td style="width: 5%; display: inline-block; overflow: hidden;" >-->
+<!--                              <span>{{ item.qty !== undefined ? item.qty : "" }}</span>-->
+<!--                            </td>-->
+<!--                            <td style="width: 9%; display: inline-block; overflow: hidden;" >-->
+<!--                              <span >{{ item.sale_price !== undefined ? item.sale_price + "$" : ""}}</span>-->
+<!--                            </td>-->
 
-                      <td style="width: 5%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >{{ (item.discount === 0 || item.discount === undefined) ? "0" : item.discount + "%" }}</b>
-                      </td>
-                      <td style="width: 5%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >
-                          {{ (item.vat === 0 || item.vat === undefined) ? 0 : item.vat + "%" }}
-                        </b>
-                      </td>
-                      <td style="width: 11%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >{{ item.subtotal !== undefined ? (item.subtotal + "$") : "" }}</b>
-                      </td>
-                      <td style="width: 9%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                        <b >{{ item.grandtotal !== undefined ? (item.grandtotal + "$") : "" }}</b>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                            <td style="width: 5%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >{{ (item.discount === 0 || item.discount === undefined) ? "0" : item.discount + "%" }}</b>
+                            </td>
+                            <td style="width: 5%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >
+                                {{ (item.vat === 0 || item.vat === undefined) ? 0 : item.vat + "%" }}
+                              </b>
+                            </td>
+                            <td style="width: 11%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >{{ item.subtotal !== undefined ? (item.subtotal + "$") : "" }}</b>
+                            </td>
+                            <td style="width: 9%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
+                              <b >{{ item.grandtotal !== undefined ? (item.grandtotal + "$") : "" }}</b>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -363,7 +394,7 @@
       <b-modal id="modal-confirm-remove-order" ref="confirm-remove-order-form-modal" size="md"
                @hidden="onResetConfirm" ok-variant="secondary" footer-class="justify-content-center"
                @ok="onSubmitToRemove" ok-title="បាទ/ចាស" cancel-title="បោះបង់" title="ការលក់" no-close-on-backdrop>
-        <h4>ទិន្នន័យការលក់មួយនេះ និងត្រូវលុបចេញ?</h4>
+        <h4 class="text-center">ទិន្នន័យការលក់មួយនេះ និងត្រូវលុបចេញ?</h4>
       </b-modal>
     </b-container>
   </div>
@@ -377,6 +408,18 @@
       return {
         vats: [{text: '0%', value: 0}, {text: '5%', value: 0.05}, {text: '10%', value: 0.1}, {text: '15%', value: 0.15}],
         items: [],
+        itemsFields: [
+          {key: 'date', label: this.$t('label_date_sale')},
+          { key: 'sale_by', label: this.$t('label_sale_by')},
+          { key: 'customer', label: this.$t('label_customer_name')},
+          { key: 'invoice_id', label: this.$t('label_number_invoice')},
+          { key: 'discount', label: this.$t('label_discount')},
+          { key: 'vat', label: this.$t('label_vat')},
+          // { key: 'subtotal', label: this.$t('label_sub_total')},
+          { key: 'grandtotal', label: this.$t('label_grand_total')},
+          {key : 'receive', label: this.$t('label_receive_money')},
+          {key : 'actions', label: this.$t('title_action')}
+        ],
         fields: [
           { key: 'sale_by', label: this.$t('label_sale_by')},
           { key: 'customer', label: this.$t('label_customer_name')},
@@ -531,9 +574,44 @@
                 let orderItem = self.orders[indexOrder];
                 let customerItem = self.filterDataCustomerList(orderItem.customer_id);
                 let user = self.cloneObject(self.$store.$cookies.get('user'));
-                itemOrder[orderItem.id] = [];
+                let itemData = [];
+                let date = "";
+                let grandtotal = 0;
 
-                if(orderItem.hasOwnProperty("orderdetails") && orderItem.orderdetails.length > 0){
+                for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
+                  let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
+                  let createdDate = new Date(orderDetailItem.created_at);
+                  let dd = createdDate.getDate();
+                  let mm = createdDate.getMonth() + 1;
+                  let day = (dd < 10) ? ('0' + dd) : dd;
+                  let month = (mm < 10) ? ('0' + mm) : mm;
+                  let yyyy = createdDate.getFullYear();
+                  date = (day + "/" + month + "/" + yyyy);
+                  if(orderItem["discount"] > 0){
+                    let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                    grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
+                  }
+                  else {
+                    grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                  }
+                }
+
+                itemData["grandtotal"] = grandtotal;
+                itemData["date"] = date;
+                itemData["order_id"] = orderItem.id;
+                itemData["sale_by"] = user.name;
+                if(customerItem){
+                  itemData["customer"] = customerItem["name"];
+                }
+                itemData["invoice_id"] = orderItem["invoice_id"];
+                itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
+                itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
+                itemData["receive"] = orderItem["receive"];
+
+                self.items.push(itemData);
+
+                //itemOrder[orderItem.id] = [];
+                /*if(orderItem.hasOwnProperty("orderdetails") && orderItem.orderdetails.length > 0){
                   for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
                     let itemOrderDetail = [];
                     let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
@@ -600,7 +678,7 @@
                     itemData["subtotal"] = itemOrder[orderItem.id][index]["subtotal"];
                   }
                   self.items.push(itemData);
-                }
+                }*/
               }
             }
           }
@@ -678,7 +756,9 @@
           }
           this.itemsProductDetail = this.cloneObject(orderDetailArray);
         }
-        this.$refs["detail-payment-form-modal"].show();
+        this.$nextTick(() => {
+          this.$refs["detail-payment-form-modal"].show();
+        });
       },
       UpdateOrderData(row, $event){
         this.orderItemSelectEdit = row;
@@ -842,18 +922,16 @@
         dataSubmit.grandtotal = (priceAfterDiscount + totalVat);
 
         self.$toast.info("Data starting submit").goAway(1500);
-        console.log(self.orderItemSelectEdit);
         if(self.orderItemSelectEdit.hasOwnProperty("tr_id") && self.orderItemSelectEdit.tr_id){
           self.$axios.put('/api/sale/' + self.orderItemSelectEdit.tr_id, dataSubmit).then(function (response) {
             console.log(response);
            if(response.data.success === true){
+
              self.$nextTick(() => {
                self.$refs['edit-payment-form-modal'].hide();
              });
+             self.getAllOrderData();
              self.$toast.success("Submit data successfully").goAway(2000);
-             // self.invoiceNumber = response.data.order["invoice_id"];
-             // self.is_show_content_print = true;
-             // self.$emit("updateListProduct", []);
            }
          })
           .catch(function (error) {
@@ -1261,6 +1339,8 @@
     float: right;
     margin-right: 15px;
   }
-
+  .content-table-scroll-stock{
+    max-height: calc(100vh - 350px);
+  }
 
 </style>

@@ -12,3 +12,8 @@
   }
 </script>
 
+<style scoped>
+.main-page-content{
+  min-height: calc(100vh - 95px);
+}
+</style>

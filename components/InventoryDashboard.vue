@@ -39,10 +39,13 @@
           <div class="panel-bottom"></div>
         </div>
       </div>
-      <div class="content-product">
+      <div class="content-product" style="height: 80vh;">
+        <div class="content-loading" v-if="loadingFields.stockLoading || loadingFields.productListLoading">
+          <div class="spinner-grow text-muted"></div>
+        </div>
         <div class="content-data">
           <div class="btn-wrapper margin-btn" v-if="!isShowFormAddProductInPurchase">
-            <b-button href="#" size="sm" variant="primary" title="Add new purchase record" @click="showPurchaseModal()">
+            <b-button v-if="stockTransfer.show === false" href="#" size="sm" variant="primary" title="Add new purchase record" @click="showPurchaseModal()">
               <span class="margin-span-btn">{{$t('stock_in')}}</span>
               <i class="fa fa-plus" aria-hidden="true"></i>
             </b-button>
@@ -54,47 +57,7 @@
               <b-form-select  class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
             </div>
           </div>
-          <div class="display-inline-block full-with">
-            <div class="display-inline-block full-with" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
-              <div class="display-inline-block content-field-purchase float-left" >
-                <p class="text-danger" v-if="suppliers.length === 0 || products.length === 0">
-                  មិនអាចបញ្ចូលទំនិញក្នុងស្តុកបានទេ ព្រោះ
-                  <span v-if="suppliers.length === 0">មិនមានបញ្ចូលទិន្នន័យអ្នកផ្គត់ផ្គង់់, </span>
-                  <span v-if="products.length === 0">មិនមានបញ្ចូលទិន្នន័យទំនិញ, </span>
-                  សូមបង្កើត
-                  <span v-if="suppliers.length === 0">ទិន្នន័យអ្នកផ្គត់ផ្គង់់</span>
-                  <span v-if="products.length === 0">ទិន្នន័យទំនិញ</span>
-                </p>
-                <div>
-                  <label class="label-with">{{$t('title_supplier')}}</label>
-                  <b-form-select :disabled="suppliers.length === 0" class="form-control select-content-inline" v-model="purchase.supplier" :options="suppliers"></b-form-select>
-                </div>
-                <div class="margin-bottom-20">
-                  <label class="label-with">{{ $t('title_warehouse') }}</label>
-                  <b-form-select :disabled="warehouses.length === 0" class="form-control select-content-inline" v-model="purchase.warehouse" :options="warehouses"></b-form-select>
-                </div>
-                <div class="display-inline-block">
-                  <b-button
-                    href="#" size="sm" variant="primary"
-                    title="Add product to stock"
-                    :disabled="(warehouses.length === 0 && suppliers.length === 0) || products.length === 0"
-                    @click="showExistingProductModal()">
-                    {{$t('title_add_product_to_stock')}}
-                  </b-button>
-                  <b-button
-                    v-show="purchase.supplier && purchase.warehouse && this.items.length > 0"
-                    href="#" size="sm" variant="success"
-                    title="Save stock" @click="submitPurchase()">
-                    {{$t('save_purchase')}}
-                  </b-button>
-                  <b-button
-                    href="#" size="sm" variant="danger"
-                    title="Discard stock" @click="discardPurchase()">
-                    {{$t('title_discard_add_stock')}}
-                  </b-button>
-                </div>
-              </div>
-            </div>
+          <div class="display-inline-block full-with" v-if="!isShowFormAddProductInPurchase">
             <transfer-stock v-model="stockTransfer" :warehouseOption="warehouseOption" :products="productListOptionForTransfer" :productList="productListForTransfer"></transfer-stock>
             <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
               <h4 class="font-700">{{$t('product_list')}}</h4>
@@ -113,24 +76,24 @@
                 <!-- check this url : https://bootstrap-vue.org/docs/components/table#tables -->
               </b-table>
             </div>
-            <div class="full-content" v-if="stockTransfer && stockTransfer.show === false">
-              <div class="content-loading" v-if="loadingFields.stockLoading || loadingFields.productListLoading">
-                <div class="spinner-grow text-muted"></div>
-              </div>
-              <b-table
-                class="content-table-scroll"
-                v-if="!loadingFields.stockLoading && isShowStockTable"
-                sticky-header="true"
-                :items="stockItems"
-                :fields="stockFields"
-                head-variant="light"
-              >
-                <template #cell(image)="row">
-                  <div class="pro-img">
+            <div class="full-content" v-if="stockTransfer.show === false" >
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <b-table id="my-table-stock" class="table table-striped table-bordered content-table-scroll-stock"
+                      v-if="!loadingFields.stockLoading && isShowStockTable"
+                      sticky-header="true"
+                      :items="stockItems"
+                      :fields="stockFields"
+                      head-variant="light">
+                    </b-table>
                   </div>
-                </template>
-              </b-table>
+                </div>
+              </div>
             </div>
+          </div>
+          <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
+            <inventory-stock :warehouses="warehouses" :suppliers="suppliers" :products="products" :purchase="purchase" @submitPurchase="submitPurchase($event)" @discardPurchase="discardPurchase($event)" :vats="vats" :productList="productListForTransfer" />
           </div>
         </div>
       </div>
@@ -281,8 +244,11 @@
 
 <script>
   export default {
+    props: [],
     data() {
       return {
+        perPage: 9,
+        currentPage: 1,
         stockTransfer: { show:false },
         newProductModal: { showModal:false },
         purchaseModal:{show: false},
@@ -384,7 +350,7 @@
         warehouseList : [],
         warehouseOption: [],
         productListForTransfer: [],
-        productListOptionForTransfer: []
+        productListOptionForTransfer: [],
       };
     },
     watch:{
@@ -396,7 +362,9 @@
       stockTransfer: {
         handler(val){
         }
-      }
+      },
+    },
+    computed: {
     },
     methods: {
       async getListProductForTransferStock($warehouse){
@@ -408,8 +376,6 @@
           if(response && response.hasOwnProperty("data")){
             let dataResponse = response.data;
             if(dataResponse && dataResponse.length > 0){
-              self.totalRows = response.data.length;
-
               for(let i=0; i < dataResponse.length; i++){
                 let productList = dataResponse[i].product;
                 if(productList && productList.length > 0){
@@ -462,6 +428,7 @@
                 for (let i=0; i < dataStock.length; i++){
                   vm.stock = {};
                   let product = dataStock[i]["product"];
+                  vm.stock.id = dataStock[i]["id"];
                   vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
                   vm.stock.product_qty = dataStock[i]["total"].toString();
                   vm.stock.en_name = product["en_name"];
@@ -794,90 +761,176 @@
         this.purchase.warehouse = this.$store.$cookies.get("storeItem");
         this.getAllSupplier();
       },
-      discardPurchase(){
-        this.isShowFormAddProductInPurchase = false;
-        this.items = [];
-        this.purchase.supplier = null;
-        this.purchase.warehouse = null;
-        this.purchase.vat = null;
-        this.isShowStockTable = true;
+      discardPurchase($event = null){
+        if($event){
+          this.isShowFormAddProductInPurchase = !$event["isDiscard"];
+          this.items = [];
+          this.purchase.supplier = null;
+          this.purchase.warehouse = null;
+          this.purchase.vat = null;
+          this.isShowStockTable = $event["isDiscard"];
+        }
+        else {
+          this.isShowFormAddProductInPurchase = false;
+          this.items = [];
+          this.purchase.supplier = null;
+          this.purchase.warehouse = null;
+          this.purchase.vat = null;
+          this.isShowStockTable = true;
+        }
       },
       handleOnSubmitPurchase(bvModalEvent){
         bvModalEvent.preventDefault();
         this.submitPurchase();
       },
-      async submitPurchase(){
+      async submitPurchase($event = null){
         let dataSubmit = {};
         let vm = this;
-        dataSubmit["warehouse_id"] = vm.purchase.warehouse;
-        dataSubmit["supplier_id"] = vm.purchase.supplier;
-        dataSubmit["batch"] = vm.purchase.batch ? vm.purchase.batch : this.generateBatch();
-        dataSubmit["vat"] = vm.purchase.vat;
+        if($event){
+          let purchaseData = $event["purchase"];
+          let productItems = $event["products"];
 
-        let purchaseDetail = [];
-        let subtotal = 0;
-        for(let index=0; index < vm.items.length; index++){
-          let purchaseDetailItem = {};
-          let productTotalPrice = 0;
+          dataSubmit["warehouse_id"] = purchaseData.warehouse;
+          dataSubmit["supplier_id"] = purchaseData.supplier;
+          dataSubmit["batch"] = purchaseData.batch ? purchaseData.batch : this.generateBatch();
+          dataSubmit["vat"] = purchaseData.vat;
 
-          purchaseDetailItem['product_id']= vm.items[index]['id'];
-          purchaseDetailItem['unitprice'] = vm.items[index]['import_price'];
-          purchaseDetailItem['quantity'] = vm.items[index]['qty'];
-          productTotalPrice = parseInt(vm.items[index]['qty']) * parseFloat(this.items[index]['import_price']);
-          subtotal += productTotalPrice;
-          //purchaseDetail.push(purchaseDetailItem);
-          purchaseDetail.unshift(purchaseDetailItem);
-        }
-        let vat = vm.purchase.vat !== null ? vm.purchase.vat : 0;
-        dataSubmit["purchases"] = purchaseDetail;
-        dataSubmit["subtotal"] = subtotal;
-        dataSubmit["grandtotal"] = (subtotal + (subtotal * parseFloat(vat)));
+          let purchaseDetail = [];
+          let subtotal = 0;
+          for(let index=0; index < productItems.length; index++){
+            let purchaseDetailItem = {};
+            let productTotalPrice = 0;
 
-        vm.loadingFields.stockLoading = true;
-        vm.isShowFormAddProductInPurchase = false;
+            purchaseDetailItem['product_id']= productItems[index]['id'];
+            purchaseDetailItem['unitprice'] = productItems[index]['import_price'];
+            purchaseDetailItem['quantity'] = productItems[index]['qty'];
+            productTotalPrice = parseInt(productItems[index]['qty']) * parseFloat(productItems[index]['import_price']);
+            subtotal += productTotalPrice;
+            purchaseDetail.unshift(purchaseDetailItem);
+          }
+          let vat = purchaseData.vat !== null ? purchaseData.vat : 0;
+          dataSubmit["purchases"] = purchaseDetail;
+          dataSubmit["subtotal"] = subtotal;
+          dataSubmit["grandtotal"] = (subtotal + (subtotal * parseFloat(vat)));
 
-        vm.$toast.info("Data starting submit").goAway(1500);
-        await this.$axios.post('/api/purchase', dataSubmit)
-          .then(function (response) {
-            if(response && response.hasOwnProperty("data")){
-              vm.isShowStockTable = true;
-              vm.loadingFields.stockLoading = false;
-              vm.purchase = {};
-              vm.$toast.success("Submit data successfully").goAway(2000);
-              if(response && response.data && response.data.message){
-                vm.$axios.get('/api/stock')
-                  .then(function (response) {
-                    if(response.data){
-                      vm.stockItems = [];
-                      let dataStock = response.data;
-                      if(dataStock && dataStock.length > 0){
-                        for (let i=0; i < dataStock.length; i++){
-                          vm.stock = {};
-                          let product = dataStock[i]["product"];
-                          vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
-                          vm.stock.product_qty = dataStock[i]["total"].toString();
-                          vm.stock.en_name = product["en_name"];
-                          vm.stock.kh_name = product["kh_name"];
-                          vm.stock.code = product["code"];
-                          vm.stock.image = product["image"];
-                          vm.stock.sale_price = product["sale_price"].toString();
-                         // vm.stockItems.push(vm.stock);
-                          vm.stockItems.unshift(vm.stock);
+          console.log(dataSubmit);
+
+          // vm.loadingFields.stockLoading = true;
+          // vm.isShowFormAddProductInPurchase = false;
+
+          vm.$toast.info("Data starting submit").goAway(1500);
+          await this.$axios.post('/api/purchase', dataSubmit)
+            .then(function (response) {
+              if(response && response.hasOwnProperty("data")){
+                vm.isShowStockTable = true;
+                vm.loadingFields.stockLoading = false;
+                vm.purchase = {};
+                vm.$toast.success("Submit data successfully").goAway(2000);
+                if(response && response.data && response.data.message){
+                  vm.$axios.get('/api/stock')
+                    .then(function (response) {
+                      if(response.data){
+                        vm.stockItems = [];
+                        let dataStock = response.data;
+                        if(dataStock && dataStock.length > 0){
+                          for (let i=0; i < dataStock.length; i++){
+                            vm.stock = {};
+                            let product = dataStock[i]["product"];
+                            vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
+                            vm.stock.product_qty = dataStock[i]["total"].toString();
+                            vm.stock.en_name = product["en_name"];
+                            vm.stock.kh_name = product["kh_name"];
+                            vm.stock.code = product["code"];
+                            vm.stock.image = product["image"];
+                            vm.stock.sale_price = product["sale_price"].toString();
+                            // vm.stockItems.push(vm.stock);
+                            vm.stockItems.unshift(vm.stock);
+                          }
                         }
                       }
-                    }
-                  })
-                  .catch(function (error) {
-                    vm.$toast.error("getting data error ").goAway(2000);
-                    console.log(error);
-                  });
+                    })
+                    .catch(function (error) {
+                      vm.$toast.error("getting data error ").goAway(2000);
+                      console.log(error);
+                    });
+                }
               }
-            }
-          })
-          .catch(function (error) {
-            console.log(error);
-            vm.$toast.success("Submit data getting error").goAway(3000);
-          });
+            })
+            .catch(function (error) {
+              console.log(error);
+              vm.$toast.success("Submit data getting error").goAway(3000);
+            });
+        }
+        else {
+          dataSubmit["warehouse_id"] = vm.purchase.warehouse;
+          dataSubmit["supplier_id"] = vm.purchase.supplier;
+          dataSubmit["batch"] = vm.purchase.batch ? vm.purchase.batch : this.generateBatch();
+          dataSubmit["vat"] = vm.purchase.vat;
+
+          let purchaseDetail = [];
+          let subtotal = 0;
+          for(let index=0; index < vm.items.length; index++){
+            let purchaseDetailItem = {};
+            let productTotalPrice = 0;
+
+            purchaseDetailItem['product_id']= vm.items[index]['id'];
+            purchaseDetailItem['unitprice'] = vm.items[index]['import_price'];
+            purchaseDetailItem['quantity'] = vm.items[index]['qty'];
+            productTotalPrice = parseInt(vm.items[index]['qty']) * parseFloat(this.items[index]['import_price']);
+            subtotal += productTotalPrice;
+            //purchaseDetail.push(purchaseDetailItem);
+            purchaseDetail.unshift(purchaseDetailItem);
+          }
+          let vat = vm.purchase.vat !== null ? vm.purchase.vat : 0;
+          dataSubmit["purchases"] = purchaseDetail;
+          dataSubmit["subtotal"] = subtotal;
+          dataSubmit["grandtotal"] = (subtotal + (subtotal * parseFloat(vat)));
+
+          vm.loadingFields.stockLoading = true;
+          vm.isShowFormAddProductInPurchase = false;
+
+          vm.$toast.info("Data starting submit").goAway(1500);
+          await this.$axios.post('/api/purchase', dataSubmit)
+            .then(function (response) {
+              if(response && response.hasOwnProperty("data")){
+                vm.isShowStockTable = true;
+                vm.loadingFields.stockLoading = false;
+                vm.purchase = {};
+                vm.$toast.success("Submit data successfully").goAway(2000);
+                if(response && response.data && response.data.message){
+                  vm.$axios.get('/api/stock')
+                    .then(function (response) {
+                      if(response.data){
+                        vm.stockItems = [];
+                        let dataStock = response.data;
+                        if(dataStock && dataStock.length > 0){
+                          for (let i=0; i < dataStock.length; i++){
+                            vm.stock = {};
+                            let product = dataStock[i]["product"];
+                            vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
+                            vm.stock.product_qty = dataStock[i]["total"].toString();
+                            vm.stock.en_name = product["en_name"];
+                            vm.stock.kh_name = product["kh_name"];
+                            vm.stock.code = product["code"];
+                            vm.stock.image = product["image"];
+                            vm.stock.sale_price = product["sale_price"].toString();
+                            vm.stockItems.unshift(vm.stock);
+                          }
+                        }
+                      }
+                    })
+                    .catch(function (error) {
+                      vm.$toast.error("getting data error ").goAway(2000);
+                      console.log(error);
+                    });
+                }
+              }
+            })
+            .catch(function (error) {
+              console.log(error);
+              vm.$toast.success("Submit data getting error").goAway(3000);
+            });
+        }
       },
       showAllPurchase(){
         this.purchaseModal.show = true;
@@ -965,31 +1018,41 @@
       }
     },
     mounted() {
+
       this.getListProductForTransferStock();
       this.getProductList();
       this.getAllWarehouse();
       this.showStockTable();
       this.stockTransfer.show = false;
-    }
+    },
   }
 </script>
 
 <style scoped>
-  .content-table{
-    width: 50%;
-    display: inline-block;
-    float: left;
-  }
-  .content-add-purchase{
-    display: inline-block;
-    width: 49%;
-    float: right;
-    margin: 10px 0 20px 0;
-  }
-  .content-btn-product{
-    display: inline-block;
-    float: right;
-    width: 69.4%;
-  }
+
+.content-stock{
+  height: calc(100vh - 370px) !important;
+}
+
+.content-table{
+  width: 50%;
+  display: inline-block;
+  float: left;
+}
+.content-add-purchase{
+  display: inline-block;
+  width: 49%;
+  float: right;
+  margin: 10px 0 20px 0;
+}
+.content-btn-product{
+  display: inline-block;
+  float: right;
+  width: 69.4%;
+}
+
+.content-table-scroll-stock{
+  max-height: calc(100vh - 300px);
+}
 
 </style>

@@ -7,29 +7,6 @@
             <h3 class="head-title">{{$t('content_title_purchase')}}</h3>
           </div>
           <div class="content-panel-right content-panel-right-full-width" style="vertical-align: text-bottom; width: 80%;">
-<!--            <div class="float-right">-->
-<!--              <b-form-select  class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>-->
-<!--            </div>-->
-<!--            <div class="float-right product" style="margin-right: 8px;">-->
-<!--              <div class="content-search" >-->
-<!--                <multiselect class="input-content content-multiple-select"-->
-<!--                             v-model="product_select" :options="productOptions"-->
-<!--                             track-by="name" label="name" :show-labels="false"-->
-<!--                             :placeholder="$t('label_search_by_product')"-->
-<!--                             @select="selectionChangeProduct"-->
-<!--                             @remove="removeElement"></multiselect>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <div class="float-right" style="margin-right: 8px">-->
-<!--              <div class="content-search" >-->
-<!--                <multiselect class="input-content content-multiple-select"-->
-<!--                             v-model="customer_select" :options="customerOptions"-->
-<!--                             track-by="name" label="name" :show-labels="false"-->
-<!--                             :placeholder="$t('label_search_by_customer')"-->
-<!--                             @select="selectionChangeCustomer"-->
-<!--                             @remove="removeElement"></multiselect>-->
-<!--              </div>-->
-<!--            </div>-->
           </div>
         </div>
       </div>
@@ -38,60 +15,87 @@
           <div class="spinner-grow text-muted"></div>
         </div>
         <div v-if="!isLoading && items && items.length > 0">
-          <table class="table table-purchase">
-            <thead class="table-header">
-              <tr class="tr-header">
-                <th class="th-header" style="width: 10%;">{{ $t('label_date_purchase') }}</th>
-                <th class="th-header" style="width: 10%;">{{ $t('label_purchase_by') }}</th>
-                <th class="th-header" style="width: 10%;">{{ $t('label_supplier_name') }}</th>
-                <th class="th-header" style="width: 15%;">{{ $t('label_product_name') }}</th>
-                <th class="th-header" style="width: 7%;">{{ $t('label_quantity') }}</th>
-                <th class="th-header" style="width: 10%;">{{ $t('label_import_price') }} ($)</th>
-                <th class="th-header" style="width: 10%;">{{ $t('label_sub_total') }} ($)</th>
-                <th class="th-header" style="width: 15%;">{{ $t('label_grand_total') }} ($)</th>
-                <th class="th-header" style="width: 10%;">{{ $t('title_action') }}</th>
-              </tr>
-            </thead>
-            <tbody class="table-body">
-              <tr class="table-body-tr" v-for="item in items" v-bind:key="item.purchase_id">
-                <td class="content-td" style="width: 10%;">
-                  <b class="content">{{ (item.date !== undefined ? item.date : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 10%;">
-                  <b class="content">{{ (item.purchase_by !== undefined ? item.purchase_by : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 10%;">
-                  <b class="content">{{ (item.supplier !== undefined ? item.supplier : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 15%;">
-                  <b class="content">{{ (item.name !== undefined ? item.name : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 7%;">
-                  <b class="content">{{ (item.quantity !== undefined ? item.quantity : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 10%;">
-                  <b class="content">{{ (item.unitprice !== undefined ? item.unitprice : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 10%;">
-                  <b class="content">{{ (item.subtotal !== undefined ? item.subtotal : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 15%;">
-                  <b class="content">{{ (item.grand_total !== undefined ? item.grand_total : "") }}</b>
-                </td>
-                <td class="content-td" style="width: 10%;" v-show="item.purchase_id" :rowspan="item.lengthDetail">
-                  <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(item)">
-                    <i class="fa fa-eye"></i>
-                  </b-button>
-                  <b-button size="sm" title="Edit order data" class="btn-no-background" @click="UpdateDetailData(item,  $event.target)">
-                    <i class="fa fa-edit"></i>
-                  </b-button>
-                  <b-button size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemove(item)">
-                    <i class="fa fa-trash"></i>
-                  </b-button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-purchase" style="display: none;">
+                  <thead class="table-header">
+                  <tr class="tr-header">
+                    <th class="th-header" style="width: 10%;">{{ $t('label_date_purchase') }}</th>
+                    <th class="th-header" style="width: 10%;">{{ $t('label_purchase_by') }}</th>
+                    <th class="th-header" style="width: 10%;">{{ $t('label_supplier_name') }}</th>
+                    <th class="th-header" style="width: 15%;">{{ $t('label_product_name') }}</th>
+                    <th class="th-header" style="width: 7%;">{{ $t('label_quantity') }}</th>
+                    <th class="th-header" style="width: 10%;">{{ $t('label_import_price') }} ($)</th>
+                    <th class="th-header" style="width: 10%;">{{ $t('label_sub_total') }} ($)</th>
+                    <th class="th-header" style="width: 15%;">{{ $t('label_grand_total') }} ($)</th>
+                    <th class="th-header" style="width: 10%;">{{ $t('title_action') }}</th>
+                  </tr>
+                  </thead>
+                  <tbody class="table-body" style="max-height: calc(100vh - 300px)">
+                  <tr class="table-body-tr" v-for="item in items" v-bind:key="item.purchase_id">
+                    <td class="content-td" style="width: 10%;">
+                      <b class="content">{{ (item.date !== undefined ? item.date : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 10%;">
+                      <b class="content">{{ (item.purchase_by !== undefined ? item.purchase_by : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 10%;">
+                      <b class="content">{{ (item.supplier !== undefined ? item.supplier : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 15%;">
+                      <b class="content">{{ (item.name !== undefined ? item.name : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 7%;">
+                      <b class="content">{{ (item.quantity !== undefined ? item.quantity : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 10%;">
+                      <b class="content">{{ (item.unitprice !== undefined ? item.unitprice : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 10%;">
+                      <b class="content">{{ (item.subtotal !== undefined ? item.subtotal : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 15%;">
+                      <b class="content">{{ (item.grand_total !== undefined ? item.grand_total : "") }}</b>
+                    </td>
+                    <td class="content-td" style="width: 10%;" v-show="item.purchase_id" :rowspan="item.lengthDetail">
+                      <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(item)">
+                        <i class="fa fa-eye"></i>
+                      </b-button>
+                      <b-button size="sm" title="Edit order data" class="btn-no-background" @click="UpdateDetailData(item,  $event.target)">
+                        <i class="fa fa-edit"></i>
+                      </b-button>
+                      <b-button size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemove(item)">
+                        <i class="fa fa-trash"></i>
+                      </b-button>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+
+                <b-table id="my-table-purchase" class="table table-striped table-bordered table-purchase"
+                         v-if="items"
+                         sticky-header="true"
+                         :items="items"
+                         :fields="itemsFields"
+                         head-variant="light"
+                >
+                  <template #cell(actions)="row">
+                    <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(row.item)">
+                      <i class="fa fa-eye"></i>
+                    </b-button>
+                    <b-button size="sm" title="Edit order data" class="btn-no-background" @click="UpdateDetailData(row.item,  $event.target)">
+                      <i class="fa fa-edit"></i>
+                    </b-button>
+                    <b-button size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemove(row.item)">
+                      <i class="fa fa-trash"></i>
+                    </b-button>
+                  </template>
+                </b-table>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -145,31 +149,35 @@
             @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
             @ok="handleSubmit" ok-title="កែប្រែ" title="ការនាំទំនិញចូល" no-close-on-backdrop>
         <b-form enctype="multipart/form-data" @submit.stop.prevent="onSubmitEditPurchase" v-if="purchase.id !== null && purchase.id !== '' && purchase.id !== undefined">
-          <div class="float-left width-48-percentage float-left" style="margin-right: 15px; margin-bottom: 15px;">
+          <div class="float-left width-48-percentage" style="margin-right: 15px; margin-bottom: 15px;">
             <b-row>
-              <b-col md="12" style="margin-bottom: 10px;">
+              <b-col md="12" style="margin-bottom: 15px;">
                 <label class="label-with">{{$t('title_supplier')}}</label>
-                <b-form-select class="form-control select-content-inline" v-model="purchase.supplier" :options="suppliers"></b-form-select>
+                <b-form-select class="form-control select-content-inline display-inline-block"  v-model="purchase.supplier" :options="suppliers"></b-form-select>
               </b-col>
-              <b-col md="12" style="margin-bottom: 10px;">
+              <b-col md="12" style="margin-bottom: 15px;">
                 <label class="label-with">{{ $t('title_warehouse') }}</label>
-                <b-form-select class="form-control select-content-inline" v-model="purchase.warehouse" :options="warehouses"></b-form-select>
+                <b-form-select class="form-control select-content-inline display-inline-block" v-model="purchase.warehouse" :options="warehouses"></b-form-select>
               </b-col>
-              <b-col md="12" style="margin-bottom: 10px;">
+              <b-col md="12" style="margin-bottom: 15px;">
                 <label :for="'input-product'" class="label-with">ឈ្មោះទំនិញសម្រាប់បន្ថែម</label>
-                <b-form-select class="form-control select-content-inline" v-model="productItemAdd" :options="productSelectOptions" @change="addMoreProductSelectedChange(productItemAdd)"></b-form-select>
+                <b-form-select class="form-control select-content-inline display-inline-block" v-model="productItemAdd" :options="productSelectOptions" @change="addMoreProductSelectedChange(productItemAdd)"></b-form-select>
               </b-col>
             </b-row>
           </div>
-          <div class="float-left width-50-percentage float-right" style="margin-bottom: 15px;">
+          <div class="width-50-percentage float-right" style="margin-bottom: 15px;">
             <b-row>
-              <b-col md="12" style="margin-bottom: 10px;">
-                <label class="label-with">ពន្ធ</label>
-                <b-form-select class="form-control select-content-inline" v-model="purchase.vat" :options="vats"></b-form-select>
+              <b-col md="12" style="margin-bottom: 15px;" >
+                <div class="float-right display-inline-block full-with">
+                  <label class="label-with">ពន្ធ</label>
+                  <b-form-select class="form-control select-content-inline display-inline-block" v-model="purchase.vat" :options="vats"></b-form-select>
+                </div>
               </b-col>
               <b-col md="12">
-                <label class="label-with">Batch</label>
-                <b-form-input class="form-control select-content-inline display-inline-block" v-model="purchase.batch"></b-form-input>
+                <div class="float-right display-inline-block full-with">
+                  <label class="label-with">Batch</label>
+                  <b-form-input class="form-control select-content-inline display-inline-block" v-model="purchase.batch"></b-form-input>
+                </div>
               </b-col>
             </b-row>
           </div>
@@ -216,6 +224,14 @@ export default {
     return {
       isLoading: false,
       items: [],
+      itemsFields: [
+        { key: 'date', label: this.$t('label_date_purchase'), thClass: "header-th", thStyle : "font-size: 17px;"},
+        { key: 'purchase_by', label: this.$t('label_purchase_by'), thClass: "header-th" , thStyle : "font-size: 17px;"},
+        { key: 'supplier', label: this.$t('label_supplier_name'), thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
+        // { key: 'subtotal', label: this.$t('label_sub_total'), thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
+        { key: 'grand_total', label: this.$t('label_grand_total'), thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
+        { key: 'actions', label: this.$t('title_action'), thClass: "header-th" , thStyle : "font-size: 17px;"},
+      ],
       showData: false,
       warehouses : [],
       warehouseList: [],
@@ -352,9 +368,39 @@ export default {
               let purchaseItem = self.cloneObject(data[index]);
               let supplier = self.suppliers.find(item => item.value === purchaseItem["supplier_id"]);
               let user = self.cloneObject(self.$store.$cookies.get('user'));
-              itemPurchase[purchaseItem.id] = [];
+              let itemData = [];
 
-              if(purchaseItem.hasOwnProperty("purchasedetails") && purchaseItem["purchasedetails"] && purchaseItem["purchasedetails"].length > 0){
+              itemData["id"] = purchaseItem.id;
+              itemData["purchase_id"] = purchaseItem.id;
+              itemData["purchase_by"] = user.name;
+              itemData["supplier"] =  supplier["text"];
+              itemData["batch"] =  purchaseItem["batch"];
+              itemData["vat"] =  purchaseItem["vat"] ? purchaseItem["vat"] : 0;
+              let date = "";
+              let grand_total = 0;
+             // let subtotal = 0;
+              for(let indexProduct = 0; indexProduct < purchaseItem["purchasedetails"].length; indexProduct++){
+                let purchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
+                let createdDate = new Date(purchaseDetailItem.created_at);
+                let dd = createdDate.getDate();
+                let mm = createdDate.getMonth() + 1;
+                let day = (dd < 10) ? ('0' + dd) : dd;
+                let month = (mm < 10) ? ('0' + mm) : mm;
+                let yyyy = createdDate.getFullYear();
+                date = (day + "/" + month + "/" + yyyy);
+                let qty = parseInt(purchaseDetailItem["quantity"]);
+                let unitprice = parseFloat(purchaseDetailItem["unitprice"]);
+                //subtotal = subtotal + (unitprice * unitprice);
+                grand_total = grand_total + parseFloat(grand_total + subtotal);
+
+              }
+              itemData["date"] = date;
+              //itemData["subtotal"] = 0;
+              itemData["grand_total"] = 0;
+              self.items.push(itemData);
+
+              //itemPurchase[purchaseItem.id] = [];
+              /*if(purchaseItem.hasOwnProperty("purchasedetails") && purchaseItem["purchasedetails"] && purchaseItem["purchasedetails"].length > 0){
                 for(let indexProduct = 0; indexProduct < purchaseItem["purchasedetails"].length; indexProduct++){
                   let purchaseDetailData = [];
                   let purchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
@@ -415,7 +461,7 @@ export default {
                   }
                   self.items.push(itemData);
                 }
-              }
+              }*/
             }
           }
         })
@@ -612,6 +658,7 @@ export default {
             self.$nextTick(() => {
               self.$refs['edit-purchase-form-modal'].hide();
             });
+            self.getDataPurchase();
             self.$toast.success("Submit data successfully").goAway(2000);
           }
         })
@@ -719,6 +766,9 @@ export default {
   border-bottom: none;
   border-top: none;
   padding: 12px 9px;
+}
+.table-purchase{
+  max-height: calc(100vh - 275px);
 }
 
 </style>

@@ -21,8 +21,29 @@ export default {
     '@/static/css/font-awesome.css',
     '@/static/css/app.css'
   ],*/
-  css: ['~/static/css/app.css', '~/static/css/font-awesome.css'],
-  script: ['~/static/js/jquery-3.3.1.min.js'],
+  css: [
+    '~/static/css/simplebar/simplebar.css',
+    '~/static/css/metismenu/metisMenu.min.css',
+    '~/static/css/perfect-scrollbar/perfect-scrollbar.css',
+    '~/static/css/bootstrap.css',
+    // '~/static/css/bootstrap-extended.css',
+    '~/static/css/font-awesome.css',
+    '~/static/css/dark-theme.css',
+    '~/static/css/light-theme.css',
+    '~/static/css/semi-dark.css',
+    '~/static/css/app.css'
+  ],
+  script: [
+    '~/static/js/bootstrap.bundle.min.js',
+    '~/static/js/jquery.min.js',
+    '~/static/js/bootstrap.js',
+    '~/static/js/simplebar/simplebar.min.js',
+    '~/static/js/metismenu/metisMenu.min.js',
+    '~/static/js/perfect-scrollbar/perfect-scrollbar.js',
+    '~/static/js/pace.min.js',
+    '~/static/js/app.js'
+  ]
+  ,
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   // Auto import components: https://go.nuxtjs.dev/config-components
