@@ -462,7 +462,7 @@ body {
 }
 
 .content-table-scroll {
-  max-height: calc(100vh - 206px);
+  max-height: calc(100vh - 306px);
 }
 .inventory-dashboard-content{
   display: inline-block;

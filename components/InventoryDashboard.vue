@@ -39,7 +39,7 @@
           <div class="panel-bottom"></div>
         </div>
       </div>
-      <div class="content-product" style="height: 80vh;">
+      <div class="content-product" style="height: 75vh;">
         <div class="content-loading" v-if="loadingFields.stockLoading || loadingFields.productListLoading">
           <div class="spinner-grow text-muted"></div>
         </div>
@@ -813,12 +813,29 @@
           dataSubmit["subtotal"] = subtotal;
           dataSubmit["grandtotal"] = (subtotal + (subtotal * parseFloat(vat)));
 
-          console.log(dataSubmit);
-
-          // vm.loadingFields.stockLoading = true;
-          // vm.isShowFormAddProductInPurchase = false;
+          vm.loadingFields.stockLoading = true;
+          vm.isShowFormAddProductInPurchase = false;
 
           vm.$toast.info("Data starting submit").goAway(1500);
+
+          for(let indexProduct =0; indexProduct < productItems.length; indexProduct++){
+            let productData = vm.productList.find(item => item.id = productItems[indexProduct].id);
+            if(
+                    productData && productData.sale_price
+                    && productItems[indexProduct].sale_price
+                    && parseFloat(productItems[indexProduct].sale_price) !== parseFloat(productData.sale_price)
+            ){
+              await this.$axios.patch('/api/product/' + productData.id, {sale_price : productData.sale_price})
+                      .then(function (response) {
+                        if(response && response.hasOwnProperty("data")){
+                        }
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                        vm.$toast.success("Submit data getting error").goAway(3000);
+                      });
+            }
+          }
           await this.$axios.post('/api/purchase', dataSubmit)
             .then(function (response) {
               if(response && response.hasOwnProperty("data")){
@@ -878,7 +895,6 @@
             purchaseDetailItem['quantity'] = vm.items[index]['qty'];
             productTotalPrice = parseInt(vm.items[index]['qty']) * parseFloat(this.items[index]['import_price']);
             subtotal += productTotalPrice;
-            //purchaseDetail.push(purchaseDetailItem);
             purchaseDetail.unshift(purchaseDetailItem);
           }
           let vat = vm.purchase.vat !== null ? vm.purchase.vat : 0;
@@ -890,6 +906,25 @@
           vm.isShowFormAddProductInPurchase = false;
 
           vm.$toast.info("Data starting submit").goAway(1500);
+          for(let indexProduct =0; indexProduct < vm.items.length; indexProduct++){
+            let productData = vm.productList.find(item => item.id = vm.items[indexProduct].id);
+            if(
+                    productData && productData.sale_price
+                    && vm.items[indexProduct].sale_price
+                    && parseFloat(vm.items[indexProduct].sale_price) !== parseFloat(productData.sale_price)
+            ){
+              await this.$axios.put('/api/product/' + productData.id, {sale_price : productData.sale_price})
+                      .then(function (response) {
+                        if(response && response.hasOwnProperty("data")){
+                        }
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                        vm.$toast.success("Submit data getting error").goAway(3000);
+                      });
+            }
+          }
+
           await this.$axios.post('/api/purchase', dataSubmit)
             .then(function (response) {
               if(response && response.hasOwnProperty("data")){

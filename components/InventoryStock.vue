@@ -44,29 +44,35 @@
         </div>
       </div>
       <div class="display-inline-block full-with margin-bottom-20" v-if="productItems && productItems.length > 0">
-        <b-table
-          class="content-table-scroll"
+        <b-table class="productItem" style="height: 25vh;"
           sticky-header="true"
           :items="productItems"
           :fields="productFields"
           head-variant="light"
         >
+          <template #cell(import_price)="row">
+            <b-form-input ref="inputImportPrice" type="number" class="input-content" v-bind:class="'content-input-import_price-'+row.item.id" v-model="row.item.import_price" :autofocus="true"></b-form-input>
+          </template>
+          <template #cell(sale_price)="row">
+            <b-form-input ref="inputSalePrice" type="number" class="input-content" v-bind:class="'content-input-sale_price-'+row.item.id" v-model="row.item.sale_price" :autofocus="true"></b-form-input>
+          </template>
           <template #cell(qty)="row">
             <b-form-input ref="inputQty" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" :autofocus="true"></b-form-input>
           </template>
         </b-table>
       </div>
       <div class="display-inline-block full-with" style="margin-top: 25px; padding-right: 15px;">
-        <b-button
-          v-show="purchase.supplier && purchase.warehouse && this.items.length > 0"
-          href="#" size="sm" variant="success"
-          title="Save stock" @click="submitPurchase()">
-          {{$t('save_purchase')}}
-        </b-button>
-        <b-button class="float-right"
+        <b-button class="float-right margin-bottom-20"
           href="#" size="sm" variant="danger"
           title="Discard stock" @click="discardPurchase()">
           {{$t('title_discard_add_stock')}}
+        </b-button>
+        <b-button
+                class="float-right"
+                v-show="purchase.supplier && purchase.warehouse && this.productItems.length > 0"
+                href="#" size="sm" variant="success"
+                title="Save stock" @click="submitPurchase()">
+          {{$t('save_purchase')}}
         </b-button>
       </div>
     </div>
@@ -144,7 +150,8 @@ export default {
     addProductToListPurchase(){
 
     },
-  }
+  },
+
 }
 </script>
 
