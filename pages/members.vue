@@ -169,7 +169,39 @@
         this.$refs['view-member-form-modal'].hide();
       },
       onSubmit(){
+        let self = this;
+        self.isLoading = true;
 
+        self.$toast.info("submit data in progress").goAway(1000);
+        if(self.member.hasOwnProperty("id")) {
+          self.$axios.put('/api/member/' + self.member, self.member)
+            .then(function (response) {
+              self.isLoading = false;
+              if(response.hasOwnProperty("data")){
+                console.log(response.data);
+              }
+
+            }).catch(function (error) {
+            self.$toast.success("Data is getting error").goAway(2000);
+            console.log(error);
+          });
+        }
+        else {
+          self.$axios.post('/api/member', self.member).then(function (response) {
+            if(response.hasOwnProperty("data")){
+              self.isLoading = false;
+              let item = {};
+              item["id"] = response.data.member["id"];
+              item["title"] = response.data.member["title"];
+              item["discount"] = parseFloat(response.data.member["discount"]);
+              item["discount_percentage"] = (parseFloat(response.data.member["discount"]) * 100) + "%";
+              self.items.unshift(item);
+            }
+          }).catch(function (error) {
+            self.$toast.success("Data is getting error").goAway(2000);
+            console.log(error);
+          });
+        }
       },
       showModal(){
         this.$refs['member-form-modal'].show();

@@ -31,6 +31,11 @@
                                @remove="removeElement"></multiselect>
                 </div>
               </div>
+              <div class="float-right" style="margin-right: 8px">
+                <div class="content-search" >
+                  <b-form-input class="min-height-42-px" type="date" v-model="filterDate" placeholder="ស្វែងរកតាមថ្ងៃ" v-on:change="filterDataByDate(filterDate)"></b-form-input>
+                </div>
+              </div>
               <div class="float-right" style="margin-right: 8px; display: inline-block;">
                 <b-button class="min-height-43-px" v-if="product_select || customer_select" @click="printFilterData()" size="sm" title="ចុច ដើម្បី ព្រីនតារាង" variant="success">ចុចព្រីនតារាង</b-button>
               </div>
@@ -477,6 +482,7 @@
         orderItemSelectEdit: {},
         orderItemSelectToRemoveId: null,
         tr_id_select: null,
+        filterDate: null
       }
     },
     methods: {
@@ -558,12 +564,13 @@
             console.log(error);
           });
       },
-      async getAllOrderData(){
+      async getAllOrderData($filterDate = null){
         let self = this;
         self.isLoading = true;
         self.items = [];
+        let api = $filterDate ? ("/saletoday/" + $filterDate) : ("/sale");
 
-        await self.$axios.get('/api/sale').then(function (response) {
+        await self.$axios.get('/api' + api).then(function (response) {
           self.isLoading = false;
           if(response && response.hasOwnProperty("data")){
             self.orders = response.data;
@@ -1085,6 +1092,10 @@
           }
 
           return orderDetailItemTemp;
+      },
+
+      filterDataByDate(filterDate){
+        this.getAllOrderData(filterDate);
       },
 
       sumAllSaleProduct($data){

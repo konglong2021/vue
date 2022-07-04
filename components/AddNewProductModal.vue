@@ -113,7 +113,7 @@
       'value.showModal':{
          //watch value change sent from parent component
          handler(value){
-           if(value==true){
+           if(value===true){
               this.$refs['product-form-modal'].show();
              this.getBrands();
              this.getCategories();

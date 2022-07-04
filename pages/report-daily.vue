@@ -43,18 +43,20 @@
       <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">
         <b-container>
           <div style="display:inline-block;width:100%; margin-bottom: 20px;">
-            <div class="form-row-content-detail full-with">
+            <div class="form-row-content-detail width-49-percentage">
               <div class="form-column-label">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
               <div class="form-column-input width-50-percentage">
                 <b-form-input type="date" v-model="dateFilter" v-on:change="changeFilterDate(dateFilter)"></b-form-input>
               </div>
             </div>
+            <div class="form-row-content-detail width-31-percentage float-right">
+              <div class="form-column-label">ជ្រើសរើសឃ្លាំងទំនិញ : </div>
+              <div class="form-column-input width-50-percentage">
+                <b-form-select  class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
+              </div>
+            </div>
           </div>
-          <div>
-            <b-table v-if="items.length > 0" striped hover :items="items" :fields="fields"></b-table>
-            <h4 style="display: none; font-weight: 900;">ទឹកប្រាក់សរុបប្រចាំថ្ងៃ : {{calculate(items) + "($)"}}</h4>
-            <h3 v-if="items.length === 0" class="text-center">មិនមានទិន្នន័យសម្រាប់ថ្ងៃនេះទេ</h3>
-          </div>
+          <daily-report-component :items="items" :fields="fields" :warehouse="warehouse" />
         </b-container>
       </div>
     </div>
@@ -90,6 +92,11 @@ export default {
         }
     },
     methods:{
+      selectedWarehouse(warehouse){
+        if(warehouse){
+          this.getProductList(warehouse);
+        }
+      },
       calculate(items){
         let total = [];
         Object.entries(items).forEach(([key, val]) => {
@@ -129,11 +136,11 @@ export default {
       showModal(){
         this.$refs['brand-form-modal'].show();
       },
-      async getProductList(){
+      async getProductList($warehouse = null){
         let vm = this;
         vm.products = [];
 
-        await vm.$axios.get('/api/stock').then(function (response) {
+        await vm.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem'))).then(function (response) {
           if(response && response.hasOwnProperty("data")){
             let dataResponse = response.data;
             if(dataResponse && dataResponse.length > 0){

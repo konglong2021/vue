@@ -73,6 +73,10 @@ body {
   width: 32%;
 }
 
+.width-31-percentage{
+  width: 31%;
+}
+
 .width-35-percentage{
   width: 35%;
 }
@@ -569,6 +573,9 @@ body {
 .min-height-43-px{
   min-height: 43px;
 }
+.min-height-42-px{
+  min-height: 42px;
+}
 .min-height-40-px{
   min-height: 40px;
 }
@@ -654,4 +661,15 @@ body {
 
 .main-page-content{
   min-height: calc(100vh - 95px);
+}
+
+.navbar{
+  margin-bottom: 0 !important;
+}
+
+.nav-tabs .nav-item .nav-link.active-tab{
+  font-weight: 700;
+  color: #17a2b8;
+  border-color: transparent;
+  border-bottom: 2px solid #7c5cc4;
 }

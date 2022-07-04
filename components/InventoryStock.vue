@@ -62,13 +62,13 @@
         </b-table>
       </div>
       <div class="display-inline-block full-with" style="margin-top: 25px; padding-right: 15px;">
-        <b-button class="float-right margin-bottom-20"
+        <b-button class="float-right"
           href="#" size="sm" variant="danger"
           title="Discard stock" @click="discardPurchase()">
           {{$t('title_discard_add_stock')}}
         </b-button>
         <b-button
-                class="float-right"
+                class="float-right" style="margin-right: 20px;"
                 v-show="purchase.supplier && purchase.warehouse && this.productItems.length > 0"
                 href="#" size="sm" variant="success"
                 title="Save stock" @click="submitPurchase()">
