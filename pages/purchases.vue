@@ -131,14 +131,16 @@
           </div>
         </div>
       </div>
-         <b-table style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" table-class="table-product-detail"
-               :items="itemsProductDetail"
-               :fields="fieldsProductDetail"
-               :per-page="0"
-               stacked="md"
-               show-empty
-               small>
-         </b-table>
+      <div style="display: inline-block; overflow:hidden; width: 100%;">
+        <b-table style="height: 500px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" table-class="table-product-detail"
+                 :items="itemsProductDetail"
+                 :fields="fieldsProductDetail"
+                 :per-page="0"
+                 stacked="md"
+                 show-empty
+                 small>
+        </b-table>
+      </div>
       <div class="container-row-form width-15-percentage float-right" style="font-size: 20px;">
         <b>សរុប : {{ grandTotalPrice(itemsProductDetail) }} $</b>
       </div>
@@ -214,6 +216,7 @@
 </template>
 <script>
 import $ from "jquery";
+import moment from "moment";
 
 export default {
   middleware: "local-auth",
@@ -378,25 +381,22 @@ export default {
               itemData["vat"] =  purchaseItem["vat"] ? purchaseItem["vat"] : 0;
               let date = "";
               let grand_total = 0;
-             // let subtotal = 0;
+              let subtotal = 0;
+
               for(let indexProduct = 0; indexProduct < purchaseItem["purchasedetails"].length; indexProduct++){
                 let purchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
-                let createdDate = new Date(purchaseDetailItem.created_at);
-                let dd = createdDate.getDate();
-                let mm = createdDate.getMonth() + 1;
-                let day = (dd < 10) ? ('0' + dd) : dd;
-                let month = (mm < 10) ? ('0' + mm) : mm;
-                let yyyy = createdDate.getFullYear();
-                date = (day + "/" + month + "/" + yyyy);
+                if(purchaseDetailItem && purchaseDetailItem.created_at){
+                  date = moment(purchaseDetailItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+                }
                 let qty = parseInt(purchaseDetailItem["quantity"]);
                 let unitprice = parseFloat(purchaseDetailItem["unitprice"]);
-                //subtotal = subtotal + (unitprice * unitprice);
+                subtotal = subtotal + (qty * unitprice);
                 grand_total = grand_total + parseFloat(grand_total + subtotal);
 
               }
               itemData["date"] = date;
-              //itemData["subtotal"] = 0;
-              itemData["grand_total"] = 0;
+              itemData["subtotal"] = subtotal.toFixed(2);
+              itemData["grand_total"] = grand_total.toFixed(2);
               self.items.push(itemData);
 
               //itemPurchase[purchaseItem.id] = [];

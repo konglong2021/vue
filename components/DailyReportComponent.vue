@@ -11,7 +11,7 @@
         <b-tab title="ការលក់" active >
           <div class="card">
             <div class="card-body">
-              <sale-daily-report :warehouse="warehouse" :orderItems="orderItems" :fieldsProductDetail="fieldsProductDetail" />
+              <sale-daily-report :isLoading="isLoading" :warehouse="warehouse" :orderItems="orderItems" :fieldsProductDetail="fieldsProductDetail" />
             </div>
           </div>
         </b-tab>
@@ -59,7 +59,8 @@ export default {
       productOptions: [],
       products: [],
       customerOptions: [],
-      customers: []
+      customers: [],
+      isLoading: false,
     }
   },
   watch:{

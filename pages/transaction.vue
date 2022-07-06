@@ -1125,7 +1125,7 @@
                 itemOrder["invoice_id"] = orderItem["invoice_id"];
                 itemOrder["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
                 itemOrder["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
-                itemOrder["grandtotal"] = grandtotal;
+                itemOrder["grandtotal"] = grandtotal.toFixed(2);
                 itemOrder["receive"] = orderItem["receive"];
                 orderItems.push(itemOrder);
               }

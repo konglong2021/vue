@@ -43,7 +43,7 @@
       <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">
         <b-container>
           <div style="display:inline-block;width:100%; margin-bottom: 20px;">
-            <div class="form-row-content-detail width-49-percentage">
+            <div class="form-row-content-detail width-49-percentage" style="display: none;">
               <div class="form-column-label">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
               <div class="form-column-input width-50-percentage">
                 <b-form-input type="date" v-model="dateFilter" v-on:change="changeFilterDate(dateFilter)"></b-form-input>
@@ -87,7 +87,7 @@ export default {
           customers: [],
           customersList: [],
           warehouses: [{text: "ជ្រើសរើស ឃ្លាំងទំនិញ", value: null}],
-          warehouse: null,
+          warehouse: this.$store.$cookies.get('storeItem'),
           orders: [],
           purchases: [],
           dateFilter: this.getFullDate()
@@ -329,7 +329,6 @@ export default {
       this.getProductList();
       this.getCustomerList();
       this.getWareHouseList();
-      console.log(this.getFullDate());
       this.getAllOrderData(this.getFullDate());
 
     }
