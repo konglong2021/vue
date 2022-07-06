@@ -11,7 +11,7 @@
               <div class="float-right">
                 <b-form-select  class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
               </div>
-              <div class="float-right product" style="margin-right: 8px;">
+              <div class="float-right product" style="margin-right: 8px; display: none;">
                 <div class="content-search" >
                   <multiselect class="input-content content-multiple-select"
                                v-model="product_select" :options="productOptions"
@@ -266,7 +266,7 @@
               </div>
               <div class="form-row-content-detail row-content-view">
                 <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ថ្ងៃខែឆ្នាំលក់ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ getFullDate() }}</strong>
+                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ order.date }}</strong>
               </div>
             </div>
           </div>
@@ -405,6 +405,7 @@
   </div>
 </template>
 <script>
+  import moment from 'moment';
   import $ from 'jquery';
   export default {
     middleware: "local-auth",
@@ -569,7 +570,6 @@
         self.isLoading = true;
         self.items = [];
         let api = $filterDate ? ("/saletoday/" + $filterDate) : ("/sale");
-
         await self.$axios.get('/api' + api).then(function (response) {
           self.isLoading = false;
           if(response && response.hasOwnProperty("data")){
@@ -579,21 +579,19 @@
             if(self.orders.length > 0){
               for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
                 let orderItem = self.orders[indexOrder];
+                let date = "";
+                if(orderItem && orderItem.created_at){
+                  date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+                }
+
                 let customerItem = self.filterDataCustomerList(orderItem.customer_id);
                 let user = self.cloneObject(self.$store.$cookies.get('user'));
                 let itemData = [];
-                let date = "";
                 let grandtotal = 0;
 
                 for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
                   let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
-                  let createdDate = new Date(orderDetailItem.created_at);
-                  let dd = createdDate.getDate();
-                  let mm = createdDate.getMonth() + 1;
-                  let day = (dd < 10) ? ('0' + dd) : dd;
-                  let month = (mm < 10) ? ('0' + mm) : mm;
-                  let yyyy = createdDate.getFullYear();
-                  date = (day + "/" + month + "/" + yyyy);
+
                   if(orderItem["discount"] > 0){
                     let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                     grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
@@ -616,76 +614,6 @@
                 itemData["receive"] = orderItem["receive"];
 
                 self.items.push(itemData);
-
-                //itemOrder[orderItem.id] = [];
-                /*if(orderItem.hasOwnProperty("orderdetails") && orderItem.orderdetails.length > 0){
-                  for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
-                    let itemOrderDetail = [];
-                    let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
-                    let productData = self.filterProduct(orderDetailItem.product_id);
-                    if(productData !== null && productData !== undefined){
-                      let createdDate = new Date(orderDetailItem.created_at);
-                      let dd = createdDate.getDate();
-                      let mm = createdDate.getMonth() + 1;
-                      let day = (dd < 10) ? ('0' + dd) : dd;
-                      let month = (mm < 10) ? ('0' + mm) : mm;
-                      let yyyy = createdDate.getFullYear();
-                      itemOrderDetail["date"] = (day + "/" + month + "/" + yyyy);
-                      itemOrderDetail["name"] = productData["en_name"] + " (" + productData["kh_name"] + ")";
-                      itemOrderDetail["en_name"] = productData["en_name"];
-                      itemOrderDetail["kh_name"] = productData["kh_name"] ;
-                      itemOrderDetail["product_id"] = productData["id"] ;
-                      itemOrderDetail["qty"] = parseInt(orderDetailItem.quantity);
-                      itemOrderDetail["sale_price"] = parseFloat(orderDetailItem["sellprice"]) ;
-                      itemOrderDetail["order_id"] = orderDetailItem.order_id;
-                      itemOrderDetail["tr_id"] = orderDetailItem.order_id;
-                      let subtotal = 0;
-                      if(orderItem["discount"] > 0){
-                        let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                        subtotal = totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem);
-                      }
-                      else {
-                        subtotal = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                      }
-                      itemOrderDetail["subtotal"] = subtotal;
-                      itemOrder[orderItem.id].push(itemOrderDetail);
-                    }
-                  }
-                }
-                for(let index=0; index < itemOrder[orderItem.id].length; index++){
-                  let itemData = [];
-                  itemData["tr_id"] = itemOrder[orderItem.id].hasOwnProperty("tr_id") ? itemOrder[orderItem.id].tr_id : orderItem["id"];
-                  itemData["customer_id"] = orderItem["customer_id"];
-                  if(index === 0){
-                    itemData["order_id"] = orderItem.id;
-                    itemData["sale_by"] = user.name;
-                    if(customerItem){
-                      itemData["customer"] = customerItem["name"];
-                    }
-                    itemData["invoice_id"] = orderItem["invoice_id"];
-                    itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-                    itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
-                    itemData["lengthDetail"] = itemOrder[orderItem.id].length;
-                    itemData["grandtotal"] = orderItem["grandtotal"];
-                    itemData["receive"] = orderItem["receive"];
-
-                    itemData["product_id"] = itemOrder[orderItem.id][index].product_id;
-                    itemData["name"] = itemOrder[orderItem.id][index].name;
-                    itemData["qty"] = itemOrder[orderItem.id][index]["qty"];
-                    itemData["sale_price"] = itemOrder[orderItem.id][index]["sale_price"];
-                    itemData["date"] = itemOrder[orderItem.id][index]["date"];
-                    itemData["subtotal"] = itemOrder[orderItem.id][index]["subtotal"];
-                  }
-                  else {
-                    itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-                    itemData["product_id"] = itemOrder[orderItem.id][index].product_id;
-                    itemData["name"] = itemOrder[orderItem.id][index].name;
-                    itemData["qty"] = itemOrder[orderItem.id][index]["qty"];
-                    itemData["sale_price"] = itemOrder[orderItem.id][index]["sale_price"];
-                    itemData["subtotal"] = itemOrder[orderItem.id][index]["subtotal"];
-                  }
-                  self.items.push(itemData);
-                }*/
               }
             }
           }
@@ -1157,82 +1085,62 @@
       },
       selectionChangeCustomer($obj){
         if($obj){
-          let orders = [];
+          this.items = [];
+          let orderItems = [];
+          this.isLoading = true;
           if(this.orders && this.orders.length > 0) {
-            let itemOrder = [];
+            this.isLoading = false;
             for (let index = 0; index < this.orders.length; index++) {
-              let orderItem = this.orders[index];
-              let customer = this.customersList.find(customer => customer.id === this.orders[index].customer_id);
-              if (customer && customer["id"] === $obj["value"]) {
-                let customerItem = this.customersList.find(customerItem => customerItem.id === $obj["value"]);
-                let user = this.cloneObject(this.$store.$cookies.get('user'));
-                itemOrder[orderItem.id] = [];
+              let itemOrder = {};
 
+              let orderItem = this.orders[index];
+              let customer = this.customersList.find(customer => customer.id === orderItem.customer_id);
+              if (customer && customer["id"] === $obj["value"]) {
+                let date = "";
+                if(orderItem && orderItem.created_at){
+                  date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+                }
+
+                let customerItem = this.filterDataCustomerList(orderItem.customer_id);
+                let user = this.cloneObject(this.$store.$cookies.get('user'));
+                let grandtotal = 0;
                 if (orderItem.hasOwnProperty("orderdetails") && orderItem.orderdetails.length > 0) {
                   for (let indexOrderDetail = 0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++) {
-                    let itemOrderDetail = [];
                     let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
-                    let productData = this.filterProduct(orderDetailItem.product_id);
-                    if (productData !== null && productData !== undefined) {
-                      let createdDate = new Date(orderDetailItem.created_at);
-                      let dd = createdDate.getDate();
-                      let mm = createdDate.getMonth() + 1;
-                      let day = (dd < 10) ? ('0' + dd) : dd;
-                      let month = (mm < 10) ? ('0' + mm) : mm;
-                      let yyyy = createdDate.getFullYear();
-                      itemOrderDetail["date"] = (day + "/" + month + "/" + yyyy);
-                      itemOrderDetail["name"] = productData["en_name"] + " (" + productData["kh_name"] + ")";
-                      itemOrderDetail["en_name"] = productData["en_name"];
-                      itemOrderDetail["kh_name"] = productData["kh_name"];
-                      itemOrderDetail["product_id"] = productData["id"];
-                      itemOrderDetail["qty"] = parseInt(orderDetailItem.quantity);
-                      itemOrderDetail["sale_price"] = productData["price"];
-                      itemOrderDetail["order_id"] = orderDetailItem.order_id;
-                      itemOrder[orderItem.id].push(itemOrderDetail);
-                    }
-                  }
-                }
-                for (let index = 0; index < itemOrder[orderItem.id].length; index++) {
-                  let itemData = {};
-                  if (index === 0) {
-                    itemData["order_id"] = orderItem.id;
-                    itemData["sale_by"] = user.name;
-                    if (customerItem) {
-                      itemData["customer"] = customerItem["name"];
-                    }
-                    itemData["invoice_id"] = orderItem["invoice_id"];
-                    itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-                    itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
-                    itemData["lengthDetail"] = itemOrder[orderItem.id].length;
-                    itemData["subtotal"] = orderItem["subtotal"];
-                    itemData["grandtotal"] = orderItem["grandtotal"];
 
-                    itemData["product_id"] = itemOrder[orderItem.id][index].product_id;
-                    itemData["name"] = itemOrder[orderItem.id][index].name;
-                    itemData["qty"] = itemOrder[orderItem.id][index]["qty"];
-                    itemData["sale_price"] = itemOrder[orderItem.id][index]["sale_price"];
-                    itemData["date"] = itemOrder[orderItem.id][index]["date"];
+                    if(orderItem["discount"] > 0){
+                      let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                      grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
+                    }
+                    else {
+                      grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                    }
                   }
-                  else {
-                    itemData["product_id"] = itemOrder[orderItem.id][index].product_id;
-                    itemData["name"] = itemOrder[orderItem.id][index].name;
-                    itemData["qty"] = itemOrder[orderItem.id][index]["qty"];
-                    itemData["sale_price"] = itemOrder[orderItem.id][index]["sale_price"];
-                  }
-                  orders.push(itemData);
                 }
+                itemOrder["order_id"] = orderItem.id;
+                itemOrder["sale_by"] = user.name;
+                if (customerItem) {
+                  itemOrder["customer"] = customerItem["name"];
+                }
+                itemOrder["invoice_id"] = orderItem["invoice_id"];
+                itemOrder["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
+                itemOrder["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
+                itemOrder["grandtotal"] = grandtotal;
+                itemOrder["receive"] = orderItem["receive"];
+                orderItems.push(itemOrder);
               }
             }
           }
-          this.items = this.cloneObject(orders);
+          this.items = this.cloneObject(orderItems);
         }
         else {
           this.getAllOrderData();
         }
         this.$forceUpdate();
       },
-      removeElement($obj){this.$forceUpdate();
-
+      removeElement(){
+        this.getAllOrderData();
+        this.$forceUpdate();
       },
       searchData($filterName){
         if($filterName === "product"){

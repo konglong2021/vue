@@ -1024,7 +1024,7 @@
         return JSON.parse(JSON.stringify(obj));
       },
       generateBatch(){
-        return this.getFullDate() + "_v" + this.getFullDateAndTime();
+        return this.getFullDate() + "_v";
       },
       getFullDateAndTime(){
         let today = new Date();

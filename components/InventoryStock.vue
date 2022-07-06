@@ -20,7 +20,7 @@
           <b-form-select :disabled="warehouses.length === 0" class="form-control select-content-inline display-inline-block" v-model="purchase.warehouse" :options="warehouses"></b-form-select>
         </div>
         <div class="margin-bottom-20">
-          <div class="width-30-percentage display-inline-block"><label class="label-input">ទំនិញ</label></div>
+          <div class="width-30-percentage display-inline-block"><label class="label-input">បញ្ចូលទំនិញតាមការជ្រើសរើស</label></div>
           <div class="width-68-percentage display-inline-block">
               <multiselect
                 v-model="product_select" :options="products"
@@ -44,7 +44,7 @@
         </div>
       </div>
       <div class="display-inline-block full-with margin-bottom-20" v-if="productItems && productItems.length > 0">
-        <b-table class="productItem" style="height: 25vh;"
+        <b-table class="productItem" style="height: 30vh;"
           sticky-header="true"
           :items="productItems"
           :fields="productFields"
@@ -140,8 +140,33 @@ export default {
 
     },
     selectedProduct($obj){
+      console.log($obj);
+      let items = [];
       let productItem = this.productList.find(item => item.id === $obj.value);
-      this.productItems.push(productItem);
+
+      if(this.productItems && this.productItems.length > 0){
+        items = this.cloneObject(this.productItems);
+        let dataItem = this.productItems.find(item => item.id === $obj.value);
+        let index = this.productItems.indexOf(dataItem);
+        if(dataItem && dataItem.hasOwnProperty("id")){
+          if(items[index].hasOwnProperty("qty") && parseInt(items[index]["qty"]) > 0 && parseInt(items[index]["qty"]) > 1){
+            items[index]["qty"] = (parseInt(items[index]["qty"]) + parseInt(productItem.qty));
+          }
+          else if(items[index].hasOwnProperty("qty") && (parseInt(items[index]["qty"]) === 0 || parseInt(items[index]["qty"]) ===1)){
+            items[index]["qty"] = (parseInt(items[index]["qty"]) + 1);
+          }
+        }
+        else {
+          items.unshift(productItem);
+        }
+      }
+      else {
+        items.unshift(productItem);
+      }
+      this.productItems = this.cloneObject(items);
+
+      //let productItem = this.productList.find(item => item.id === $obj.value);
+      //this.productItems.push(productItem);
       this.$forceUpdate();
     },
     removeElementProduct(){
@@ -149,6 +174,10 @@ export default {
     },
     addProductToListPurchase(){
 
+    },
+
+    cloneObject(obj) {
+      return JSON.parse(JSON.stringify(obj));
     },
   },
 

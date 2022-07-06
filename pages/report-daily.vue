@@ -56,7 +56,9 @@
               </div>
             </div>
           </div>
-          <daily-report-component :items="items" :fields="fields" :warehouse="warehouse" />
+          <div style="display: inline-block; height: 100%; width: 100%;">
+            <daily-report-component :items="items" :fields="fields" :warehouse="warehouse" />
+          </div>
         </b-container>
       </div>
     </div>
