@@ -21,7 +21,7 @@
                                @remove="removeElement"></multiselect>
                 </div>
               </div>
-              <div class="float-right" style="margin-right: 8px; display: none;">
+              <div class="float-right" style="margin-right: 8px; display: inline-block;">
                 <b-form-select class="form-control input-content input-select-warehouse min-height-43-px" v-model="status_select" :options="statusList" @change="selectedStatusSale(status_select)"></b-form-select>
               </div>
               <div class="float-right" style="margin-right: 8px">
@@ -34,7 +34,7 @@
                                @remove="removeElement"></multiselect>
                 </div>
               </div>
-              <div class="float-right" style="margin-right: 8px" >
+              <div class="float-right" style="margin-right: 8px">
                 <div class="content-search" >
                   <b-form-input class="min-height-42-px" type="date" v-model="filterDate" placeholder="ស្វែងរកតាមថ្ងៃ" v-on:change="filterDataByDate(filterDate)"></b-form-input>
                 </div>
@@ -471,6 +471,7 @@
           autoClose: true,
         },
         orderList: [],
+        orderItemList: [],
         order: {
           customer: null,
           vat: 0,
@@ -596,6 +597,7 @@
                 let user = self.cloneObject(self.$store.$cookies.get('user'));
                 let itemData = [];
                 let grandtotal = 0;
+                let status_code = 'pending';
 
                 for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
                   let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
@@ -608,7 +610,7 @@
                     grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                   }
                 }
-                itemData["status_code"] =((parseFloat(orderItem.receive) === grandtotal) ? "complete" : "pending");
+
                 itemData["grandtotal"] = grandtotal;
                 itemData["date"] = date;
                 itemData["order_id"] = orderItem.id;
@@ -621,7 +623,12 @@
                 itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
                 itemData["receive"] = orderItem["receive"];
                 itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
+                if(parseFloat(itemData["receive"]) === grandtotal){
+                  status_code = 'complete';
+                }
+                itemData["status_code"] = status_code;
                 self.items.push(itemData);
+                self.orderItemList.push(itemData);
               }
 
               console.log(self.items);
@@ -1150,17 +1157,7 @@
         this.$forceUpdate();
       },
       selectedStatusSale(status_select){
-        if(status_select){
-          let orderList = this.cloneObject(this.items);
-          let orders = [];
-          for(let i=0; i < orderList.length; i++){
-            console.log(orderList[i].status_code, status_select);
-            if(orderList[i] && orderList[i].hasOwnProperty("status_code") && orderList[i].status_code === status_select){
-              orders.push(orderList[i])
-            }
-          }
-          this.items = this.cloneObject(orders);
-        }
+        this.items = this.orderItemList.filter(data=> data.status_code === status_select);
       },
       removeElement(){
         this.getAllOrderData();
