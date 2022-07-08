@@ -677,3 +677,14 @@ body {
 .no-border-bottom{
   border-bottom: none !important;
 }
+.badge-radius{
+  border-radius: 3px !important;
+}
+
+.badge-danger {
+  background-color: #ff7588;
+}
+
+.badge-success {
+  background-color: #16d39a;
+}

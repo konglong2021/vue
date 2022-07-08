@@ -21,6 +21,9 @@
                                @remove="removeElement"></multiselect>
                 </div>
               </div>
+              <div class="float-right" style="margin-right: 8px; display: none;">
+                <b-form-select class="form-control input-content input-select-warehouse min-height-43-px" v-model="status_select" :options="statusList" @change="selectedStatusSale(status_select)"></b-form-select>
+              </div>
               <div class="float-right" style="margin-right: 8px">
                 <div class="content-search" >
                   <multiselect class="input-content content-multiple-select"
@@ -31,7 +34,7 @@
                                @remove="removeElement"></multiselect>
                 </div>
               </div>
-              <div class="float-right" style="margin-right: 8px">
+              <div class="float-right" style="margin-right: 8px" >
                 <div class="content-search" >
                   <b-form-input class="min-height-42-px" type="date" v-model="filterDate" placeholder="ស្វែងរកតាមថ្ងៃ" v-on:change="filterDataByDate(filterDate)"></b-form-input>
                 </div>
@@ -138,6 +141,9 @@
                              :fields="itemsFields"
                              head-variant="light"
                     >
+                      <template #cell(status)="row">
+                        <div v-html="row.item.status"></div>
+                      </template>
                       <template #cell(actions)="row">
                         <b-button size="sm" title="View data" class="btn-no-background" @click="viewOrderData(row.item)">
                           <i class="fa fa-eye"></i>
@@ -173,7 +179,7 @@
                             <th style="width: 10%; display: inline-block; overflow: hidden;" >{{$t('label_customer_name')}}</th>
                             <th style="width: 12%; display: inline-block; overflow: hidden;" >{{$t('label_number_invoice')}}</th>
 
-<!--                            <th style="width: 13%; display: inline-block; overflow: hidden;" >{{$t('label_product_name')}}</th>-->
+                            <th style="width: 13%; display: inline-block; overflow: hidden;" >Status</th>
 <!--                            <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_quantity')}}</th>-->
 <!--                            <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_sale_price')}} ($)</th>-->
 
@@ -198,9 +204,9 @@
                               <b >{{ (item.invoice_id !== undefined ? item.invoice_id : "") }}</b>
                             </td>
 
-<!--                            <td style="width: 13%; display: inline-block; overflow: hidden;" >-->
-<!--                              <span>{{ item.name !== undefined ? item.name : "" }}</span>-->
-<!--                            </td>-->
+                            <td style="width: 13%; display: inline-block; overflow: hidden;" >
+                              <div class="badge badge-success">Completed</div>
+                            </td>
 <!--                            <td style="width: 5%; display: inline-block; overflow: hidden;" >-->
 <!--                              <span>{{ item.qty !== undefined ? item.qty : "" }}</span>-->
 <!--                            </td>-->
@@ -424,6 +430,7 @@
           // { key: 'subtotal', label: this.$t('label_sub_total')},
           { key: 'grandtotal', label: this.$t('label_grand_total')},
           {key : 'receive', label: this.$t('label_receive_money')},
+          {key : 'status', label: "status"},
           {key : 'actions', label: this.$t('title_action')}
         ],
         fields: [
@@ -483,7 +490,9 @@
         orderItemSelectEdit: {},
         orderItemSelectToRemoveId: null,
         tr_id_select: null,
-        filterDate: null
+        filterDate: null,
+        status_select: null,
+        statusList: [{ text: 'ស្វែងរកតាមស្ថានការណ៏(Status)', value: null }, { text: 'Completed', value: "complete" },{ text: 'Pending', value: "pending" }]
       }
     },
     methods: {
@@ -575,7 +584,6 @@
           if(response && response.hasOwnProperty("data")){
             self.orders = response.data;
             self.orderList = self.cloneObject(response.data);
-            let itemOrder = [];
             if(self.orders.length > 0){
               for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
                 let orderItem = self.orders[indexOrder];
@@ -600,7 +608,7 @@
                     grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                   }
                 }
-
+                itemData["status_code"] =((parseFloat(orderItem.receive) === grandtotal) ? "complete" : "pending");
                 itemData["grandtotal"] = grandtotal;
                 itemData["date"] = date;
                 itemData["order_id"] = orderItem.id;
@@ -612,9 +620,11 @@
                 itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
                 itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
                 itemData["receive"] = orderItem["receive"];
-
+                itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
                 self.items.push(itemData);
               }
+
+              console.log(self.items);
             }
           }
         }).catch(function (error) {
@@ -801,7 +811,6 @@
       updatedDataOfCurrentProduct(dataItem, item, fieldName){
         let data = this.itemsProductDetail.find(product => product.id === item.id);
         let discount = data.discount;
-        console.log(data);
         if(fieldName === 'qty'){
          let itemTemp = JSON.parse(JSON.stringify(data));
          let index = this.indexWhere(this.itemsProductDetail, (product => product.id  === item.id));
@@ -1127,6 +1136,8 @@
                 itemOrder["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
                 itemOrder["grandtotal"] = grandtotal.toFixed(2);
                 itemOrder["receive"] = orderItem["receive"];
+                itemData["status"] = parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"]) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
+                itemData["status_code"] = parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"]) ? "complete" : "pending";
                 orderItems.push(itemOrder);
               }
             }
@@ -1137,6 +1148,19 @@
           this.getAllOrderData();
         }
         this.$forceUpdate();
+      },
+      selectedStatusSale(status_select){
+        if(status_select){
+          let orderList = this.cloneObject(this.items);
+          let orders = [];
+          for(let i=0; i < orderList.length; i++){
+            console.log(orderList[i].status_code, status_select);
+            if(orderList[i] && orderList[i].hasOwnProperty("status_code") && orderList[i].status_code === status_select){
+              orders.push(orderList[i])
+            }
+          }
+          this.items = this.cloneObject(orders);
+        }
       },
       removeElement(){
         this.getAllOrderData();
@@ -1174,7 +1198,8 @@
         $($event.target).hide();
         $($event.target).prev().show();
 
-      }
+      },
+
   },
     mounted() {
       this.warehouse = this.$store.$cookies.get('storeItem');
