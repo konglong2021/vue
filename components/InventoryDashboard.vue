@@ -43,7 +43,7 @@
         <div class="content-loading" v-if="loadingFields.stockLoading || loadingFields.productListLoading">
           <div class="spinner-grow text-muted"></div>
         </div>
-        <div class="content-data">
+        <div class="content-data" v-if="!loadingFields.stockLoading && !loadingFields.productListLoading">
           <div class="btn-wrapper margin-btn" v-if="!isShowFormAddProductInPurchase">
             <b-button v-if="stockTransfer.show === false" href="#" size="sm" variant="primary" title="Add new purchase record" @click="showPurchaseModal()">
               <span class="margin-span-btn">{{$t('stock_in')}}</span>
@@ -93,7 +93,7 @@
             </div>
           </div>
           <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
-            <inventory-stock :warehouses="warehouses" :suppliers="suppliers" :products="products" :purchase="purchase" @submitPurchase="submitPurchase($event)" @discardPurchase="discardPurchase($event)" :vats="vats" :productList="productListForTransfer" />
+            <inventory-stock :productList="productList" :warehouses="warehouses" :suppliers="suppliers" :products="products" :purchase="purchase" @submitPurchase="submitPurchase($event)" @discardPurchase="discardPurchase($event)" :vats="vats" />
           </div>
         </div>
       </div>
@@ -220,7 +220,7 @@
                           @select="selectedProduct"
                           @remove="removeElement"></multiselect>
                 </div>
-                <!--                <b-form-select class="form-control select-content-inline" v-model="product_select.product" :options="products" @change="selectedProduct(productList, product_select.product)"></b-form-select>-->
+                <!-- <b-form-select class="form-control select-content-inline" v-model="product_select.product" :options="products" @change="selectedProduct(productList, product_select.product)"></b-form-select>-->
               </div>
               <div class="form-group form-content-detail">
                 <label class="label-with">{{$t('import_price')}} ($)</label>
@@ -787,8 +787,8 @@
         let dataSubmit = {};
         let vm = this;
         if($event){
-          let purchaseData = $event["purchase"];
-          let productItems = $event["products"];
+          let purchaseData = vm.cloneObject($event["purchase"]);
+          let productItems = vm.cloneObject($event["productItems"]);
 
           dataSubmit["warehouse_id"] = purchaseData.warehouse;
           dataSubmit["supplier_id"] = purchaseData.supplier;
@@ -825,7 +825,7 @@
                     && productItems[indexProduct].sale_price
                     && parseFloat(productItems[indexProduct].sale_price) !== parseFloat(productData.sale_price)
             ){
-              await this.$axios.patch('/api/product/' + productData.id, {sale_price : productData.sale_price})
+              await this.$axios.put('/api/updatesaleprice/' + productItems[indexProduct].id, {sale_price : productItems[indexProduct].sale_price})
                       .then(function (response) {
                         if(response && response.hasOwnProperty("data")){
                         }
@@ -906,24 +906,24 @@
           vm.isShowFormAddProductInPurchase = false;
 
           vm.$toast.info("Data starting submit").goAway(1500);
-          for(let indexProduct =0; indexProduct < vm.items.length; indexProduct++){
-            let productData = vm.productList.find(item => item.id = vm.items[indexProduct].id);
-            if(
-                    productData && productData.sale_price
-                    && vm.items[indexProduct].sale_price
-                    && parseFloat(vm.items[indexProduct].sale_price) !== parseFloat(productData.sale_price)
-            ){
-              await this.$axios.put('/api/product/' + productData.id, {sale_price : productData.sale_price})
-                      .then(function (response) {
-                        if(response && response.hasOwnProperty("data")){
-                        }
-                      })
-                      .catch(function (error) {
-                        console.log(error);
-                        vm.$toast.success("Submit data getting error").goAway(3000);
-                      });
-            }
-          }
+          // for(let indexProduct =0; indexProduct < vm.items.length; indexProduct++){
+          //   let productData = vm.productList.find(item => item.id = vm.items[indexProduct].id);
+          //   if(
+          //           productData && productData.sale_price
+          //           && vm.items[indexProduct].sale_price
+          //           && parseFloat(vm.items[indexProduct].sale_price) !== parseFloat(productData.sale_price)
+          //   ){
+          //     await this.$axios.put('/api/updatesaleprice/' + vm.items[indexProduct].id, {sale_price : vm.items[indexProduct].sale_price})
+          //             .then(function (response) {
+          //               if(response && response.hasOwnProperty("data")){
+          //               }
+          //             })
+          //             .catch(function (error) {
+          //               console.log(error);
+          //               vm.$toast.success("Submit data getting error").goAway(3000);
+          //             });
+          //   }
+          // }
 
           await this.$axios.post('/api/purchase', dataSubmit)
             .then(function (response) {

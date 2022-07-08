@@ -69,13 +69,15 @@
             <div v-if="barcodeItem.code.length > 12">
               <div v-for="item in barcodeListToPrint">
                 <span style="text-align: center !important;">{{ barcodeItem.name }}</span>
-                <barcode :value="item" height ='75' width="2" paddingTop="0" marginTop="0" marginBottom="0" fontSize="12" paddingBottom="0" marginLeft="0"></barcode>
+                <barcode :value="item" height ='65' width="2" paddingTop="0" marginTop="0" marginBottom="0" fontSize="12" paddingBottom="0" marginLeft="0"></barcode>
+                <span style="text-align: center !important; font-weight: 900;">តម្លៃ USD : {{ barcodeItem.sale_price }}</span>
               </div>
             </div>
-            <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="barcodeItem.code.length === 12">
+            <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="barcodeItem.code.length <= 12">
               <div v-for="item in barcodeListToPrint">
                 <span style="margin-left:12px; text-align: center !important; display: block;">{{ barcodeItem.name }}</span>
-                <barcode :value="item" height ='80' width="2" marginTop="0" marginBottom="0" fontSize="12"></barcode>
+                <barcode :value="item" height ='65' width="2" marginTop="0" marginBottom="0" fontSize="10"></barcode>
+                <span style="margin-left:8px; text-align: center !important; display: block; font-weight: 900;">តម្លៃ USD : {{ barcodeItem.sale_price }}</span>
               </div>
             </div>
           </div>
@@ -126,16 +128,27 @@
           </b-form>
         </b-modal>
         <b-modal
-          id="modal-input-number-barcode" ref="input-number-barcode-modal" size="lg" no-close-on-backdrop
-          title="Product View"  @ok="barcodePrint" ok-title="Save" title-class="text-center mx-auto" no-close-on-backdrop>
+          id="modal-input-number-barcode" ref="input-number-barcode-modal" size="md" no-close-on-backdrop
+          title="ព្រីនបារកូដ"  @ok="barcodePrint" :cancel-title="$t('label_cancel_button')"
+          ok-title="ព្រីនចេញ" title-class="text-center mx-auto" no-close-on-backdrop>
             <b-form>
-              <div class="product-data data">
-                <b-row class="my-1">
-                  <b-col sm="4"><label :for="'input-number-barcode'" class="label-input label-margin-top">ចំនួនព្រីនចេញ</label></b-col>
-                  <b-col sm="4">
-                    <b-form-input :id="'input-number-barcode'" type="text" v-model="numberPrint" @change="updateNumberBarcodePrint(numberPrint)" class="input-content input-no-background"></b-form-input>
-                  </b-col>
-                </b-row>
+              <div class="display-inline-block full-with">
+                <table class="table ">
+                  <thead >
+                   <tr>
+                     <th class="no-border-bottom">ឈ្មោះទំនិញ</th>
+                     <th class="no-border-bottom">ចំនួនព្រីនចេញ</th>
+                   </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="barcodeItem">
+                      <td>{{  barcodeItem.en_name + " - " + barcodeItem.kh_name + "  (" + barcodeItem.code + ") " }}</td>
+                      <td>
+                        <b-form-input :id="'input-number-barcode'" type="text" v-model="numberPrint" @change="updateNumberBarcodePrint(numberPrint)" class="input-content"></b-form-input>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </b-form>
         </b-modal>
@@ -167,6 +180,7 @@
           {key: 'category_name', label: this.$t('title_category')},
           {key: 'brand', label: this.$t('title_brand')},
           {key: 'loyalty', label: 'Loyalty'},
+          {key: 'sale_price', label: this.$t('label_unit_price')},
           {key: 'actions', label: this.$t('title_action')}
         ],
         category: {}, //new item for category

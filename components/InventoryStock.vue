@@ -1,6 +1,6 @@
 <template>
   <b-container >
-    <h2 class="text-center text-success">បញ្ចូលទំនិញក្នុងស្តុក</h2>
+    <h2 class="text-center text-success" style="margin-bottom: 50px;">បញ្ចូលទំនិញក្នុងស្តុក</h2>
     <div class="display-inline-block full-with">
       <div class="display-inline-block content-field-purchase float-left" >
         <p class="text-danger" v-if="suppliers.length === 0 || products.length === 0">
@@ -64,14 +64,15 @@
       <div class="display-inline-block full-with" style="margin-top: 25px; padding-right: 15px;">
         <b-button class="float-right"
           href="#" size="sm" variant="danger"
-          title="Discard stock" @click="discardPurchase()">
+          title="Discard stock" @click="discardPurchase()"
+        >
           {{$t('title_discard_add_stock')}}
         </b-button>
         <b-button
                 class="float-right" style="margin-right: 20px;"
                 v-show="purchase.supplier && purchase.warehouse && this.productItems.length > 0"
                 href="#" size="sm" variant="success"
-                title="Save stock" @click="submitPurchase()">
+                title="Save stock" @click="submitPurchase()" :disabled="checkingToDisable()">
           {{$t('save_purchase')}}
         </b-button>
       </div>
@@ -128,7 +129,7 @@ export default {
   },
   methods: {
     submitPurchase(){
-      this.$emit("submitPurchase",{purchase: this.purchase, products: this.productItems});
+      this.$emit("submitPurchase",{purchase: this.purchase, productItems: this.productItems});
     },
     discardPurchase() {
       this.$emit("discardPurchase",{isDiscard: true});
@@ -140,34 +141,51 @@ export default {
 
     },
     selectedProduct($obj){
-      console.log($obj);
-      let items = [];
-      let productItem = this.productList.find(item => item.id === $obj.value);
+      if($obj && $obj.hasOwnProperty("value")){
+        let items = this.cloneObject(this.productItems);
+        let productItem = {};
+        productItem = this.productList.find(item => item.id === $obj.value);
 
-      if(this.productItems && this.productItems.length > 0){
-        items = this.cloneObject(this.productItems);
-        let dataItem = this.productItems.find(item => item.id === $obj.value);
-        let index = this.productItems.indexOf(dataItem);
-        if(dataItem && dataItem.hasOwnProperty("id")){
-          if(items[index].hasOwnProperty("qty") && parseInt(items[index]["qty"]) > 0 && parseInt(items[index]["qty"]) > 1){
-            items[index]["qty"] = (parseInt(items[index]["qty"]) + parseInt(productItem.qty));
+        if(items && items > 0){
+          let dataItem = this.productItems.find(item => item.id === $obj.value);
+          let index = this.productItems.indexOf(dataItem);
+          if(dataItem && dataItem.hasOwnProperty("id")){
+            if(items[index].hasOwnProperty("qty") && parseInt(items[index]["qty"]) > 0 && parseInt(items[index]["qty"]) > 1){
+              items[index]["qty"] = (parseInt(items[index]["qty"]) + parseInt(productItem.qty));
+            }
+            else if(items[index].hasOwnProperty("qty") && (parseInt(items[index]["qty"]) === 0 || parseInt(items[index]["qty"]) ===1)){
+              items[index]["qty"] = (parseInt(items[index]["qty"]) + 1);
+            }
           }
-          else if(items[index].hasOwnProperty("qty") && (parseInt(items[index]["qty"]) === 0 || parseInt(items[index]["qty"]) ===1)){
-            items[index]["qty"] = (parseInt(items[index]["qty"]) + 1);
+          else {
+            items.unshift(productItem);
           }
         }
         else {
           items.unshift(productItem);
         }
+        this.productItems = this.cloneObject(items);
+        console.log(this.productItems);
       }
-      else {
-        items.unshift(productItem);
-      }
-      this.productItems = this.cloneObject(items);
-
-      //let productItem = this.productList.find(item => item.id === $obj.value);
-      //this.productItems.push(productItem);
       this.$forceUpdate();
+    },
+    checkingToDisable(){
+      let countInputQty = 0;
+      let countInputPrice = 0;
+      let shouldBeDisable = false;
+      if(this.productItems && this.productItems.length > 0){
+        for (let i=0; i< this.productItems.length; i++){
+          if(this.productItems[i] && this.productItems[i].hasOwnProperty("qty") && this.productItems[i]["qty"] > 0){
+            countInputQty = (countInputQty + 1);
+          }
+          if(this.productItems[i] && this.productItems[i].hasOwnProperty("import_price") && this.productItems[i]["import_price"] > 0){
+            countInputPrice = (countInputPrice + 1);
+          }
+        }
+        shouldBeDisable = (countInputQty < this.productItems.length || countInputPrice < this.productItems.length);
+      }
+      console.log(shouldBeDisable);
+      return shouldBeDisable;
     },
     removeElementProduct(){
       this.$forceUpdate();
