@@ -145,13 +145,13 @@
                         <div v-html="row.item.status"></div>
                       </template>
                       <template #cell(actions)="row">
-                        <b-button size="sm" title="View data" class="btn-no-background" @click="viewOrderData(row.item)">
+                        <b-button v-can="'pos_access'" size="sm" title="View data" class="btn-no-background" @click="viewOrderData(row.item)">
                           <i class="fa fa-eye"></i>
                         </b-button>
-                        <b-button size="sm" title="Edit order data" class="btn-no-background" @click="UpdateOrderData(row.item,  $event.target)">
+                        <b-button v-can="'pos_edit'" size="sm" title="Edit order data" class="btn-no-background" @click="UpdateOrderData(row.item,  $event.target)">
                           <i class="fa fa-edit"></i>
                         </b-button>
-                        <b-button size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemoveOrder(row.item)">
+                        <b-button v-can="'pos_delete'" size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemoveOrder(row.item)">
                           <i class="fa fa-trash"></i>
                         </b-button>
                       </template>
@@ -873,11 +873,10 @@
         dataSubmit.grandtotal = (priceAfterDiscount + totalVat);
 
         self.$toast.info("Data starting submit").goAway(1500);
-        if(self.orderItemSelectEdit.hasOwnProperty("tr_id") && self.orderItemSelectEdit.tr_id){
-          self.$axios.put('/api/sale/' + self.orderItemSelectEdit.tr_id, dataSubmit).then(function (response) {
+        if(self.orderItemSelectEdit.hasOwnProperty("order_id") && self.orderItemSelectEdit.order_id){
+          self.$axios.put('/api/sale/' + self.orderItemSelectEdit.order_id, dataSubmit).then(function (response) {
             console.log(response);
            if(response.data.success === true){
-
              self.$nextTick(() => {
                self.$refs['edit-payment-form-modal'].hide();
              });
