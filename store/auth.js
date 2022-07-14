@@ -8,6 +8,7 @@ export const state = () => ({
   storeItem: null,
   setting: null,
   storeList: [],
+  permissions:[]
 });
 
 export const getters = {
@@ -18,9 +19,14 @@ export const getters = {
   setting: state => state.setting,
   storeList: state => state.storeList,
   check: state => state.user !== null,
+  permissions: state => state.permissions,
 };
 
 export const mutations = {
+  setPermissions(state, permissions){
+      state.permissions = permissions;
+      Cookie.set('permissions', permissions);
+  },
   setToken(state, token){
     state.token = token;
     Cookie.set('token', token);

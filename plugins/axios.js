@@ -17,7 +17,6 @@ export default ({ $axios, store , redirect }) => {
     }
     return Promise.reject(error);
   });
-
   $axios.onResponseError(error => {
     const { status } = error.response || {};
     if (status === 401 && store.getters['auth/check']) {

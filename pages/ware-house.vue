@@ -18,7 +18,7 @@
                         <input class="form-control input-search-box" type="search" placeholder="Search..."/>
                       </div>
                     </b-col>
-                    <div class="btn-wrapper">
+                    <div class="btn-wrapper" v-can="'warehouse_create'">
                       <b-button href="#"  title="Add new WareHouse" size="sm" variant="primary"
                                 @click="showModal()">
                         {{ $t('title_new_warehouse') }}
@@ -45,10 +45,10 @@
                   :fields="fields"
                   head-variant="light">
                   <template #cell(actions)="row">
-                    <b-button size="sm" variant="primary" title="View Inventory History Detail"  @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
+                    <b-button v-can="'warehouse_access'" size="sm" variant="primary" title="View Inventory History Detail"  @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
                       <i class="fa fa-eye"></i>
                     </b-button>
-                    <b-button size="sm" title="Adjust invetory stock" variant="success" @click="editWareHouse(row.item, row.index, $event.target)">
+                    <b-button v-can="'warehouse_edit'" size="sm" title="Adjust invetory stock" variant="success" @click="editWareHouse(row.item, row.index, $event.target)">
                       <i class="fa fa-edit"></i>
                     </b-button>
                   </template>

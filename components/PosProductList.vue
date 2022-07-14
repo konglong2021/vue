@@ -10,7 +10,7 @@
                     <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>
                     <input
                       class="form-control input-search-box" type="search" placeholder="Search..."  v-model="searchInput"
-                      @keyup.enter="searchProduct()"
+                      @keyup.enter="searchProduct()" v-inputTextUppercase
                     />
                   </div>
                 </b-col>
@@ -24,8 +24,9 @@
         </div>
       </div>
       <div class="product-list-body">
-        <div class="scanning-input" style="display:none;">
-          <b-input v-model="scanningInput" :autofocus="true" class="input-scanning" @keyup.enter="searchAndSelectedProduct(scanningInput)"></b-input>
+        <div class="scanning-input" >
+          <!--<h1 v-colorChange="'red'">This is a custom directive RED text</h1>-->
+          <!--<b-input v-model="scanningInput" class="input-scanning" @keyup.enter="searchAndSelectedProduct(scanningInput)" v-colorChange="'red'"></b-input>-->
         </div>
         <div v-if="!productLoading && warehouse" >
           <div class="content-product" v-if="products && products.length > 0">

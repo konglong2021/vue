@@ -16,7 +16,7 @@
                       <input class="form-control input-search-box" type="search" placeholder="Search..."/>
                     </div>
                   </b-col>
-                  <div class="btn-wrapper">
+                  <div class="btn-wrapper" v-can="'user_create'">
                     <b-button href="#"  title="Add new Category" size="sm" variant="primary"
                               @click="showModal()">
                       New User
@@ -41,10 +41,10 @@
               show-empty
               small>
               <template #cell(actions)="row">
-                <b-button size="sm" variant="primary" title="View Inventory History Detail"  @click="viewDetailUser(row.item, row.index, $event.target)" class="mr-1">
+                <b-button v-can="'user_access'" size="sm" variant="primary" title="View Inventory History Detail"  @click="viewDetailUser(row.item, row.index, $event.target)" class="mr-1">
                   <i class="fa fa-eye"></i>
                 </b-button>
-                <b-button size="sm" title="Adjust invetory stock" variant="success" @click="editUser(row.item, row.index, $event.target)">
+                <b-button v-can="'user_edit'" size="sm" title="Adjust invetory stock" variant="success" @click="editUser(row.item, row.index, $event.target)">
                   <i class="fa fa-edit"></i>
                 </b-button>
               </template>
@@ -69,13 +69,13 @@
           <div class="full-content">
             <b-row class="my-1">
               <div class="label-content-user"><label :for="'input-first-name'" class="label-input">First Name</label></div>
-              <b-col sm="4"><b-form-input :id="'input-first-name'" type="text" v-model="user.firstname" class="input-content"></b-form-input></b-col>
+              <b-col sm="4"><b-form-input :id="'input-first-name'" type="text" v-model="user.firstname" class="input-content" v-inputTextSentenceCase></b-form-input></b-col>
               <div class="label-content-user"><label :for="'input-last-name'" class="label-input">Last Name</label></div>
               <b-col sm="4"><b-form-input :id="'input-last-name'" type="text" v-model="user.lastname" class="input-content" v-inputTextUppercase></b-form-input></b-col>
             </b-row>
             <b-row class="my-1">
               <div class="label-content-user"><label :for="'input-occupation'" class="label-input">Occupation</label></div>
-              <b-col sm="4"><b-form-input :id="'input-occupation'" type="text" v-model="user.occupation" class="input-content"></b-form-input></b-col>
+              <b-col sm="4"><b-form-input :id="'input-occupation'" type="text" v-model="user.occupation" class="input-content" v-inputTextSentenceCase></b-form-input></b-col>
               <div class="label-content-user"><label :for="'input-phone'" class="label-input">Phone number</label></div>
               <b-col sm="4"><b-form-input :id="'input-phone'" type="tel" v-model="user.phone" class="input-content" v-numericOnly></b-form-input></b-col>
             </b-row>
@@ -273,7 +273,8 @@
         }
         else {
           await self.$axios.post('/api/user', dataSubmit).then(function (response) {
-            console.log(response);
+            formData.append("user_id", response.data.user["id"]);
+            self.submitProfileData(formData);
             if(response){
               self.user = {};
             }
@@ -282,8 +283,6 @@
             self.$toast.error("Submit data getting error").goAway(3000);
           });
         }
-        await self.submitProfileData(formData);
-
       },
       async submitProfileData(dataSubmit){
         let self = this;

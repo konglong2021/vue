@@ -16,7 +16,7 @@
                          <input class="form-control input-search-box" type="search" placeholder="Search..." v-model="searchInput" @keyup.enter="searchCategories()" @change="handleClick"/>
                        </div>
                      </b-col>
-                     <div class="btn-wrapper">
+                     <div class="btn-wrapper" v-can="'category_create'">
                        <b-button href="#"  title="Add new Category" size="sm" variant="primary" @click="showModal()">
                          {{ $t('label_add_new_category') }}
                          <i class="fa fa-plus" aria-hidden="true"></i>
@@ -42,10 +42,10 @@
                        head-variant="light"
                 >
                 <template #cell(actions)="row">
-                  <b-button size="sm" variant="primary" title="View Inventory History Detail"  @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
+                  <b-button v-can="'category_access'" size="sm" variant="primary" title="View Inventory History Detail"  @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
                     <i class="fa fa-eye"></i>
                   </b-button>
-                  <b-button size="sm" title="Adjust invetory stock" variant="success" @click="adjustCategory(row.item, row.index, $event.target)">
+                  <b-button v-can="'category_edit'" size="sm" title="Adjust invetory stock" variant="success" @click="adjustCategory(row.item, row.index, $event.target)">
                     <i class="fa fa-edit"></i>
                   </b-button>
                 </template>

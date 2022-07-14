@@ -80,6 +80,9 @@ export default {
     '~/plugins/i18n',
     '~/plugins/jquery',
     '~/plugins/input-text-uppercase',
+    '~/plugins/input-text-sentence-case',
+    '~/plugins/focus',
+    '~/plugins/can',
   ],
 
   axios: {

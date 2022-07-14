@@ -1,5 +1,5 @@
 <template>
-  <div class="inventory-dashboard-content main-page-content">
+  <div class="inventory-dashboard-content main-page-content" v-can="'inventory_access'">
     <div class="full-content">
       <div class="control-panel">
         <div class="panel-top">

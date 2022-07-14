@@ -9,32 +9,32 @@
     </div>
     <div class="content-menu-text">
       <ul class="list-menu-text">
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'inventory_access'">
           <a href="/inventory">
             <span><i class="fa fa-balance-scale" aria-hidden="true"></i> {{ $t('title_inventory') }}</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'inventory_access'">
           <a href="/purchases">
             <span><i class="fa fa-recycle" aria-hidden="true"></i>  ប្រតិបត្តការបញ្ចូលក្នុងស្តុក</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'inventory_access'">
           <a href="/transfer">
             <span><i class="fa fa-truck" aria-hidden="true"></i>  ផ្ទេរស្តុក</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'category_access'">
           <a href="/categories">
             <span> <i class="fa fa-cogs" aria-hidden="true"></i> {{ $t('title_categories') }} </span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'brand_access'">
           <a href="/brands">
             <span> <i class="fa fa-asterisk" aria-hidden="true"></i> {{ $t('title_brands') }}</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'product_access'">
           <a href="/products">
             <span><i class="fa fa-gift" aria-hidden="true"></i> {{ $t('title_products') }}</span>
           </a>
@@ -44,12 +44,12 @@
             <span><i class="fa fa-trophy" aria-hidden="true"></i> Loyalty</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'supplier_access'">
           <a href="/supplier">
             <span> <i class="fa fa-truck" aria-hidden="true"></i> {{ $t('title_supplier') }} </span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'warehouse_access'">
           <a href="/ware-house">
             <span> <i class="fa fa-home" aria-hidden="true"></i> {{ $t('title_warehouse') }} </span>
           </a>

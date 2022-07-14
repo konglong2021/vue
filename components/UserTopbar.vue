@@ -9,22 +9,22 @@
     </div>
     <div class="content-menu-text">
       <ul class="list-menu-text">
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'user_access'">
           <a href="/users">
             <span><i class="fa fa-users" aria-hidden="true"></i> {{ $t('label_menu_title_user') }}</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'role_access'">
           <a href="/roles">
             <span> <i class="fa fa-cogs" aria-hidden="true"></i>{{ $t('label_menu_title_role') }}</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'member_access'">
           <a href="/members">
             <span> <i class="fa fa-user" aria-hidden="true"></i> {{ $t('label_menu_title_member') }}</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" v-can="'customer_access'">
           <a href="/customer">
             <span> <i class="fa fa-user" aria-hidden="true"></i> {{ $t('label_menu_title_customer') }}</span>
           </a>

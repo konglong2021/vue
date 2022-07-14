@@ -16,7 +16,7 @@
                       <input class="form-control input-search-box" type="search" placeholder="Search..." v-model="searchInput" @keyup.enter="searchProduct()" @change="handleClick" />
                     </div>
                   </b-col>
-                  <div class="btn-wrapper">
+                  <div class="btn-wrapper" v-can="'product_create'">
                        <b-button href="#"  title="Add new Category" size="sm" variant="primary"
                        @click="showModal()">
                         {{ $t('title_new_product') }}
@@ -51,13 +51,13 @@
                   </div>
                 </template>
                 <template #cell(actions)="row">
-                  <b-button size="sm" variant="primary" title="View Inventory History Detail" @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
+                  <b-button v-can="'product_access'" size="sm" variant="primary" title="View Inventory History Detail" @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
                     <i class="fa fa-eye"></i>
                   </b-button>
-                  <b-button size="sm" title="Adjust invetory stock" variant="success" @click="adjustProduct(row.item, row.index, $event.target)">
+                  <b-button v-can="'product_edit'" size="sm" title="Adjust invetory stock" variant="success" @click="adjustProduct(row.item, row.index, $event.target)">
                     <i class="fa fa-edit"></i>
                   </b-button>
-                  <b-button size="sm" title="Print barcode" variant="primary" @click="barcodeInputNumberPrint(row.item)">
+                  <b-button v-can="'product_access'" size="sm" title="Print barcode" variant="primary" @click="barcodeInputNumberPrint(row.item)">
                     <i class="fa fa-print"></i>
                   </b-button>
                 </template>

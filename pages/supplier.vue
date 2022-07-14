@@ -17,7 +17,7 @@
                         <input class="form-control input-search-box" type="search" placeholder="Search..." v-model="searchInput" @keyup.enter="searchingFunction()" @change="handleClick"/>
                       </div>
                     </b-col>
-                    <div class="btn-wrapper">
+                    <div class="btn-wrapper" v-can="'supplier_create'">
                       <b-button href="#"  title="Add new Supplier" size="sm" variant="primary"
                                 @click="showModal()">
                         {{ $t('label_add_new_supplier') }}
@@ -43,10 +43,10 @@
                   head-variant="light"
                 >
                     <template #cell(actions)="row">
-                      <b-button size="sm" variant="primary" title="View Supplier data Detail"  @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
+                      <b-button v-can="'supplier_access'" size="sm" variant="primary" title="View Supplier data Detail"  @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
                         <i class="fa fa-eye"></i>
                       </b-button>
-                      <b-button size="sm" title="Adjust Supplier data" variant="success" @click="editData(row.item, row.index, $event.target)">
+                      <b-button v-can="'supplier_edit'" size="sm" title="Adjust Supplier data" variant="success" @click="editData(row.item, row.index, $event.target)">
                         <i class="fa fa-edit"></i>
                       </b-button>
                     </template>

@@ -5,7 +5,7 @@
         <b-container class="col-8 mx-auto menu-wrapper">
           <b-row>
             <b-col>
-              <b-button href="/users"  variant="dark">
+              <b-button href="/users" class="color-white" variant="dark">
                 <i class="fa fa-users fa-3x" > </i> <div>
                 {{ $t('index_menu_user') }}
               </div>

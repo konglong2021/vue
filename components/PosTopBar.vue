@@ -10,17 +10,17 @@
         <div style="display: inline-block; overflow: hidden; float: right; width: 100%;">
           <div class="content-logout" style="float: right;">
             <ul class="ul-style">
-              <li class="li-style" style="overflow: hidden;" v-if="routePath !== '/pos'">
+              <li class="li-style" v-can="'pos_access'" style="overflow: hidden;" v-if="routePath !== '/pos'">
                 <a class="content-link" href="/pos">
                   <span>{{ $t('title_pos') }}</span>
                 </a>
               </li>
-              <li class="li-style" style="overflow: hidden;">
+              <li class="li-style" v-can="'pos_access'" style="overflow: hidden;">
                 <a class="content-link" href="/transaction">
                   <span>{{ $t('title_transaction') }}</span>
                 </a>
               </li>
-              <li class="li-style" style="overflow: hidden;">
+              <li class="li-style" v-can="'pos_payment'" style="overflow: hidden;">
                 <a class="content-link" href="/debt">
                   <span> ការទូរទាត់ទឹកប្រាក់ </span>
                 </a>
