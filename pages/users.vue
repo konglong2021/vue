@@ -126,13 +126,12 @@
       return {
         items:[],
         fields: [
-          { key: 'name', label: 'Name' },
+           { key: 'name', label: 'Name' },
            { key: 'username', label: 'Username' },
-
            {key:'state',label:'Status'} ,
            {key:'last_login',label:'Last Login'},
            {key:'roles',label:'Roles'},
-          { key: 'actions', label: 'Actions' },
+           { key: 'actions', label: 'Actions' },
         ],
         user:{}, //new item for user
         roles: [],

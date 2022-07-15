@@ -76,6 +76,7 @@ export default {
               for (let index=0; index< permission.permissions.length;index++){
                   permissions.push(permission.permissions[index]["title"]);
               }
+              console.log(permissions);
               self.$store.commit('auth/setPermissions', permissions);
           }
           if(user && user.hasOwnProperty("profile") && user.profile && user.profile.warehouse_id){

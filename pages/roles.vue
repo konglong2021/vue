@@ -28,24 +28,28 @@
             <div class="panel-bottom"></div>
           </div>
         </div>
-        <div class="content-product">
-          <b-table
-            :items="items"
-            :fields="fields"
-            stacked="md"
-            show-empty
-            small
-          >
-            <template #cell(actions)="row">
-              <b-button size="sm" variant="primary" title="View data role of user" @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
-                <i class="fa fa-eye"></i>
-              </b-button>
-              <b-button size="sm" title="Edit role of user" variant="success" @click="editRoleOfUser(row.item, row.index, $event.target)">
-                <i class="fa fa-edit"></i>
-              </b-button>
-            </template>
-            <!-- check this url : https://bootstrap-vue.org/docs/components/table#tables -->
-          </b-table>
+        <div class="content-product content-role">
+          <div class="content-loading" v-if="isLoading">
+            <div class="spinner-grow text-muted"></div>
+          </div>
+          <div v-if="items && items.length > 0 && !isLoading">
+            <b-table
+              :items="items"
+              :fields="fields"
+              stacked="md"
+              show-empty
+              small
+            >
+              <template #cell(actions)="row">
+                <b-button size="sm" variant="primary" title="View data role of user" @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
+                  <i class="fa fa-eye"></i>
+                </b-button>
+                <b-button size="sm" title="Edit role of user" variant="success" @click="editRoleOfUser(row.item, row.index, $event.target)">
+                  <i class="fa fa-edit"></i>
+                </b-button>
+              </template>
+            </b-table>
+          </div>
         </div>
         <b-modal
                 id="modal-view-role" ref="view-role-form-modal" size="lg" no-close-on-backdrop
@@ -109,35 +113,37 @@
         middleware: "local-auth",
         layout: "userui",
         data() {
-            return {
-                items: [],
-                fields: [
-        { key: "title", label: "Title" },
-
-        { key: "permission", label: "Permission" },
-        { key: "actions", label: "Actions" }
-      ],
-                roleView: {},
-                roleEdit: {},
-                permissions: []
-            };
+          return {
+            isLoading: false,
+            items: [],
+            fields: [
+              { key: "title", label: "Title" },
+              { key: "permission", label: "Permission", },
+              { key: "actions", label: "Actions" }
+              ],
+            roleView: {},
+            roleEdit: {},
+            permissions: []
+          };
         },
         methods: {
             cloneObject(obj) {
                 return JSON.parse(JSON.stringify(obj));
             },
             async onGetDataPermissionList(){
-                let self = this;
-                await self.$axios.get('/api/permission').then(function (response) {
-                    if(response.hasOwnProperty("data")){
-                        for(let index=0; index < response.data.length; index++){
-                            self.permissions.push({name : response.data[index]["title"], value : response.data[index]["id"]});
-                        }
-                    }
-                }).catch(function (error) {
-                    self.$toast.error("getting data error ").goAway(2000);
-                    console.log(error);
-                });
+              let self = this;
+              self.isLoading = true;
+              await self.$axios.get('/api/permission').then(function (response) {
+                self.isLoading = false;
+                if(response.hasOwnProperty("data")){
+                      for(let index=0; index < response.data.length; index++){
+                          self.permissions.push({name : response.data[index]["title"], value : response.data[index]["id"]});
+                      }
+                  }
+              }).catch(function (error) {
+                self.$toast.error("getting data error ").goAway(2000);
+                console.log(error);
+              });
             },
             async onGetDataRoles(){
                 let self = this;

@@ -24,9 +24,13 @@ export const getters = {
 
 export const mutations = {
   setPermissions(state, permissions){
-      state.permissions = permissions;
+      state.permissions = JSON.parse(JSON.stringify(permissions));
       Cookie.set('permissions', permissions);
   },
+  updatePermissions(state, { permissions }){
+    state.permissions = permissions;
+  },
+
   setToken(state, token){
     state.token = token;
     Cookie.set('token', token);
@@ -83,6 +87,9 @@ export const actions = {
   },
   updateUser({ commit }, payload){
     commit('updateUser', payload);
+  },
+  updatePermissions({ commit }, payload){
+    commit('updatePermissions', payload);
   },
   async logout({ commit }){
     try{

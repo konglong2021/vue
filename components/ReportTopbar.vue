@@ -55,7 +55,7 @@
     methods: {
       async logOut(){
         let response = await this.$axios.post('/api/logout');
-        if(response && response.data.hasOwnProperty("message") && response.data.message.toLocaleLowerCase() === "logged out"){
+        if(response && response.data.hasOwnProperty("message") && (response.data.message.toLocaleLowerCase() === "logged out" || response.data.message.toLocaleLowerCase() === "logout")){
           await this.$router.push('/login');
         }
       },
