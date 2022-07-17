@@ -25,8 +25,7 @@
       </div>
       <div class="product-list-body">
         <div class="scanning-input" >
-          <!--<h1 v-colorChange="'red'">This is a custom directive RED text</h1>-->
-          <!--<b-input v-model="scanningInput" class="input-scanning" @keyup.enter="searchAndSelectedProduct(scanningInput)" v-colorChange="'red'"></b-input>-->
+          <b-form-input v-model="scanningInput" class="input-scanning" @keyup.enter="searchAndSelectedProduct(scanningInput)" autofocus ref="scanningInput" ></b-form-input>
         </div>
         <div v-if="!productLoading && warehouse" >
           <div class="content-product" v-if="products && products.length > 0">
@@ -267,6 +266,7 @@
     mounted() {
       this.warehouse = this.$store.$cookies.get('storeItem');
       if(this.$store.$cookies.get('storeItem')){
+        this.$refs.scanningInput.focus();
         this.getListProduct(this.$store.$cookies.get('storeItem'));
       }
       this.getWareHouseList();

@@ -53,22 +53,21 @@
         </div>
         <b-modal
                 id="modal-view-role" ref="view-role-form-modal" size="lg" no-close-on-backdrop
-                title="ពិនិត្យទិន្នន័យ តួនាទីរបស់អ្នកប្រើប្រាស់" title-class="text-center mx-auto" hide-footer
+                title="ពិនិត្យទិន្នន័យ តួនាទីរបស់អ្នកប្រើប្រាស់" title-class="text-center mx-auto"
+                ok-only ok-title="បិទ" footer-class="justify-content-center"
         >
           <b-form enctype="multipart/form-data">
             <div class="full-content">
               <b-row class="my-1">
-                <b-col sm="4"><label class="label-input">Name</label></b-col>
+                <b-col sm="4"><label class="label-input">Title Role</label></b-col>
                 <b-col sm="8">
-                  <span>{{ roleView.name }}</span>
-                  <!--<b-form-input type="text" v-model="roleView.name" class="input-content"></b-form-input>-->
+                  <span>{{ roleView.title }}</span>
                 </b-col>
               </b-row>
               <b-row class="my-1">
-                <b-col sm="4"><label class="label-input">Name(KH)</label></b-col>
+                <b-col sm="4"><label class="label-input">Permission</label></b-col>
                 <b-col sm="8">
-                  <span>{{ roleView.name }}</span>
-                  <!--<b-form-input type="text" v-model="roleView.kh_name" class="input-content"></b-form-input>-->
+                  <span>{{ roleView.permission }}</span>
                 </b-col>
               </b-row>
             </div>
@@ -78,28 +77,27 @@
                 id="modal-edit-role" ref="edit-role-form-modal" size="lg" no-close-on-backdrop
                 @hidden="onReset" :cancel-title="$t('label_cancel_button')" no-close-on-backdrop
                 @ok="handleOnSubmit" :ok-title="$t('label_save_button')"
-                title="កែប្រែទិន្នន័យ តួនាទីរបស់អ្នកប្រើប្រាស់" title-class="text-center mx-auto" hide-footer
+                title="កែប្រែទិន្នន័យ តួនាទីរបស់អ្នកប្រើប្រាស់" title-class="text-center mx-auto"
         >
           <b-form enctype="multipart/form-data">
-            <div class="full-content">
+            <div class="full-content" style="min-height: 250px;">
               <b-row class="my-1">
                 <b-col sm="4"><label class="label-input">Title Role</label></b-col>
-                <b-col sm="8"><b-form-input type="text" v-model="roleView.title" class="input-content"></b-form-input></b-col>
+                <b-col sm="8"><b-form-input type="text" v-model="roleEdit.title" class="input-content"></b-form-input></b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label class="label-input">Permissions</label></b-col>
                 <b-col sm="8">
                   <multiselect
-                          class="input-category-brand"
-                          v-model="roleView.permission" :options="permissions"
+                          class="input-content"
+                          v-model="roleEdit.permission" :options="permissions"
                           track-by="name" label="name" :multiple="true"
-                          :show-labels="false" aria-placeholder="Select brands"
+                          :show-labels="false" aria-placeholder="Select Permission"
                           @select="selectionChange"
                           @remove="removeElement"
                   ></multiselect>
                 </b-col>
               </b-row>
-
             </div>
           </b-form>
         </b-modal>
@@ -132,9 +130,7 @@
             },
             async onGetDataPermissionList(){
               let self = this;
-              self.isLoading = true;
               await self.$axios.get('/api/permission').then(function (response) {
-                self.isLoading = false;
                 if(response.hasOwnProperty("data")){
                       for(let index=0; index < response.data.length; index++){
                           self.permissions.push({name : response.data[index]["title"], value : response.data[index]["id"]});
@@ -147,8 +143,11 @@
             },
             async onGetDataRoles(){
                 let self = this;
+                self.items = [];
+                self.isLoading = true;
                 await self.$axios.get('/api/role')
                     .then(function (response) {
+                        self.isLoading = false;
                         if(response.hasOwnProperty("data")){
                             for(let index=0; index < response.data.length; index++){
                                 let roleItemResponse = response.data[index];
@@ -185,13 +184,16 @@
                     for (let index=0; index < item["permissions"].length; index++){
                         permissionList.push({name: item["permissions"][index]["title"], value: item["permissions"][index]["id"]});
                     }
-                    this.roleEdit["permissions"] = this.cloneObject(permissionList);
+                    this.roleEdit["permission"] = this.cloneObject(permissionList);
                 }
-                console.log(this.roleEdit);
                 this.$refs['edit-role-form-modal'].show();
             },
-            selectionChange(){},
-            removeElement(){},
+            selectionChange($obj){
+              this.$forceUpdate();
+            },
+            removeElement(){
+              this.$forceUpdate();
+            },
             handleOnSubmit(bvModalEvent){
                 bvModalEvent.preventDefault();
                 this.onSubmit();
@@ -200,27 +202,40 @@
                 let self = this;
                 let dataSubmit = {};
                 let permissions = [];
-                /*let formData = new FormData();
-                if(self.category.brand && self.category.brand.length > 0){
-                    for(let index=0; index < self.category.brand.length; index++){
-                        brands.push(self.category.brand[index]["value"]);
+                let formData = new FormData();
+                if(self.roleEdit.permission && self.roleEdit.permission.length > 0){
+                    for(let index=0; index < self.roleEdit.permission.length; index++){
+                      permissions.push(self.roleEdit.permission[index]["value"]);
                     }
                 }
-                dataSubmit["name"] = self.category.name;
-                dataSubmit["kh_name"] = self.category.kh_name;
-                dataSubmit["brands"] = (brands);
-                dataSubmit["description"] = self.category.description;
-
-                if(self.category.hasOwnProperty("id") && self.category.id){
+                dataSubmit["title"] = self.roleEdit.title;
+                dataSubmit["permissions"] = (permissions);
+                if(self.roleEdit.hasOwnProperty("id") && self.roleEdit.id){
                     formData.append("_method", "PUT");
                     self.$toast.info("Data starting submit").goAway(1500);
-                    await self.$axios.put(('/api/category/' + self.category.id), dataSubmit)
+                    await self.$axios.put(('/api/role/' + self.roleEdit.id), dataSubmit)
                         .then(function (response) {
-                            if(response){
-                                let brands = self.cloneObject(response.data.brands);
-                                self.updatedCategoryData(self.items, response.data.data.id, brands);
-                                self.$toast.success("Submit data successfully").goAway(2000);
-                                self.category = {};
+                            if(response && response.data){
+                                self.onGetDataRoles();
+                                // let roleItem = response.data.role;
+                                // let permissions = self.cloneObject(response.data.permissions);
+                                // let itemData = self.items.find(i=> i.id === roleItem.id);
+                                // //self.items.unshift(itemData);
+                                // for(let i=0; i< self.items.length; i++){
+                                //     if(roleItem.id === self.items[i].id){
+                                //         let responsePermissionsName = [];
+                                //         let responsePermissions = [];
+                                //         for(let i=0; i < permissions.length; i++){
+                                //             let itemResponsePermission = self.cloneObject(self.selectedPermissionList(permissions[i]));
+                                //             responsePermissionsName.push(itemResponsePermission["name"]);
+                                //         }
+                                //         self.items[i]["permission"] = responsePermissionsName.join(", ");
+                                //         self.items[i]['title'] = roleItem["title"];
+                                //     }
+                                // }
+                                self.$nextTick(() => {
+                                    self.$refs['edit-role-form-modal'].hide();
+                                });
                             }
                         })
                         .catch(function (error) {
@@ -230,38 +245,49 @@
                 }
                 else{
                     self.$toast.info("submit data in progress").goAway(1000);
-                    await self.$axios.post('/api/category', dataSubmit)
+                    await self.$axios.post('/api/role', dataSubmit)
                         .then(function (response) {
                             if(response.data.hasOwnProperty("data")){
-                                let categoryItem = response.data.data;
-                                let brands = self.cloneObject(response.data.brands);
-                                let item = {};
+                                let roleItem = response.data.role;
+                                let permissions = self.cloneObject(response.data.permissions);
+                                let itemData = {};
 
-                                let responseBrandName = [];
-                                let responseBrand = [];
-                                for(let i=0; i < brands.length; i++){
-                                    let itemResponseBrand = self.cloneObject(self.selectedBrandList(brands[i]));
-                                    responseBrandName.push(itemResponseBrand["name"]);
+                                let responsePermissionsName = [];
+                                let responsePermissions = [];
+                                for(let i=0; i < permissions.length; i++){
+                                    let itemResponseBrand = self.cloneObject(self.selectedPermissionList(permissions[i]));
+                                    responsePermissionsName.push(itemResponseBrand["name"]);
                                 }
-                                item["brands"] = self.cloneObject(responseBrand);
-                                item["brand"] = responseBrandName.join(", ");
-                                item['name'] = categoryItem["name"];
-                                item['parent'] = "--ROOT--";
-                                item['products_count'] = categoryItem["products_count"];
-                                //self.items.push(item);
-                                self.items.unshift(item);
+                                //itemData["permissions"] = self.cloneObject(responseBrand);
+                                itemData["permission"] = responsePermissionsName.join(", ");
+                                itemData['title'] = roleItem["title"];
+                                itemData['id'] = roleItem["id"];
+                                self.items.unshift(itemData);
+                                self.$nextTick(() => {
+                                    self.$refs['edit-role-form-modal'].hide();
+                                });
                                 self.$toast.success("submit data is successfully").goAway(1500);
-                                self.hideModal();
-                                self.category = {};
                             }
                         })
                         .catch(function (error) {
                             self.$toast.success("submit data is getting error").goAway(2000);
                             console.log(error);
                         });
-                }*/
+                }
             },
-            onReset(){}
+            onReset(){},
+            selectedPermissionList(item){
+                let itemData;
+                if(this.permissions && this.permissions.length > 0){
+                    for (let index=0; this.permissions.length; index++){
+                        if(this.permissions[index] && this.permissions[index]["value"] && item === this.permissions[index]["value"]){
+                            itemData = this.permissions[index];
+                            break;
+                        }
+                    }
+                }
+                return itemData;
+            },
         },
         mounted(){
             this.onGetDataPermissionList();
