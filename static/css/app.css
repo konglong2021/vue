@@ -692,3 +692,8 @@ body {
 .color-white{
   color: #ffffff !important;
 }
+.body-print{
+  display: inline-block;
+  width: 95%;
+  margin: 15px;
+}

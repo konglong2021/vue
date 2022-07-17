@@ -131,7 +131,7 @@
                   </b-tr>
                 </b-tbody>
               </b-table-simple>
-              <div class="card">
+              <div class="card" v-if="items.length > 0">
                 <div class="card-body">
                   <div class="table-responsive" >
                     <b-table id="my-table-stock" class="table table-striped table-bordered content-table-scroll-stock"
@@ -159,7 +159,7 @@
                   </div>
                 </div>
               </div>
-              <h3 v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
+              <h3 class="text-center color-info" v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
               <div class="content-detail">
                 <h5 v-if="product_select">ចំនួនលក់សរុបទាំងអស់ : {{ sumAllSaleProduct(items) }}</h5>
                 <h5 v-if="product_select">សរុបទឹកប្រាក់ទាំងអស់ : {{ sumAllPriceSaleProduct(items) + "$"}}</h5>
@@ -239,6 +239,36 @@
           </div>
         </div>
       </div>
+      <div id="invoice-print-pos-again" style="margin-left: 15px!important; display: none; width: 95%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
+<!--        <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center; font-size: 25px;">{{ $t('title') }}</h1>-->
+        <span style="margin-bottom: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center; font-size: 23px;">{{ $t('title') }}</span><br/><br/>
+<!--        <span v-for="item in itemsProductDetail">-->
+<!--          <span style="font-size: 13px;!important;">{{ item.name }}</span>-->
+<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.qty }}</span>-->
+<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.price }}</span>-->
+<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.total }}</span>-->
+<!--          <br/>-->
+<!--        </span>-->
+        <table>
+          <thead>
+          <tr>
+            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 70% !important;">ឈ្មោះទំនិញ</th>
+            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">ចំនួន</th>
+            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">តម្លៃ</th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in itemsProductDetail" style="font-size: 16px !important; width: 99% !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">
+              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 70% !important;">{{ item.name }}</td>
+              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">{{ item.qty }}</td>
+              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">{{ item.price }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <hr>
+        <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span><br/>
+        <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span>
+      </div>
 
       <b-modal id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
                @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
@@ -289,7 +319,7 @@
               <span style="display: block;margin-top: 10px;">{{$t('title_total_after_vat_in_usd')}} : {{ order.grandtotal}} USD</span>
           </div>
         </b-form>
-        <div id="invoice-print-again" style="display: none; width: 100%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
+        <div id="invoice-print-again" style="margin: 15px; display: none; width: 95%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
           <div style="margin-bottom: 30px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; display:inline-block; width: 100%;">
             <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center;">{{ $t('title') }}</h1>
           </div>
@@ -325,7 +355,7 @@
           </div>
           <b-table style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" table-class="table-payment"
                    :items="itemsProductDetail"
-                   :fields="fieldsProductDetail"
+                   :fields="fieldsProductDetailPrint"
                    stacked="md"
                    show-empty
                    small
@@ -451,6 +481,12 @@
           { key: 'total_after_discount', label: 'តម្លៃសរុប បន្ទាប់ពី បញ្ចុះតម្លៃ ($)', thClass: "header-th", thStyle : "font-size: 17px;"},
           { key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle : "font-size: 17px;"},
         ],
+        fieldsProductDetailPrint: [
+          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 17px;"},
+          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
+          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
+          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 17px;"},
+        ],
         warehouses : [{text : "ជ្រើសរើស ឃ្លាំងទំនិញ", value : null}],
         warehouse: null,
         products : [],
@@ -575,12 +611,15 @@
             console.log(error);
           });
       },
-      async getAllOrderData($filterDate = null){
+      async getAllOrderData($filterDate = null, $warehouse = null){
         let self = this;
         self.isLoading = true;
         self.items = [];
-        let api = $filterDate ? ("/saletoday/" + $filterDate) : ("/sale");
-        await self.$axios.get('/api' + api).then(function (response) {
+        let api = ($filterDate ? ("/saletoday/" + $filterDate) : ("/salebywarehouse"));
+        let fullApi = (api + ("/" + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))));
+
+        console.log(fullApi);
+        await self.$axios.get('/api' + fullApi).then(function (response) {
           self.isLoading = false;
           if(response && response.hasOwnProperty("data")){
             self.orders = response.data;
@@ -650,9 +689,10 @@
         }
       },
       selectedWarehouse(warehouse){
-        this.$emit('selectWarehouse', warehouse);
+        //this.$emit('selectWarehouse', warehouse);
         if(warehouse){
-          this.getListProduct(warehouse);
+          this.getListProduct( warehouse);
+          this.getAllOrderData(null, warehouse);
         }
       },
       generateImageUrlDisplay(img){
@@ -709,7 +749,8 @@
           this.itemsProductDetail = this.cloneObject(orderDetailArray);
         }
         this.$nextTick(() => {
-          this.$refs["detail-payment-form-modal"].show();
+          this.onSubmitToPrint();
+          //this.$refs["detail-payment-form-modal"].show();
         });
       },
       UpdateOrderData(row, $event){
@@ -969,7 +1010,8 @@
       },
       onResetPrint(){},
       onSubmitToPrint(){
-        this.$htmlToPaper("invoice-print-again", this.optionStyleHtmlToPaper);
+        //this.$htmlToPaper("invoice-print-again", this.optionStyleHtmlToPaper);
+        this.$htmlToPaper("invoice-print-pos-again", this.optionStyleHtmlToPaper);
       },
 
       filterOrderByParam($filteName, $paramFilter){
@@ -1280,7 +1322,7 @@
     margin-right: 15px;
   }
   .content-table-scroll-stock{
-    max-height: calc(100vh - 350px);
+    max-height: calc(100vh - 200px);
   }
 
 </style>
