@@ -51,7 +51,7 @@
             </div>
             <div class="form-row-content-detail width-31-percentage float-right">
               <div class="form-column-label">ជ្រើសរើសឃ្លាំងទំនិញ : </div>
-              <div class="form-column-input width-50-percentage">
+              <div class="form-column-input width-50-percentage" v-can="'warehouse_access'">
                 <b-form-select  class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
               </div>
             </div>

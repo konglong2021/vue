@@ -53,7 +53,7 @@
               <i class="fa fa-truck" aria-hidden="true"></i>
               <span class="margin-span-btn">{{$t('stock_transfer')}}</span>
             </b-button>
-            <div style="display: inline-block; width: 13%; float: right; margin-right: 10px; margin-bottom: 10px">
+            <div v-can="'warehouse_access'" style="display: inline-block; width: 13%; float: right; margin-right: 10px; margin-bottom: 10px">
               <b-form-select  class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
             </div>
           </div>

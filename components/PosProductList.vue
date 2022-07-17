@@ -14,8 +14,8 @@
                     />
                   </div>
                 </b-col>
-                <b-col sm="6">
-                  <b-form-select  class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
+                <b-col sm="6" v-can="'warehouse_access'">
+                  <b-form-select class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
                 </b-col>
               </b-row>
             </b-container>

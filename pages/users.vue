@@ -341,6 +341,7 @@
 
       },
       editUser(item, index, target){
+        //let userObj = this.cloneObject(item);
         let userObj = {};
         userObj["id"] = item.id;
         userObj["username"] = item.username;

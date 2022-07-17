@@ -7,7 +7,7 @@
             <h3 class="head-title">អំពី ការទូទាត់ទឹកប្រាក់</h3>
           </div>
           <div class="content-panel-right content-panel-right-full-width" style="display: none; vertical-align: text-bottom; width: 80%;">
-            <div class="float-right">
+            <div class="float-right" v-can="'warehouse_access'">
               <b-form-select  class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
             </div>
           </div>

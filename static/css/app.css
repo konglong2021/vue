@@ -455,6 +455,7 @@ body {
   border: none;
   outline: none ;
   box-shadow: none;
+  color: white;
 }
 
 .no-padding-right{
@@ -696,4 +697,13 @@ body {
   display: inline-block;
   width: 95%;
   margin: 15px;
+}
+.pagination{
+  display: flex !important;
+  padding-left: 0;
+  list-style: none;
+  border-radius: 0.25rem;
+}
+.pagination > li {
+  display: list-item !important;
 }

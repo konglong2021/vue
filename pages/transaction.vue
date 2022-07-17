@@ -8,7 +8,7 @@
               <h3 class="head-title">{{$t('content_title_order')}}</h3>
             </div>
             <div class="content-panel-right content-panel-right-full-width" style="vertical-align: text-bottom; width: 80%;">
-              <div class="float-right">
+              <div class="float-right" v-can="'warehouse_access'">
                 <b-form-select  class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
               </div>
               <div class="float-right product" style="margin-right: 8px; display: none;">
