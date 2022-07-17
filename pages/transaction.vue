@@ -157,83 +157,18 @@
                       </template>
                     </b-table>
                   </div>
+<!--                  <b-pagination-->
+<!--                          v-model="currentPage"-->
+<!--                          :total-rows="rows"-->
+<!--                          :per-page="perPage"-->
+<!--                          aria-controls="my-table"-->
+<!--                  ></b-pagination>-->
                 </div>
               </div>
               <h3 class="text-center color-info" v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
               <div class="content-detail">
                 <h5 v-if="product_select">ចំនួនលក់សរុបទាំងអស់ : {{ sumAllSaleProduct(items) }}</h5>
                 <h5 v-if="product_select">សរុបទឹកប្រាក់ទាំងអស់ : {{ sumAllPriceSaleProduct(items) + "$"}}</h5>
-              </div>
-              <div id="table-order" v-if="product_select" style="display: none; width: 100%; overflow: hidden;">
-                <h2 style="margin-bottom: 35px;">អំពី ការលក់ </h2>
-                <h4 v-if="product_select">ចំនួនលក់សរុបទំនិញទាំងអស់ : {{ sumAllSaleProduct(items) }}</h4>
-                <h4 v-if="product_select">ទឹកប្រាក់សរុបទាំងអស់ : {{ sumAllPriceSaleProduct(items) + "$"}}</h4>
-                <div class="card">
-                  <div class="card-body">
-                    <div class="table-responsive">
-                      <table class="content-table-scroll-stock" style="display: inline-block;width: 100%;overflow: hidden;">
-                        <thead style="display: inline-block;width: 100%;overflow: hidden; ">
-                          <tr style="display: inline-block;width: 100%;overflow: hidden;">
-                            <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_date_sale')}}</th>
-                            <th style="width: 8%; display: inline-block; overflow: hidden;" >{{$t('label_sale_by')}}</th>
-                            <th style="width: 10%; display: inline-block; overflow: hidden;" >{{$t('label_customer_name')}}</th>
-                            <th style="width: 12%; display: inline-block; overflow: hidden;" >{{$t('label_number_invoice')}}</th>
-
-                            <th style="width: 13%; display: inline-block; overflow: hidden;" >Status</th>
-<!--                            <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_quantity')}}</th>-->
-<!--                            <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_sale_price')}} ($)</th>-->
-
-                            <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_discount')}}</th>
-                            <th style="width: 5%; display: inline-block; overflow: hidden;" >{{$t('label_vat')}}</th>
-                            <th style="width: 11%; display: inline-block; overflow: hidden;" >{{$t('label_sub_total')}} ($)</th>
-                            <th style="width: 9%; display: inline-block; overflow: hidden;" >{{$t('label_grand_total')}} ($)</th>
-                          </tr>
-                        </thead>
-                        <tbody style="display: inline-block;width: 100%;overflow: hidden;">
-                          <tr style="display: inline-block;width: 100%;overflow: hidden; padding-bottom: 15px; padding-top: 5px;" v-for="item in items" v-bind:key="item.order_id">
-                            <td style="width: 9%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >{{ (item.date !== undefined ? item.date : "") }}</b>
-                            </td>
-                            <td style="width: 8%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >{{ (item.sale_by !== undefined ? item.sale_by : "") }}</b>
-                            </td>
-                            <td style="width: 10%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >{{ (item.customer !== undefined ? item.customer : "") }}</b>
-                            </td>
-                            <td style="width: 12%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >{{ (item.invoice_id !== undefined ? item.invoice_id : "") }}</b>
-                            </td>
-
-                            <td style="width: 13%; display: inline-block; overflow: hidden;" >
-                              <div class="badge badge-success">Completed</div>
-                            </td>
-<!--                            <td style="width: 5%; display: inline-block; overflow: hidden;" >-->
-<!--                              <span>{{ item.qty !== undefined ? item.qty : "" }}</span>-->
-<!--                            </td>-->
-<!--                            <td style="width: 9%; display: inline-block; overflow: hidden;" >-->
-<!--                              <span >{{ item.sale_price !== undefined ? item.sale_price + "$" : ""}}</span>-->
-<!--                            </td>-->
-
-                            <td style="width: 5%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >{{ (item.discount === 0 || item.discount === undefined) ? "0" : item.discount + "%" }}</b>
-                            </td>
-                            <td style="width: 5%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >
-                                {{ (item.vat === 0 || item.vat === undefined) ? 0 : item.vat + "%" }}
-                              </b>
-                            </td>
-                            <td style="width: 11%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >{{ item.subtotal !== undefined ? (item.subtotal + "$") : "" }}</b>
-                            </td>
-                            <td style="width: 9%; display: inline-block; overflow: hidden;" :rowspan="item.lengthDetail">
-                              <b >{{ item.grandtotal !== undefined ? (item.grandtotal + "$") : "" }}</b>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -269,7 +204,6 @@
         <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span><br/>
         <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span>
       </div>
-
       <b-modal id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
                @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
                @ok="onSubmitToPrint" ok-title="ព្រីនចេញ" title="ការលក់" no-close-on-backdrop>
@@ -617,8 +551,6 @@
         self.items = [];
         let api = ($filterDate ? ("/saletoday/" + $filterDate) : ("/salebywarehouse"));
         let fullApi = (api + ("/" + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))));
-
-        console.log(fullApi);
         await self.$axios.get('/api' + fullApi).then(function (response) {
           self.isLoading = false;
           if(response && response.hasOwnProperty("data")){
@@ -669,8 +601,6 @@
                 self.items.push(itemData);
                 self.orderItemList.push(itemData);
               }
-
-              console.log(self.items);
             }
           }
         }).catch(function (error) {
@@ -689,7 +619,6 @@
         }
       },
       selectedWarehouse(warehouse){
-        //this.$emit('selectWarehouse', warehouse);
         if(warehouse){
           this.getListProduct( warehouse);
           this.getAllOrderData(null, warehouse);
@@ -749,8 +678,8 @@
           this.itemsProductDetail = this.cloneObject(orderDetailArray);
         }
         this.$nextTick(() => {
-          this.onSubmitToPrint();
-          //this.$refs["detail-payment-form-modal"].show();
+          //this.onSubmitToPrint();
+          this.$refs["detail-payment-form-modal"].show();
         });
       },
       UpdateOrderData(row, $event){
