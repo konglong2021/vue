@@ -1,14 +1,14 @@
 <template>
   <div class="display-inline-block full-with">
+    <div class="display-inline-block full-with margin-bottom-20">
+      <h3 class="float-right">សរុប: {{ calculate(orderItems) + " $" }}</h3>
+    </div>
     <div>
       <div class="content-loading" v-if="isLoading">
         <div class="spinner-grow text-muted"></div>
       </div>
     </div>
     <div v-if="!isLoading">
-      <div class="display-inline-block full-with margin-bottom-20">
-        <h3 class="float-right">សរុប: {{ calculate(orderItems) }}</h3>
-      </div>
       <div class="d-flex align-items-center">
         <div class="table-responsive">
           <b-table class="productItem" style="height: calc(100vh - 70px) !important;"
@@ -29,7 +29,7 @@ import moment from "moment";
 export default {
   props: {
     warehouse: {
-      type: String,
+      type: Number,
       require: true
     },
     orderItems: {

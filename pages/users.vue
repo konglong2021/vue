@@ -41,10 +41,10 @@
               show-empty
               small>
               <template #cell(actions)="row">
-                <b-button v-can="'user_access'" size="sm" variant="primary" title="View Inventory History Detail"  @click="viewDetailUser(row.item, row.index, $event.target)" class="mr-1">
+                <b-button v-can="'user_access'" size="sm" variant="primary" title="View User Detail"  @click="viewDetailUser(row.item, row.index, $event.target)" class="mr-1">
                   <i class="fa fa-eye"></i>
                 </b-button>
-                <b-button v-can="'user_edit'" size="sm" title="Adjust invetory stock" variant="success" @click="editUser(row.item, row.index, $event.target)">
+                <b-button v-can="'user_edit'" size="sm" title="Edit user" variant="success" @click="editUser(row.item, row.index, $event.target)">
                   <i class="fa fa-edit"></i>
                 </b-button>
               </template>
@@ -55,8 +55,10 @@
         <div></div>
       </div>
       <b-modal id="modal-create-user" ref="create-user-form-modal" size="lg"
-               @hidden="onReset" cancel-title="Cacnel" no-close-on-backdrop
-               @ok="onSubmit" ok-title="Save" title="New User">
+               @hidden="onReset" cancel-title="Cancel" no-close-on-backdrop
+               @ok="onSubmitEditUserData" ok-title="Save" title="New User"
+               :hide-footer="user.isView"
+      >
         <b-form enctype="multipart/form-data">
           <div class="full-content">
             <div class="content-file-upload">
@@ -68,23 +70,23 @@
           </div>
           <div class="full-content">
             <b-row class="my-1">
-              <div class="label-content-user"><label :for="'input-first-name'" class="label-input">First Name</label></div>
+              <div class="label-content-user"><label :for="'input-first-name'" class="label-input">{{$t('label_firstname')}}</label></div>
               <b-col sm="4"><b-form-input :id="'input-first-name'" type="text" v-model="user.firstname" class="input-content" v-inputTextSentenceCase></b-form-input></b-col>
-              <div class="label-content-user"><label :for="'input-last-name'" class="label-input">Last Name</label></div>
+              <div class="label-content-user"><label :for="'input-last-name'" class="label-input">{{$t('label_lastname')}}</label></div>
               <b-col sm="4"><b-form-input :id="'input-last-name'" type="text" v-model="user.lastname" class="input-content" v-inputTextUppercase></b-form-input></b-col>
             </b-row>
             <b-row class="my-1">
-              <div class="label-content-user"><label :for="'input-occupation'" class="label-input">Occupation</label></div>
+              <div class="label-content-user"><label :for="'input-occupation'" class="label-input">មុខងារ</label></div>
               <b-col sm="4"><b-form-input :id="'input-occupation'" type="text" v-model="user.occupation" class="input-content" v-inputTextSentenceCase></b-form-input></b-col>
-              <div class="label-content-user"><label :for="'input-phone'" class="label-input">Phone number</label></div>
+              <div class="label-content-user"><label :for="'input-phone'" class="label-input">លេខទូរស័ព្ទ</label></div>
               <b-col sm="4"><b-form-input :id="'input-phone'" type="tel" v-model="user.phone" class="input-content" v-numericOnly></b-form-input></b-col>
             </b-row>
             <b-row class="my-1">
-              <b-col sm="2"><label :for="'input-gender'" class="label-input">Gender</label></b-col>
+              <b-col sm="2"><label :for="'input-gender'" class="label-input">ភេទ</label></b-col>
               <b-col sm="8">
                 <b-form-group>
-                  <b-form-radio v-model="user.gender" name="gender-radios" value="M" class="display-inline-block">Male</b-form-radio>
-                  <b-form-radio v-model="user.gender" name="gender-radios" value="F" class="display-inline-block">Female</b-form-radio>
+                  <b-form-radio v-model="user.gender" name="gender-radios" value="M" class="display-inline-block">ប្រុស</b-form-radio>
+                  <b-form-radio v-model="user.gender" name="gender-radios" value="F" class="display-inline-block">ស្រី</b-form-radio>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -100,18 +102,24 @@
               <div class="label-content-user"><label :for="'input-birthdate'" class="label-input">Date of birth</label></div>
               <b-col sm="4"><b-form-input :id="'input-birthdate'" class="input-content" type="date" v-model="user.birthdate"></b-form-input></b-col>
             </b-row>
+            <b-row class="my-1">
+              <div class="label-content-user"><label class="label-input">ជ្រើសរើសឃ្លាំងគោល</label></div>
+              <b-col sm="4"><b-form-select class="input-content font-size-15" v-model="user.warehouse_id" :options="warehouses"></b-form-select></b-col>
+            </b-row>
             <b-row>
               <b-col sm="2"><label :for="'input-role'" class="label-input">Roles</label></b-col>
               <b-col sm="10">
-                <multiselect class="input-content"
-                             v-model="user.role"
-                             :options="roles" track-by="name" label="name"
-                             :multiple="true" :show-labels="false"
-                             aria-placeholder="Select User roles"
-                             @select="selectionChange"
-                             @remove="removeElement"></multiselect>
+                <multiselect
+                  class="input-content"
+                 v-model="user.role"
+                 :options="roles" track-by="name" label="name"
+                 :multiple="true" :show-labels="false"
+                 aria-placeholder="Select User roles"
+                 @select="selectionChange"
+                 @remove="removeElement"></multiselect>
               </b-col>
             </b-row>
+
           </div>
         </b-form>
       </b-modal>
@@ -133,15 +141,34 @@
            {key:'roles',label:'Roles'},
            { key: 'actions', label: 'Actions' },
         ],
-        user:{}, //new item for user
+        user:{isView: false}, //new item for user
         roles: [],
         isLoading: false,
         uploadFile: null,
         file: null,
         errors: [],
+        warehouses: [],
     }
     },
     methods:{
+      async getAllWarehouse(){
+        let vm = this;
+        vm.warehouses = [];
+
+        await vm.$axios.get('/api/warehouse').then(function (response) {
+          if(response && response.hasOwnProperty("data")){
+            if(response.data.data){
+              let data = response.data.data;
+              for(let index=0; index < data.length; index++){
+                vm.warehouses.push({text: (data[index]["name"] + " " + data[index]["address"]), value: data[index]["id"]});
+              }
+            }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          vm.$toast.error("Getting data error").goAway(3000);
+        });
+      },
       async getAllRoles(){
         let self = this;
         self.roles = [];
@@ -167,86 +194,86 @@
           self.isLoading = false;
           if (response && response.hasOwnProperty("data")) {
             let data = response.data;
-            data.forEach((value, index ) => {
+            for (let index=0; index < data.length; index++){
               let item = {}, roleText = [];
-              item["username"] = value["email"];
-              item["name"] = value["name"];
+              item["username"] = data[index]["email"];
+              item["name"] = data[index]["name"];
               item["state"] = "Active";
               item["last_login"] = "";
-              item["email"] = value["email"];
-              item["id"] = value["id"];
+              item["id"] = data[index]["id"];
 
-              if (value.hasOwnProperty("roles") && value["roles"]["length"] > 0) {
-                item["rolesList"] = value["roles"];
-
-               value.roles.forEach((valueRole, indexRole ) => {
-                 roleText.push(valueRole["title"]);
+              if (data[index].hasOwnProperty("roles") && data[index]["roles"]["length"] > 0) {
+                item["rolesList"] = data[index]["roles"];
+                data[index].roles.forEach((valueRole, indexRole ) => {
+                  roleText.push(valueRole["title"]);
                 });
                 item["roles"] = roleText.join(", ");
               }
-              if(value.hasOwnProperty("profile") && value["profile"]){
-                item["firstname"] = value["profile"]["firstname"];
-                item["lastname"] = value["profile"]["lastname"];
-                item["occupation"] = value["profile"]["occupation"];
-                item["phone"] = value["profile"]["phone"];
-                item["email"] = value["profile"]["email"];
-                item["address"] = value["profile"]["address"];
-                item["birthdate"] = value["profile"]["birthdate"];
-                item["profile_id"] = value["profile"]["id"];
-                item["gender"] = value["profile"]["gender"];
+              item["role"] = self.cloneObject(data[index]["roles"]);
+              if(data[index].hasOwnProperty("profile") && data[index]["profile"]){
+                item["firstname"] = data[index]["profile"]["firstname"];
+                item["lastname"] = data[index]["profile"]["lastname"];
+                item["occupation"] = data[index]["profile"]["occupation"];
+                item["phone"] = data[index]["profile"]["phone"];
+                item["email"] = data[index]["profile"]["email"];
+                item["address"] = data[index]["profile"]["address"];
+                item["birthdate"] = data[index]["profile"]["birthdate"];
+                item["profile_id"] = data[index]["profile"]["id"];
+                item["gender"] = data[index]["profile"]["gender"];
               }
               self.items.push(item);
-            });
+            }
           }
         }).catch(function (error) {
           console.log(error);
           self.$toast.error("Submit data getting error").goAway(3000);
         });
       },
-      async onSubmit(){
+      async onSubmitEditUserData(){
         let formData = new FormData();
         let self = this, dataSubmit = {}, rolesId = [], dataSubmitProfile ={};
-        dataSubmit["name"] = (self.user["firstname"] + " " + self.user["lastname"]);
+        let profileId = self.user.profile_id;
+        /*dataSubmit["name"] = (self.user["firstname"] + " " + self.user["lastname"]);
         dataSubmit["password"] = self.user.password;
         dataSubmit["email"] = self.user["email"];
+        dataSubmit["warehouse_id"] = self.user["warehouse_id"];
 
         self.user["role"].forEach((value, index ) => {
           rolesId.push(value["value"]);
         });
         dataSubmit["roles"] = rolesId;
+        dataSubmit["firstname"] = self.user["firstname"];
+        dataSubmit["lastname"] = self.user["lastname"];
+        dataSubmit["gender"] =  self.user["gender"];
+        dataSubmit["occupation"] = self.user["occupation"];
+        dataSubmit["phone"] =  self.user["phone"];
+        dataSubmit["birthdate"] =  self.user["birthdate"];
+        dataSubmit["address"] =  self.user["address"];*/
 
-        //dataSubmitProfile["firstname"] = self.user["firstname"];
-        formData.append("firstname", self.user["firstname"]);
-
-        //dataSubmitProfile["lastname"] = self.user["lastname"];
-        formData.append("lastname", self.user["lastname"]);
-
-        //dataSubmitProfile["gender"] = self.user["gender"];
-        formData.append("gender", self.user["gender"]);
-
-        //dataSubmitProfile["occupation"] = self.user["occupation"];
-        formData.append("occupation", self.user["occupation"]);
-
-        //dataSubmitProfile["phone"] = self.user["phone"];
-        formData.append("phone", self.user["phone"]);
-
-        //dataSubmitProfile["email"] = self.user["email"];
+        self.user["role"].forEach((value, index ) => {
+          rolesId.push(value["value"]);
+        });
+        formData.append("roles", JSON.stringify(rolesId));
+        formData.append("name", (self.user["firstname"] + " " + self.user["lastname"]));
+        formData.append("password", self.user.password);
         formData.append("email", self.user["email"]);
-
-        //dataSubmitProfile["birthdate"] = self.user["birthdate"];
+        formData.append("warehouse_id", self.user["warehouse_id"])
+        formData.append("firstname", self.user["firstname"]);
+        formData.append("lastname", self.user["lastname"]);
+        formData.append("gender", self.user["gender"]);
+        formData.append("occupation", self.user["occupation"]);
+        formData.append("phone", self.user["phone"]);
+        formData.append("email", self.user["email"]);
         formData.append("birthdate", self.user["birthdate"]);
-
-        //dataSubmitProfile["address"] = self.user["address"];
         formData.append("address", self.user["address"]);
         formData.append("image", self.uploadFile);
 
         self.$toast.info("submit data in progress").goAway(1000);
         if(self.user.hasOwnProperty("id") && self.user.id){
-          self.$axios.put('/api/user/' + self.user.id, dataSubmit)
+          formData.append("_method", "PUT");
+          self.$axios.post('/api/user/' + self.user.id, formData)
             .then(function (response) {
               let dataReturn = response.data;
-              let roles = response.roles;
-
               self.items.forEach((value, index ) => {
                 if(value.id === dataReturn.id){
                   value["username"] = dataReturn["email"];
@@ -263,52 +290,26 @@
                   }
                 }
               });
-              self.user = {};
-            })
-            .catch(function (error) {
+            }).catch(function (error) {
               self.$toast.success("Data is getting error").goAway(2000);
               console.log(error);
             });
         }
         else {
-          await self.$axios.post('/api/user', dataSubmit).then(function (response) {
+          await self.$axios.post('/api/user', formData).then(function (response) {
             formData.append("user_id", response.data.user["id"]);
-            self.submitProfileData(formData);
-            if(response){
-              self.user = {};
-            }
           }).catch(function (error) {
             console.log(error);
             self.$toast.error("Submit data getting error").goAway(3000);
           });
         }
       },
-      async submitProfileData(dataSubmit){
+      async submitProfileData(dataSubmit, profile_id){
         let self = this;
-        if(self.user.hasOwnProperty("profile_id") && self.user.profile_id){
-          dataSubmit.append("_method", "PUT");
-          self.$axios.put('/api/profile/' + self.user.profile_id, dataSubmit)
+        if(profile_id){
+          self.$axios.put('/api/profile/' + profile_id, dataSubmit)
             .then(function (response) {
               console.log(response);
-              //let dataReturn = response.data;
-              //let roles = response.roles;
-
-              /*self.items.forEach((value, index ) => {
-                if(value.id === dataReturn.id){
-                  value["username"] = dataReturn["email"];
-                  value["name"] = dataReturn["name"];
-                  value["state"] = "Active";
-                  value["last_login"] = "";
-                  value["email"] = dataReturn["email"];
-                  value["id"] = dataReturn["id"];
-                  if (dataReturn.hasOwnProperty("roles") && dataReturn["roles"]["length"] > 0) {
-                    dataReturn.roles.forEach((valueRole, indexRole ) => {
-                      value["role"] = valueRole["id"];
-                      value["roles"] = valueRole["title"];
-                    });
-                  }
-                }
-              });*/
               self.user = {};
             })
             .catch(function (error) {
@@ -329,7 +330,9 @@
         }
       },
       showModal(){
-        this.$refs['create-user-form-modal'].show();
+        this.$nextTick(() => {
+          this.$refs['create-user-form-modal'].show();
+        });
       },
       selectionChange(){
         this.$forceUpdate();
@@ -338,11 +341,20 @@
         this.$forceUpdate();
       },
       viewDetailUser(item, index, target){
-
+        this.user = this.cloneObject(item);
+        let roleList = [];
+        if(item.hasOwnProperty("role")){
+          for (let index=0; index < item["role"].length; index++){
+            roleList.push({name: item["role"][index]["title"], value: item["role"][index]["id"]});
+          }
+          this.user["role"] = this.cloneObject(roleList);
+        }
+        this.user.isView = true;
+        this.showModal();
       },
       editUser(item, index, target){
-        //let userObj = this.cloneObject(item);
-        let userObj = {};
+        let userObj = this.cloneObject(item);
+        userObj.isView = false;
         userObj["id"] = item.id;
         userObj["username"] = item.username;
         userObj["email"] = item.email;
@@ -360,8 +372,7 @@
         userObj["birthdate"] = item["birthdate"];
         userObj["profile_id"] = item["profile_id"];
         userObj["gender"] = item["gender"];
-        this.user = userObj;
-        console.log(this.user);
+        this.user = this.cloneObject(userObj);
         this.showModal();
       },
       cloneObject(obj) {
@@ -390,6 +401,7 @@
     mounted() {
       this.getAllRoles();
       this.getUsers();
+      this.getAllWarehouse();
     }
   }
 </script>

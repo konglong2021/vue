@@ -1,10 +1,5 @@
 <template>
   <div>
-    <div style="display:none;">
-      <b-table v-if="items.length > 0" striped hover :items="items" :fields="fields"></b-table>
-      <h4 style="display: none; font-weight: 900;">ទឹកប្រាក់សរុបប្រចាំថ្ងៃ : {{calculate(items) + "($)"}}</h4>
-      <h3 v-if="items.length === 0" class="text-center">មិនមានទិន្នន័យសម្រាប់ថ្ងៃនេះទេ</h3>
-    </div>
     <div>
       <b-tabs
         active-nav-item-class="active-tab" style="display: inline-block; width: 100%; height: 100%;">
@@ -28,7 +23,7 @@ import moment from "moment";
 export default {
   props: {
     warehouse: {
-      type: String,
+      type: Number,
       require: true
     },
     items: {

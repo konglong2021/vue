@@ -116,4 +116,6 @@ export default {
   "label_status":"status",
   "stock_transfer":"Stock Transfer",
   "label_date":"Date",
+  "label_firstname":"First Name",
+  "label_lastname":"Last Name"
 };

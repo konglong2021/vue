@@ -707,3 +707,7 @@ body {
 .pagination > li {
   display: list-item !important;
 }
+
+.font-size-15{
+  font-size: 15px;
+}

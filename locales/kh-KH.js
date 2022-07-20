@@ -116,4 +116,6 @@ export default {
   "label_status":"ស្ថានភាព",
   "stock_transfer":"ផ្ទេរទំនិញ",
   "label_date":"ថ្ងៃខែ",
+  "label_firstname":"នាមខ្លួន",
+  "label_lastname":"នាមត្រកូល"
 };

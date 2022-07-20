@@ -222,7 +222,7 @@
         <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" v-if="exchange_rate">{{$t('title_total_in_riel')}} : {{calculateToRiel(calculate("USD", items), exchange_rate)}} Riel</span>
       </div>
     </div>
-    <div id="invoice-print-pos">
+    <div id="invoice-print-pos" style="display: none; height: 100%; overflow: hidden; padding: 30px 70px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important; width: 95%; margin: 15px;">
       <div style="margin-bottom: 30px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; display:inline-block">
         <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center;">{{ $t('title') }}</h1>
       </div>

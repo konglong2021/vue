@@ -97,6 +97,7 @@ export default {
       selectedWarehouse(warehouse){
         if(warehouse){
           this.getProductList(warehouse);
+          this.getAllOrderData((this.dateFilter ? this.dateFilter : this.getFullDate()) , warehouse);
         }
       },
       calculate(items){
@@ -192,12 +193,12 @@ export default {
           self.$toast.error("getting data error ").goAway(2000);
         });
       },
-      async getAllOrderData($filterDate){
+      async getAllOrderData($filterDate, $warehouse = null){
         let self = this;
         let lastArray = [];
         self.items = [];
         self.isLoading = true;
-        await self.$axios.get('/api/buysell/' + $filterDate).then(function (response) {
+        await self.$axios.get('/api/buysell/' + $filterDate + ($warehouse ? "/" + $warehouse : "/" + self.$store.$cookies.get('storeItem'))).then(function (response) {
           if (response && response.hasOwnProperty("data") && response.data) {
             self.isLoading = false;
             let orders = self.cloneObject(response.data.order);
@@ -321,7 +322,7 @@ export default {
           , 0);
       },
       changeFilterDate(filterDate){
-        this.getAllOrderData(filterDate);
+        this.getAllOrderData(filterDate, (this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
       }
 },
 
@@ -329,7 +330,7 @@ export default {
       this.getProductList();
       this.getCustomerList();
       this.getWareHouseList();
-      this.getAllOrderData(this.getFullDate());
+      this.getAllOrderData(this.getFullDate(), (this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
 
     }
 }

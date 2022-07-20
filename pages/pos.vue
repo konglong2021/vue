@@ -34,13 +34,16 @@
             </b-modal>
           </div>
           <div v-show="!showModalCashBalance">
-            <b-row>
+            <b-row v-if="isAdmin === false">
               <b-col cols="6" class="content-product-select">
                 <PosSelectProduct :products="productSelectList" @selectedItem="selectedItem" :warehouseSelectedId ="warehouseSelectedId" @updateListProduct="updateListProduct" :cashBalance="cashBalanceData.balance" />
               </b-col>
               <b-col cols="6" class="product-list">
                 <PosProductList @selectProduct="selectProduct($event)" @selectWarehouse="selectWarehouse($event)" :cashBalance="cashBalanceData.balance" />
               </b-col>
+            </b-row>
+            <b-row v-if="isAdmin">
+              <inventory-stock />
             </b-row>
           </div>
         </div>
@@ -70,7 +73,8 @@ export default {
       add_balance : null,
       cash_in: 0,
       verify_balance_input : 0,
-      balance_income: 0
+      balance_income: 0,
+      isAdmin: false
     }
   },
   methods: {
@@ -287,6 +291,14 @@ export default {
   },
   mounted() {
     let self = this;
+    let user = self.$store.$cookies.get('user');
+    let roles = user["role"];
+      console.log(roles);
+    if(roles && roles.length > 0){
+        self.isAdmin = (roles[0]["title"] === "Admin");
+    }
+    console.log(self.isAdmin);
+
     self.showSelectStoreModal = (self.$store.$cookies.get('storeItem') === null || self.$store.$cookies.get('storeItem') === undefined || self.$store.$cookies.get('storeItem') === 'undefined') ? true : false;
     if(self.showSelectStoreModal === false){
       self.getBalanceData();

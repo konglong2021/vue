@@ -1,8 +1,8 @@
 <template>
   <b-container >
     <h2 class="text-center text-success" style="margin-bottom: 50px;">បញ្ចូលទំនិញក្នុងស្តុក</h2>
-    <div class="display-inline-block full-with">
-      <div class="display-inline-block content-field-purchase float-left" >
+    <div class="display-inline-block full-with" v-if="purchase">
+      <div class="display-inline-block content-field-purchase float-left" v-if="suppliers && products">
         <p class="text-danger" v-if="suppliers.length === 0 || products.length === 0">
           មិនអាចបញ្ចូលទំនិញក្នុងស្តុកបានទេ ព្រោះ
           <span v-if="suppliers.length === 0">មិនមានបញ្ចូលទិន្នន័យអ្នកផ្គត់ផ្គង់់, </span>
@@ -34,11 +34,11 @@
         </div>
       </div>
       <div class="display-inline-block content-field-purchase float-right">
-        <div class="float-right display-inline-block full-with" style="margin-bottom: 15px">
+        <div class="float-right display-inline-block full-with" style="margin-bottom: 15px" v-if="vats">
           <label class="label-with">ពន្ធ</label>
           <b-form-select class="form-control select-content-inline display-inline-block" v-model="purchase.vat" :options="vats"></b-form-select>
         </div>
-        <div class="float-right display-inline-block full-with margin-bottom-20">
+        <div class="float-right display-inline-block full-with margin-bottom-20" >
           <label class="label-with">Batch</label>
           <b-form-input class="form-control select-content-inline display-inline-block" v-model="purchase.batch"></b-form-input>
         </div>
