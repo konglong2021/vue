@@ -117,6 +117,7 @@ export default {
       product_select: null,
       productItems: [],
       productFields: [
+        { key: 'number', label: "លេខរៀង"},
         { key: 'en_name', label: this.$t('label_name_english')},
         { key: 'kh_name', label: this.$t('label_name_khmer')},
         { key: 'image', label: this.$t('title_icon') },
@@ -142,30 +143,31 @@ export default {
     },
     selectedProduct($obj){
       if($obj && $obj.hasOwnProperty("value")){
-        let items = this.cloneObject(this.productItems);
+        let itemsData = this.cloneObject(this.productItems);
         let productItem = {};
         productItem = this.productList.find(item => item.id === $obj.value);
 
-        if(items && items > 0){
+        if(itemsData && itemsData.length > 0){
           let dataItem = this.productItems.find(item => item.id === $obj.value);
           let index = this.productItems.indexOf(dataItem);
           if(dataItem && dataItem.hasOwnProperty("id")){
-            if(items[index].hasOwnProperty("qty") && parseInt(items[index]["qty"]) > 0 && parseInt(items[index]["qty"]) > 1){
-              items[index]["qty"] = (parseInt(items[index]["qty"]) + parseInt(productItem.qty));
+            if(itemsData[index].hasOwnProperty("qty") && parseInt(itemsData[index]["qty"]) > 0 && parseInt(itemsData[index]["qty"]) > 1){
+              itemsData[index]["qty"] = (parseInt(itemsData[index]["qty"]) + parseInt(productItem.qty));
             }
-            else if(items[index].hasOwnProperty("qty") && (parseInt(items[index]["qty"]) === 0 || parseInt(items[index]["qty"]) ===1)){
-              items[index]["qty"] = (parseInt(items[index]["qty"]) + 1);
+            else if(itemsData[index].hasOwnProperty("qty") && (parseInt(itemsData[index]["qty"]) === 0 || parseInt(itemsData[index]["qty"]) ===1)){
+              itemsData[index]["qty"] = (parseInt(itemsData[index]["qty"]) + 1);
             }
           }
           else {
-            items.unshift(productItem);
+            productItem["number"] = (this.productItems.length + 1);
+            itemsData.unshift(productItem);
           }
         }
         else {
-          items.unshift(productItem);
+          productItem["number"] = 1;
+          itemsData.unshift(productItem);
         }
-        this.productItems = this.cloneObject(items);
-        console.log(this.productItems);
+        this.productItems = this.cloneObject(itemsData);
       }
       this.$forceUpdate();
     },
@@ -184,7 +186,6 @@ export default {
         }
         shouldBeDisable = (countInputQty < this.productItems.length || countInputPrice < this.productItems.length);
       }
-      console.log(shouldBeDisable);
       return shouldBeDisable;
     },
     removeElementProduct(){
