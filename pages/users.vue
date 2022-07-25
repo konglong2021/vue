@@ -5,7 +5,7 @@
         <div class="control-panel">
           <div class="panel-top">
             <div class="content-panel-left">
-              <h3 class="head-title">Users Overview</h3>
+              <h3 class="head-title">អ្នកប្រើប្រាស់</h3>
             </div>
             <div class="content-panel-right">
               <b-container class="col-6 mx-auto menu-wrapper">
@@ -13,13 +13,13 @@
                   <b-col>
                     <div class="input-group input-group-sm search-content">
                       <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>
-                      <input class="form-control input-search-box" type="search" placeholder="Search..."/>
+                      <input class="form-control input-search-box" type="search" placeholder="ស្វែងរក...."/>
                     </div>
                   </b-col>
                   <div class="btn-wrapper" v-can="'user_create'">
                     <b-button href="#"  title="Add new Category" size="sm" variant="primary"
                               @click="showModal()">
-                      New User
+                      បង្កើត អ្នកប្រើប្រាស់ថ្មី
                       <i class="fa fa-plus" aria-hidden="true"></i>
                     </b-button>
                   </div>
@@ -56,7 +56,7 @@
       </div>
       <b-modal id="modal-create-user" ref="create-user-form-modal" size="lg"
                @hidden="onReset" cancel-title="Cancel" no-close-on-backdrop
-               @ok="onSubmitEditUserData" ok-title="Save" title="New User"
+               @ok="onSubmitEditUserData" ok-title="Save" title="អ្នកប្រើប្រាស់ថ្មី"
                :hide-footer="user.isView"
       >
         <b-form enctype="multipart/form-data">
@@ -91,23 +91,24 @@
               </b-col>
             </b-row>
             <b-row class="my-1">
-              <div class="label-content-user"><label :for="'input-user-name'" class="label-input">User Name</label></div>
+              <div class="label-content-user"><label :for="'input-user-name'" class="label-input">ឈ្មោះប្រើប្រាស់</label></div>
               <b-col sm="4"><b-form-input :id="'input-user-name'" type="text" v-model="user.username" class="input-content"></b-form-input></b-col>
-              <div class="label-content-user"><label :for="'input-user'" class="label-input">Email</label></div>
+              <div class="label-content-user"><label :for="'input-user'" class="label-input">អ៊ីម៉ែល</label></div>
               <b-col sm="4"><b-form-input :id="'input-user'" class="form-control input-content" type="email" v-model="user.email"></b-form-input></b-col>
             </b-row>
             <b-row class="my-1">
-              <div class="label-content-user"><label :for="'input-password'" class="label-input">Password</label></div>
+              <div class="label-content-user"><label :for="'input-password'" class="label-input">ពាក្យសំងាត់</label></div>
               <b-col sm="4"><b-form-input :id="'input-password'" class="input-content" type="password" v-model="user.password"></b-form-input></b-col>
-              <div class="label-content-user"><label :for="'input-birthdate'" class="label-input">Date of birth</label></div>
+              <div class="label-content-user"><label :for="'input-birthdate'" class="label-input">ថ្ងៃខែកំណើត</label></div>
               <b-col sm="4"><b-form-input :id="'input-birthdate'" class="input-content" type="date" v-model="user.birthdate"></b-form-input></b-col>
             </b-row>
             <b-row class="my-1">
               <div class="label-content-user"><label class="label-input">ជ្រើសរើសឃ្លាំងគោល</label></div>
-              <b-col sm="4"><b-form-select class="input-content font-size-15" v-model="user.warehouse_id" :options="warehouses"></b-form-select></b-col>
+              <b-col sm="4"><b-form-select class="input-content font-size-15" v-model="user.warehouse_id" 
+              :options="warehouses"></b-form-select></b-col>
             </b-row>
             <b-row>
-              <b-col sm="2"><label :for="'input-role'" class="label-input">Roles</label></b-col>
+              <b-col sm="2"><label :for="'input-role'" class="label-input">តួនាទីក្នុងប្រពន្ធ័</label></b-col>
               <b-col sm="10">
                 <multiselect
                   class="input-content"
@@ -134,12 +135,12 @@
       return {
         items:[],
         fields: [
-           { key: 'name', label: 'Name' },
-           { key: 'username', label: 'Username' },
-           {key:'state',label:'Status'} ,
-           {key:'last_login',label:'Last Login'},
-           {key:'roles',label:'Roles'},
-           { key: 'actions', label: 'Actions' },
+           { key: 'name', label: 'ឈ្មោះ' },
+           { key: 'username', label: 'ឈ្មោះក្នុងប្រពន្ធ័' },
+           {key:'state',label:'កំណត់សំគាល់'} ,
+           {key:'last_login',label:'ថ្ងៃចូលក្នុងប្រពន្ធ័ចុងក្រោយ'},
+           {key:'roles',label:'ទួនាទី'},
+           { key: 'actions', label: 'សកម្មភាព' },
         ],
         user:{isView: false}, //new item for user
         roles: [],
@@ -249,7 +250,7 @@
         dataSubmit["phone"] =  self.user["phone"];
         dataSubmit["birthdate"] =  self.user["birthdate"];
         dataSubmit["address"] =  self.user["address"];*/
-
+        debugger;
         self.user["role"].forEach((value, index ) => {
           rolesId.push(value["value"]);
         });
@@ -299,6 +300,7 @@
           await self.$axios.post('/api/user', formData).then(function (response) {
             formData.append("user_id", response.data.user["id"]);
           }).catch(function (error) {
+            debugger;
             console.log(error);
             self.$toast.error("Submit data getting error").goAway(3000);
           });
