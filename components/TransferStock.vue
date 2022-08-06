@@ -1,85 +1,90 @@
 <template >
-  <div class="display-inline-block full-with " v-if="showContent === true">
-    <div class="container" >
-      <b-form enctype="multipart/form-data">
-        <h2 class="text-center margin-bottom-50">ផ្ទេរឥវ៉ាន់</h2>
-        <div class="full-content">
-          <div class="row margin-bottom-20">
-            <div class="display-inline-block width-50-percentage float-left">
-              <b-col class="width-35-percentage display-inline-block"><label class="label-input">ឃ្លាំងចាស់</label></b-col>
-              <b-col class="width-63-percentage display-inline-block">
-                <b-form-select type="text" class="input-content" :options="warehouseOption" v-model="transfer.from_warehouse" required></b-form-select>
-              </b-col>
+  <div class="display-inline-block full-with">
+    <div class="display-inline-block full-with" v-if="showContent === true">
+      <div class="container" >
+        <b-form enctype="multipart/form-data">
+          <h2 class="text-center margin-bottom-50">ផ្ទេរឥវ៉ាន់</h2>
+          <div class="full-content">
+            <div class="row margin-bottom-20">
+              <div class="display-inline-block width-50-percentage float-left">
+                <b-col class="width-35-percentage display-inline-block"><label class="label-input">ឃ្លាំងចាស់</label></b-col>
+                <b-col class="width-63-percentage display-inline-block">
+                  <b-form-select type="text" class="input-content" :options="warehouseOption" v-model="transfer.from_warehouse" required></b-form-select>
+                </b-col>
+              </div>
+              <div class="display-inline-block width-49-percentage float-left">
+                <b-col class="width-35-percentage display-inline-block"><label class="label-input">ឃ្លាំងផ្ទេរទៅកាន់</label></b-col>
+                <b-col class="width-63-percentage display-inline-block">
+                  <b-form-select type="text" class="input-content" :options="warehouseOption" v-model="transfer.to_warehouse" required></b-form-select>
+                </b-col>
+              </div>
             </div>
-            <div class="display-inline-block width-49-percentage float-left">
-              <b-col class="width-35-percentage display-inline-block"><label class="label-input">ឃ្លាំងផ្ទេរទៅកាន់</label></b-col>
-              <b-col class="width-63-percentage display-inline-block">
-                <b-form-select type="text" class="input-content" :options="warehouseOption" v-model="transfer.to_warehouse" required></b-form-select>
-              </b-col>
-            </div>
-          </div>
-          <div class="row margin-bottom-20">
-            <div class="display-inline-block width-50-percentage float-left">
-              <b-col class="width-35-percentage display-inline-block"><label class="label-input">ទំនិញ</label></b-col>
-              <b-col class="width-63-percentage display-inline-block">
-                <multiselect
-                  v-model="product_select" :options="products"
-                  track-by="name" label="name" :show-labels="false"
-                  :placeholder="$t('label_search_by_product')"
-                  @select="selectedProduct"
-                  @remove="removeElementProduct"></multiselect>
-              </b-col>
-            </div>
-            <div class="display-inline-block width-49-percentage float-left">
-              <b-col class="width-35-percentage display-inline-block"><label class="label-input">Reference</label></b-col>
-              <b-col class="width-63-percentage display-inline-block">
-                <b-form-input type="text" class="input-content" v-model="transfer.ref" required></b-form-input>
-              </b-col>
-            </div>
+            <div class="row margin-bottom-20">
+              <div class="display-inline-block width-50-percentage float-left">
+                <b-col class="width-35-percentage display-inline-block"><label class="label-input">ទំនិញ</label></b-col>
+                <b-col class="width-63-percentage display-inline-block">
+                  <multiselect
+                    v-model="product_select" :options="products"
+                    track-by="name" label="name" :show-labels="false"
+                    :placeholder="$t('label_search_by_product')"
+                    @select="selectedProduct"
+                    @remove="removeElementProduct"></multiselect>
+                </b-col>
+              </div>
+              <div class="display-inline-block width-49-percentage float-left">
+                <b-col class="width-35-percentage display-inline-block"><label class="label-input">Reference</label></b-col>
+                <b-col class="width-63-percentage display-inline-block">
+                  <b-form-input type="text" class="input-content" v-model="transfer.ref" required></b-form-input>
+                </b-col>
+              </div>
 
-            <div class="display-inline-block width-29-percentage float-right" style="padding-left: 15px; display: none">
-              <b-button class="float-left" href="#" size="sm" variant="success" title="Add product to list" @click="addProductToListTransfer()">
-                <i class="fa fa-plus font-size-22" aria-hidden="true"></i>
-                <span class="margin-span-btn">បញ្ចូលទំនិញផ្ទេរទៅក្នុងតារាង</span>
+              <div class="display-inline-block width-29-percentage float-right" style="padding-left: 15px; display: none">
+                <b-button class="float-left" href="#" size="sm" variant="success" title="Add product to list" @click="addProductToListTransfer()">
+                  <i class="fa fa-plus font-size-22" aria-hidden="true"></i>
+                  <span class="margin-span-btn">បញ្ចូលទំនិញផ្ទេរទៅក្នុងតារាង</span>
+                </b-button>
+              </div>
+            </div>
+            <div class="display-inline-block full-with margin-bottom-20" v-if="productItems && productItems.length > 0">
+              <b-table
+                class="content-table-scroll"
+                sticky-header="true"
+                :items="productItems"
+                :fields="productFields"
+                head-variant="light"
+              >
+                <template #cell(qty)="row">
+                  <b-form-input ref="inputQty" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" :autofocus="true"></b-form-input>
+                </template>
+              </b-table>
+            </div>
+            <div class="display-inline-block full-with" style="margin-top: 25px; padding-right: 15px;">
+              <b-button class="float-right" href="#" size="md" variant="danger" title="Transfer product to new stock" @click="hideTransferStock()">
+                <!--              <i class="fa fa-truck" aria-hidden="true"></i>-->
+                <span class="margin-span-btn">បោះបង់</span>
+              </b-button>
+              <b-button class="float-right" style="margin-right: 15px;" href="#" size="md" variant="primary" title="Transfer product to new stock" @click="submitTransferStock()">
+                <!--              <i class="fa fa-truck" aria-hidden="true"></i>-->
+                <span class="margin-span-btn">រក្សារទុក</span>
               </b-button>
             </div>
           </div>
-          <div class="display-inline-block full-with margin-bottom-20" v-if="productItems && productItems.length > 0">
-            <b-table
-              class="content-table-scroll"
-              sticky-header="true"
-              :items="productItems"
-              :fields="productFields"
-              head-variant="light"
-            >
-              <template #cell(qty)="row">
-                <b-form-input ref="inputQty" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" :autofocus="true"></b-form-input>
-              </template>
-            </b-table>
-          </div>
-          <div class="display-inline-block full-with" style="margin-top: 25px; padding-right: 15px;">
-            <b-button class="float-right" href="#" size="md" variant="danger" title="Transfer product to new stock" @click="hideTransferStock()">
-<!--              <i class="fa fa-truck" aria-hidden="true"></i>-->
-              <span class="margin-span-btn">បោះបង់</span>
-            </b-button>
-            <b-button class="float-right" style="margin-right: 15px;" href="#" size="md" variant="primary" title="Transfer product to new stock" @click="submitTransferStock()">
-<!--              <i class="fa fa-truck" aria-hidden="true"></i>-->
-              <span class="margin-span-btn">រក្សារទុក</span>
-            </b-button>
-          </div>
-        </div>
-      </b-form>
+        </b-form>
+      </div>
     </div>
-  </div>
-  <div v-else-if="!showContent">
-    <div v-if="listStockOut && listStockOut.length > 0">
-      <b-table
-        class="content-table-scroll"
-        sticky-header="true"
-        :items="listStockOut"
-        :fields="listStockOutFields"
-        head-variant="light"
-      ></b-table>
+    <div v-else-if="showContent === false">
+      <div v-if="listStockOut">
+        <div v-if="listStockOut.length > 0">
+          <b-table
+            class="content-table-scroll"
+            sticky-header="true"
+            :items="listStockOut"
+            :fields="listStockOutFields"
+            head-variant="light"
+          ></b-table>
+        </div>
+        <div v-if="listStockOut.length === 0"><h2 class="text-center color-info">មិនមានទិន្នន័យទេ</h2></div>
+      </div>
     </div>
   </div>
 
@@ -91,6 +96,10 @@ export default {
     'value':{
       type:Object,
       require:true
+    },
+    isLoading: {
+      type: Boolean,
+      require:false
     },
     warehouseOption: {
       type:Array,
@@ -117,7 +126,7 @@ export default {
         }
       },
       deep: true,
-    }
+    },
   },
 
   data() {
@@ -134,6 +143,7 @@ export default {
         { key: 'qty', label: 'ចំនួន'},
       ],
       listStockOutFields: [
+        { key: 'date', label: 'ថ្ងៃខែផ្ទេរ'},
         { key: 'warehouse_from', label: 'ឃ្លាំងចាស់'},
         { key: 'warehouse_to', label: 'ឃ្លាំងផ្ទេរទៅកាន់'},
         { key: 'product', label: this.$t('label_product_name') },
@@ -147,6 +157,7 @@ export default {
         quantity: 0,
         ref: null
       },
+      items: [],
     }
   },
   methods: {
@@ -200,6 +211,10 @@ export default {
           console.log(error);
         });
       }
+    },
+    changeFilterDate(filterDate){
+      this.$emit("changeFilterDate", {filterDate: filterDate});
+      //this.getAllOrderData(filterDate, (this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
     }
   },
   mounted() {
