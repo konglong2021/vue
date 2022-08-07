@@ -38,7 +38,7 @@
         </li>
         <li class="li-style" style="overflow: hidden;">
           <b-button class="button-no-background" @click="logOut()">
-            <span>Logout</span>
+            <span> ចាកចេញ</span>
           </b-button>
         </li>
       </ul>

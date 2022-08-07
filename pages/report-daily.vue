@@ -40,8 +40,9 @@
           </b-row>
         </b-container>
       </div>
-      <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">
+      <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">      
         <b-container>
+          <!--
           <div style="display:inline-block;width:100%; margin-bottom: 20px;">
             <div class="form-row-content-detail width-49-percentage" style="display: none;">
               <div class="form-column-label">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
@@ -59,6 +60,13 @@
           <div style="display: inline-block; height: 100%; width: 100%;">
             <daily-report-component :items="items" :fields="fields" :warehouse="warehouse" />
           </div>
+          -->
+          <b-list-group>
+            <b-list-group-item href="/report-daily-orders"  active variant="primary"> របាយការ ការលក់</b-list-group-item>
+            <b-list-group-item href="javascript:;" variant="dark">របាយការ ការនាំចូល</b-list-group-item>
+
+          </b-list-group>
+        
         </b-container>
       </div>
     </div>

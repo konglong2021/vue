@@ -721,3 +721,14 @@ body {
     height: 90mm;
   }
 }
+.table-footer {
+  width: 80%;
+  
+}
+.table-footer p {
+  margin-top: 20px;
+}
+.report-head {
+  width: 80%;
+  padding: 20px;
+}

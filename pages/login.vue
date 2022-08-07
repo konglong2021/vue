@@ -4,14 +4,14 @@
       <b-row>
           <div class="col-lg-6 mx-auto login-form">
               <div class="mx-auto">
-                  <center><h2>Login</h2></center>
+                  <center><h2>ចូលទៅកាត់ប្រពន្ធ័ គ្រប់គ្រង</h2></center>
               </div>
             <ValidationObserver v-slot="{ invalid }">
               <b-form @submit.prevent="onSubmit">
                 <b-form-group id="input-group-1">
                   <b-form-input
                     id="input-1" v-model="form.email"
-                    placeholder="Username" required focus
+                    placeholder="ឈ្មោះសំគាល់" required focus
                   ></b-form-input>
 
                 </b-form-group>
@@ -23,7 +23,7 @@
                   <b-form-group id="input-group-2">
                     <b-form-input
                       id="input-2" v-model="form.password"
-                      placeholder="Enter passwrod" type="password" required
+                      placeholder="ពាក្យសំងាត់" type="password" required
                       :error-messages="errors"
                     ></b-form-input>
                     <span class="input-invalid-message" style="color: red;">
@@ -32,7 +32,7 @@
                   </b-form-group>
                 </ValidationProvider>
 
-                <b-button type="submit" class="col-sm-12" variant="success"> Login </b-button>
+                <b-button type="submit" class="col-sm-12" variant="success"> ចូលទៅកាន់ប្រពន្ធ័ </b-button>
               </b-form>
             </ValidationObserver>
           </div>
