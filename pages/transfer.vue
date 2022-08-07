@@ -17,13 +17,18 @@
                         <input class="form-control input-search-box" type="search" placeholder="Search..." v-model="searchInput" @keyup.enter="searchProduct()" @change="handleClick" />
                       </div>
                     </b-col>
+                    <div>
+                      <div class="form-column-label">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
+                      <div class="form-column-input width-50-percentage">
+                        <b-form-input type="date" v-model="dateFilter" v-on:change="changeFilterDate(dateFilter)"></b-form-input>
+                      </div>
+                    </div>
                     <div class="btn-wrapper">
-                      <b-button href="#"  title="Add new Transfer" size="sm" variant="primary" @click="addTransferStock()">
+                      <b-button style="padding: 7px 10px;" href="#"  title="Add new Transfer" size="sm" variant="primary" @click="addTransferStock()">
                         <i class="fa fa-truck" aria-hidden="true"></i>
                         <span class="margin-span-btn">{{ 'បន្ថែម' + $t('stock_transfer')}}</span>
                       </b-button>
                     </div>
-
                   </b-row>
                 </b-container>
               </div>
@@ -32,7 +37,12 @@
           </div>
           <div class="content-product">
             <div class="content-data">
-              <transfer-stock :listStockOut="listDataStockOut" v-model="stockTransfer" :warehouseOption="warehouseOption" :products="productListOptionForTransfer" :productList="productListForTransfer"/>
+              <div class="content-loading" v-if="isLoading">
+                <div class="spinner-grow text-muted"></div>
+              </div>
+              <div v-if="!isLoading">
+                <transfer-stock isLoading:="isLoading" :listStockOut="listDataStockOut" v-model="stockTransfer" :warehouseOption="warehouseOption" :products="productListOptionForTransfer" :productList="productListForTransfer"/>
+              </div>
             </div>
           </div>
         </div>
@@ -42,6 +52,8 @@
 </template>
 
 <script>
+import moment from "moment";
+
 export default {
   middleware: "local-auth",
   layout:'inventoryui',
@@ -53,6 +65,8 @@ export default {
       productListForTransfer: [],
       listDataStockOut: [],
       searchInput : null,
+      isLoading: false,
+      dateFilter : null,
     }
   },
   methods: {
@@ -122,29 +136,76 @@ export default {
         self.$toast.error("getting data error ").goAway(2000);
       });
     },
-    async getAllDataStockOut(){
+    async getAllDataStockOut($dateFilter = null){
       let self = this;
+      self.isLoading = true;
       self.listDataStockOut = [];
+      if(!$dateFilter){
+        await self.$axios.get('/api/stockout').then(function (response) {
+          self.isLoading = false;
+          if(response && response.hasOwnProperty("data") && response.data){
+            let data = response["data"];
+            let dataArray = Object.keys(data).map(key => {
+              return data[key];
+            });
 
-      await self.$axios.get('/api/stockout').then(function (response) {
-        if(response && response.hasOwnProperty("data") && response.data){
-          for(let index=0; index < response.data.length; index++){
-            let item = response.data[index];
-            let dataItem = {warehouse_from: null, warehouse_to: null, product: null, quantity: 0, ref: null};
-            dataItem.warehouse_from = item.from_warehouse.name + " (" + item.from_warehouse.address + ") ";
-            dataItem.warehouse_to = item.to_warehouse.name + " (" + item.to_warehouse.address + ") ";
-            dataItem.product = item.product.en_name + " - " + item.product.kh_name + "( " + item.product.code + ") ";
-            dataItem.ref = item.ref;
-            dataItem.quantity = parseInt(item.quantity);
-            self.listDataStockOut.push(dataItem);
+            if(dataArray && dataArray.length > 0){
+              for(let index=0; index < dataArray.length; index++){
+                let item = dataArray[index];
+                let dataItem = {warehouse_from: null, warehouse_to: null, product: null, quantity: 0, ref: null};
+                let date = "";
+                if(item && item.created_at){
+                  date = moment(item.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+                }
+
+                dataItem.warehouse_from = item.from_warehouse.name + " (" + item.from_warehouse.address + ") ";
+                dataItem.warehouse_to = item.to_warehouse.name + " (" + item.to_warehouse.address + ") ";
+                dataItem.product = item.product.en_name + " - " + item.product.kh_name + "( " + item.product.code + ") ";
+                dataItem.ref = item.ref;
+                dataItem.quantity = parseInt(item.quantity);
+                dataItem["date"] = date;
+                self.listDataStockOut.push(dataItem);
+              }
+            }
           }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("Getting data error").goAway(3000);
+        });
+      }
+      else {
+        await self.$axios.get('/api/stockout/' + $dateFilter).then(function (response) {
+          self.isLoading = false;
+          if(response && response.hasOwnProperty("data") && response.data){
+            let data = response["data"];
+            let dataArray = Object.keys(data).map(key => {
+              return data[key];
+            });
 
-          console.log(self.listDataStockOut);
-        }
-      }).catch(function (error) {
-        console.log(error);
-        self.$toast.error("Getting data error").goAway(3000);
-      });
+            if(dataArray && dataArray.length > 0){
+              for(let index=0; index < dataArray.length; index++){
+                let item = dataArray[index];
+                let dataItem = {warehouse_from: null, warehouse_to: null, product: null, quantity: 0, ref: null};
+                let date = "";
+                if(item && item.created_at){
+                  date = moment(item.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+                }
+
+                dataItem.warehouse_from = item.from_warehouse.name + " (" + item.from_warehouse.address + ") ";
+                dataItem.warehouse_to = item.to_warehouse.name + " (" + item.to_warehouse.address + ") ";
+                dataItem.product = item.product.en_name + " - " + item.product.kh_name + "( " + item.product.code + ") ";
+                dataItem.ref = item.ref;
+                dataItem.quantity = parseInt(item.quantity);
+                dataItem["date"] = date;
+                self.listDataStockOut.push(dataItem);
+              }
+            }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("Getting data error").goAway(3000);
+        });
+      }
     },
     searchProduct(){
 
@@ -154,6 +215,9 @@ export default {
         this.searchInput = '';
         this.getAllDataStockOut();
       }
+    },
+    changeFilterDate(filterDate){
+      this.getAllDataStockOut(filterDate);
     },
   },
   mounted() {
