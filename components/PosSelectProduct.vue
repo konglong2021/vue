@@ -123,6 +123,14 @@
                 <b-form-select  class="form-control input-content" v-model="order.vat" :options="vats"></b-form-select>
               </div>
             </div>
+            <div class="form-row-content-detail">
+              <div class="form-column-label">
+                <label :for="'input-vat'" class="label-input no-margin-bottom">Reference</label>
+              </div>
+              <div class="form-column-input">
+                <b-form-input type="text" class="input-content" v-model="order.reference"></b-form-input>
+              </div>
+            </div>
           </div>
           <div class="container-row-form width-45-percentage float-right">
             <div class="form-row-content-detail">
@@ -556,6 +564,7 @@ export default {
       dataSubmit.customer_id = self.order.customer;
       dataSubmit.vat = self.order.vat;
       dataSubmit.discount = self.order.discount;
+      dataSubmit.reference = self.order.reference;
       dataSubmit.items = [];
       let subTotal = 0;
       let grandTotal =0;

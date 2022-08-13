@@ -72,10 +72,10 @@
                                         <th>Reference</th>
                                         <th>ថ្ងៃខែប្រតិបត្តិការ </th>
                                         <th>អតិថិជន</th>
-                                        <th>សរុបរួម</th>
-                                        <th>បញ្ចុះតម្លៃ </th>
-                                        <th> ពន្ធ </th>
-                                        <th>សរុប</th>
+                                        <th>សរុប ($)</th>
+                                        <th>បញ្ចុះតម្លៃ (%)</th>
+                                        <th> ពន្ធ (%)</th>
+                                        <th>សរុបរួម ($)</th>
                                         <th>អ្នកគិតលុយ</th>
                                         <th>
                                         ឃ្លាំង
@@ -88,10 +88,10 @@
                                         <td> {{item.reference}} </td>
                                         <td> {{item.created_at}}</td>
                                         <td> {{item.customer_name}}</td>
-                                        <td> {{item.grandtotal}}</td>
+                                        <td> {{item.subtotal}}</td>
                                         <td> {{item.discount + "%"}}</td>
                                         <td> {{item.vat}}</td>
-                                        <td> {{item.subtotal}}</td>
+                                        <td> {{item.grandtotal}}</td>
                                         <td> {{item.user_name}}</td>
                                         <td> {{item.warehouse_name}}</td>
 
