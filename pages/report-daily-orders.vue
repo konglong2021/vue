@@ -86,7 +86,7 @@
                                     <tr v-for="(item, index) in items" :key="item.id">
                                         <td> {{item.invoice_id}} </td>
                                         <td> {{item.reference}} </td>
-                                        <td> {{item.created_at}}</td>
+                                        <td> {{formatDateDisplay(item.created_at)}}</td>
                                         <td> {{item.customer_name}}</td>
                                         <td> {{item.subtotal}}</td>
                                         <td> {{item.discount + "%"}}</td>
@@ -143,6 +143,8 @@
     </b-container>
 </template>
 <script>
+
+import moment from "moment";
 
 export default {
     middleware: "local-auth",
@@ -267,8 +269,8 @@ export default {
 
 
         },
-        generateDiscount(discount){
-          return discount + "%";
+        formatDateDisplay(date){
+          return moment(date, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
         }
     }
 }</script>
