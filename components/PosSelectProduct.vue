@@ -1,5 +1,12 @@
 <template>
   <div class="display-inline-block full-with" v-show="cashBalance">
+      <div style="padding: 10px"></div>
+        <div class="scanning-input" >
+          <b-form-input v-model="scanningInput" class="input-scanning" 
+            @keyup.enter="searchAndSelectedProduct(scanningInput)"
+            placeholder="បញ្ចូលបារកូដទំនិញ"
+           autofocus ref="scanningInput" ></b-form-input>
+        </div>
     <div  class="calculator-product-content">
       <div class="p-item" v-if="products && products.length > 0">
         <div style="width:42%;" class="display-inline-block"><span></span></div>
@@ -30,7 +37,7 @@
         </div>
       </div>
     </div>
-    <div class="content-calculator">
+    <!-- <div class="content-calculator">
       <div class="content-btn-card" style="display: none;">
         <b-button
           v-bind:disabled = "calculate('USD', products) === 0 && calculate('Riel', products) === 0"
@@ -60,7 +67,7 @@
         <div class="total">{{ $t('title_total_no_tax_add_discount') }} : {{calculateAfterDis(calculate("USD", products))}} USD </div>
         <div class="total"> {{ $t('title_total_no_tax_in_riel') }}: {{calculate("Riel", products)}} Riel </div>
       </div>
-    </div>
+    </div> -->
     <b-modal id="modal-input-qty-product" ref="input-qty-product-form-modal" modal-class="payment-form-modal"
              @hidden="onResetAddMoreQtyProduct" ok-only ok-variant="secondary" footer-class="justify-content-center"
              @ok="handleAddMoreQtyProductOk" :ok-title="$t('label_title_update')"
@@ -104,7 +111,8 @@
                 <label :for="'input-customer'" class="label-input no-margin-bottom">ឈ្មោះអតិថិជន</label>
               </div>
               <div class="form-column-input">
-                <b-form-select class="form-control input-content" v-model="order.customer" :options="customers" @change="updateCustomerSelected(order.customer)"></b-form-select>
+                <b-form-select class="form-control input-content" v-model="order.customer" :options="customers" 
+                @change="updateCustomerSelected(order.customer)"></b-form-select>
               </div>
             </div>
             <div class="form-row-content-detail">
@@ -138,7 +146,9 @@
                 <label :for="'input-getting-money-usd'" class="label-input no-margin-bottom">ទទួលទឹកប្រាក់ ($)</label>
               </div>
               <div class="form-column-input">
-                <b-form-input :id="'input-getting-money-usd'" type="number" class="input-content" v-model="getting_money_usd"></b-form-input>
+                <b-form-input 
+                :id="'input-getting-money-usd'" 
+                type="number" class="input-content" v-model="getting_money_usd"></b-form-input>
               </div>
             </div>
             <div class="form-row-content-detail">
@@ -151,6 +161,7 @@
             </div>
           </div>
         </div>
+   
         <b-table table-class="table-payment"
                  :items="items"
                  :fields="fields"
@@ -222,7 +233,7 @@
         <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" v-if="exchange_rate">{{$t('title_total_in_riel')}} : {{calculateToRiel(calculate("USD", items), exchange_rate)}} Riel</span>
       </div>
     </div>
-    <div id="invoice-print-pos" style="display: none; height: 100%; overflow: hidden; padding: 30px 70px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important; width: 95%; margin: 15px;">
+    <!-- <div id="invoice-print-pos" style="display: none; height: 100%; overflow: hidden; padding: 30px 70px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important; width: 95%; margin: 15px;">
       <div style="margin-bottom: 30px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; display:inline-block">
         <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center;">{{ $t('title') }}</h1>
       </div>
@@ -274,7 +285,7 @@
         <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{$t('title_total_after_vat_in_usd')}} : {{calculateIncludeTax(calculate("USD", items))}} USD</span>
         <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" v-if="exchange_rate">{{$t('title_total_in_riel')}} : {{calculateToRiel(calculate("USD", items), exchange_rate)}} Riel</span>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 <script>
@@ -286,6 +297,7 @@ export default {
   },
   data() {
     return {
+      scanningInput: null,
       productList : [],
       selected: undefined,
       selectedItemData: {},
@@ -549,6 +561,52 @@ export default {
         console.log(error);
       });
     },
+      generateImageUrlDisplay(img){
+        if (typeof window !== "undefined") {
+          return window.location.protocol + "//" + window.location.hostname + ":8000/" + "storage/img/" + img;
+        }
+      },
+
+    //search by barcode
+    async searchAndSelectedProduct(scanningInput){
+          let self = this;
+         await self.$axios.get('/api/product_by_barcode/'+scanningInput).then(function (response) {
+          if( response.data.hasOwnProperty("data")) {
+            debugger;
+            let data = response.data;
+            if( data.success){
+            let product = data.data;
+            let productItem = {
+                id : product.id,
+                price: product.sale_price,
+                name : product.en_name +' ('+product.kh_name +')',
+                img : (product.image !== "no image" && product.image !== "no image created" ) ? self.generateImageUrlDisplay(product.image) : "images/no_icon.png",
+                code : product.code
+              };
+   
+                self.$emit('selectProduct', productItem);
+
+            }
+            else{
+              let errorCode = data.error_code;
+              if( errorCode == 401) {
+                self.$toast.error("រកផលិតផលមិនឃើញ").goAway(2000);
+              }
+              else {
+                self.$toast.error( data.message).goAway(2000);
+              }
+            }
+            
+          }
+          else{
+            self.$toast.error("Not found data property"),goAway(2000);
+          }
+         }).catch(function(error){
+               self.$toast.error("getting product error ").goAway(2000);
+              console.log(error);
+
+         });
+      },
     async onSubmitPayment(){
       let self = this;
       let dataSubmit = {};
@@ -598,16 +656,17 @@ export default {
     },
 
     async printInvoice(){
-      this.$htmlToPaper("invoice-print-pos", this.optionStyleHtmlToPaper);
-      //this.$htmlToPaper("invoice-print", this.optionStyleHtmlToPaper);
-      setTimeout(() => {
-        this.isInvoicePrint = true;
-        this.is_show_content_print = false;
-        this.invoiceNumber = null;
-        this.items = [];
-        this.order["vat"] =0;
-        this.order["discount"] = 0;
-      }, 700);
+      // debugger;
+      // this.$htmlToPaper("invoice-print-pos", this.optionStyleHtmlToPaper);
+      // //this.$htmlToPaper("invoice-print", this.optionStyleHtmlToPaper);
+      // setTimeout(() => {
+      //   this.isInvoicePrint = true;
+      //   this.is_show_content_print = false;
+      //   this.invoiceNumber = null;
+      //   this.items = [];
+      //   this.order["vat"] =0;
+      //   this.order["discount"] = 0;
+      // }, 700);
     },
     onResetPayment(){
       this.getting_money_usd = 0;
@@ -710,6 +769,11 @@ export default {
     let self = this;
     self.onInitData();
     self.getCustomerList();
+    self.$root.$on('print-receipt',()=>{
+        self.items = self.cloneObject( self.products);
+        debugger
+        self.printInvoice();
+    });
   },
 }
 </script>

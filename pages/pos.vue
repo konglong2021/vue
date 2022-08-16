@@ -36,10 +36,36 @@
           <div v-show="!showModalCashBalance">
             <b-row v-if="isAdmin === false">
               <b-col cols="6" class="content-product-select">
-                <PosSelectProduct :products="productSelectList" @selectedItem="selectedItem" :warehouseSelectedId ="warehouseSelectedId" @updateListProduct="updateListProduct" :cashBalance="cashBalanceData.balance" />
+                <PosSelectProduct :products="productSelectList" 
+                @selectedItem="selectedItem" 
+                @selectProduct="selectProduct($event)" 
+                :warehouseSelectedId ="warehouseSelectedId" 
+                @updateListProduct="updateListProduct" 
+                :cashBalance="cashBalanceData.balance" />
               </b-col>
+
               <b-col cols="6" class="product-list">
-                <PosProductList @selectProduct="selectProduct($event)" @selectWarehouse="selectWarehouse($event)" :cashBalance="cashBalanceData.balance" />
+                <div>
+                  <b-tabs>
+                        <b-tab title="ពត៌មាននៃការលក់" active>
+                          <div>
+                              <pos-sale-info :products="productSelectList" 
+                                  @updateListProduct="updateListProduct"
+                              ></pos-sale-info>
+                          </div>
+                        </b-tab>
+                          <b-tab title="ផលិតផល">
+                            <div>
+                              <PosProductList 
+                              @selectProduct="selectProduct($event)" 
+                              @selectWarehouse="selectWarehouse($event)" 
+                              :cashBalance="cashBalanceData.balance" />
+                            </div>
+                        </b-tab>
+                  </b-tabs>
+                    
+                </div>
+                
               </b-col>
             </b-row>
             <b-row v-if="isAdmin">

@@ -25,7 +25,9 @@
       </div>
       <div class="product-list-body">
         <div class="scanning-input" >
-          <b-form-input v-model="scanningInput" class="input-scanning" @keyup.enter="searchAndSelectedProduct(scanningInput)" autofocus ref="scanningInput" ></b-form-input>
+          <b-form-input v-model="scanningInput" class="input-scanning" 
+            @keyup.enter="searchAndSelectedProduct(scanningInput)"
+           autofocus ref="scanningInput" ></b-form-input>
         </div>
         <div v-if="!productLoading && warehouse" >
           <div class="content-product" v-if="products && products.length > 0">
@@ -66,6 +68,7 @@
         warehouses : [{text : "ជ្រើសរើស ឃ្លាំងទំនិញ", value : null}],
         warehouse: null,
         searchInputData: null,
+        selectedItems:[],
       };
     },
     watch:{
@@ -223,10 +226,12 @@
       async searchAndSelectedProduct(scanningInput){
         if(scanningInput !== "" && scanningInput !== null){
           let foundItem = false;
+          console.log( this.products);
           for (let index=0; index < this.products.length; index++){
             let productItem = this.products[index];
             if(productItem["code"] === scanningInput || productItem["name"] === scanningInput){
               foundItem = true;
+              debugger;
               this.$emit('selectProduct', productItem);
               this.scanningInput = null;
               break;
