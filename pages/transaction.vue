@@ -313,13 +313,14 @@
           {key: 'date', label: this.$t('label_date_sale')},
           { key: 'sale_by', label: this.$t('label_sale_by')},
           { key: 'customer', label: this.$t('label_customer_name')},
+          { key: 'ref', label: "Reference"},
           { key: 'invoice_id', label: this.$t('label_number_invoice')},
-          { key: 'discount', label: this.$t('label_discount')},
-          { key: 'vat', label: this.$t('label_vat')},
-          // { key: 'subtotal', label: this.$t('label_sub_total')},
-          { key: 'grandtotal', label: this.$t('label_grand_total')},
+          { key: 'subtotal', label: "សរុប ($)"},
+          { key: 'discount', label: this.$t('label_discount') + " (%)"},
+          { key: 'vat', label: this.$t('label_vat') + " (%)"},
+          { key: 'grandtotal', label: "សរុបរួម ($)"},
           {key : 'receive', label: this.$t('label_receive_money')},
-          {key : 'status', label: "status"},
+          {key : 'status', label: "ស្ថានភាព"},
           {key : 'actions', label: this.$t('title_action')}
         ],
         fields: [
@@ -517,8 +518,8 @@
                   }
                 }
 
-                itemData["subtotal"] = subtotal;
-                itemData["grandtotal"] = grandtotal;
+                itemData["subtotal"] = subtotal.toFixed(2);
+                itemData["grandtotal"] = grandtotal.toFixed(2);
                 itemData["date"] = date;
                 itemData["order_id"] = orderItem.id;
                 itemData["sale_by"] = user.name;

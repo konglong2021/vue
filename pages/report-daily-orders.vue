@@ -69,56 +69,53 @@
                                         <th>
                                             លេខវិក័យបត្រ័
                                         </th>
-                                        <th>
-                                            ថ្ងៃខែប្រតិបត្តិការ
-                                        </th>
-                                        <th>
-                                            សរុប
-                                        </th>
-                                        <th>
-                                            ពន្ធ
-                                        </th>
-                                        <th>
-                                            អ្នកគិតលុយ
-                                        </th>
+                                        <th>Reference</th>
+                                        <th>ថ្ងៃខែប្រតិបត្តិការ </th>
+                                        <th>អតិថិជន</th>
+                                        <th>សរុប ($)</th>
+                                        <th>បញ្ចុះតម្លៃ (%)</th>
+                                        <th> ពន្ធ (%)</th>
+                                        <th>សរុបរួម ($)</th>
+                                        <th>អ្នកគិតលុយ</th>
                                         <th>
                                         ឃ្លាំង
-                                        </th>
-                                        <th>
-                                            អតិថិជន
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="(item, index) in items" :key="item.id">
-                                        <td>{{item.invoice_id}}</td>
-                                        <td>{{item.created_at}}</td>
-                                        <td>{{item.grandtotal}}</td>
-                                        <td>{{item.vat}}</td>
+                                        <td> {{item.invoice_id}} </td>
+                                        <td> {{item.reference}} </td>
+                                        <td> {{formatDateDisplay(item.created_at)}}</td>
+                                        <td> {{item.customer_name}}</td>
+                                        <td> {{item.subtotal}}</td>
+                                        <td> {{item.discount + "%"}}</td>
+                                        <td> {{item.vat}}</td>
+                                        <td> {{item.grandtotal}}</td>
                                         <td> {{item.user_name}}</td>
                                         <td> {{item.warehouse_name}}</td>
-                                        <td> {{item.customer_name}}</td>
-                                        
+
+
                                     </tr>
                                     </tbody>
                             </table>
                             <div class="table-footer">
                                 <b-row>
-                        
-                                    
+
+
                                             <b-col cols="2">
-                                                
+
                                            <p><b-form-select v-model="pPerPage" :options="perPageList"></b-form-select>  </p>
-                                           
-                                    
+
+
                                         </b-col>
                                         <b-col cols="2">
                                             <p>
-                                            ក្នុងមួយទំព័រ  | 
+                                            ក្នុងមួយទំព័រ  |
                                             </p>
                                         </b-col>
                                         <b-col cols="1">
-                                            <p>  
+                                            <p>
                                                  ទំព័រទី: {{ currentPage }}
                                             </p>
                                         </b-col>
@@ -126,13 +123,13 @@
                                             <b-pagination @change="onPageChanged" v-model="currentPage" :total-rows="rows"
                                                 :per-page="perPage" aria-controls="my-table"></b-pagination>
                                         </b-col>
-                                        
-                        
+
+
                                 </b-row>
                             </div>
-                            <div>                                   
-                                    
-                                
+                            <div>
+
+
 
 
                             </div>
@@ -146,6 +143,8 @@
     </b-container>
 </template>
 <script>
+
+import moment from "moment";
 
 export default {
     middleware: "local-auth",
@@ -251,7 +250,7 @@ export default {
                             //callBack( self.items);
                             self.pTotalMoney = data.data.summary.total;
                             self.pTotalTran = self.rows;
-                            
+
                         }
                         else {
                             self.$toast.error( data.message ).goAway(3000);
@@ -261,14 +260,17 @@ export default {
                         console.log( response );
                         self.$toast.error("Error getting data" ).goAway(3000);
                     }
-                    
+
 
             }).catch(function (error) {
                 console.log( error);
             });
             return null;
-            
 
+
+        },
+        formatDateDisplay(date){
+          return moment(date, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
         }
     }
 }</script>
