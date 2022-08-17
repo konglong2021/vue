@@ -60,6 +60,7 @@
                 <b-form-input :id="'input-getting-money-usd'" 
                   type="number" class="input-content" 
                   min="0"
+                  @keyup="deleteInput(event)"
                 v-model="gettingMoneyUsd"></b-form-input>
               </div>
             </div>
@@ -359,7 +360,23 @@ export default {
       return JSON.parse(JSON.stringify(obj));
     },
     gettingMoney(){
-      let getting = parseFloat(this.gettingMoneyUsd) +  parseFloat(this.gettingMoneyRiel)/ parseFloat(this.exchangeRate);
+      let gettingUsd = parseFloat( this.gettingMoneyUsd);
+      let gettingKh = parseFloat( this.gettingMoneyRiel);
+      if( isNaN(gettingUsd)) {
+        gettingUsd = 0.0;
+        this.gettingMoneyUsd = 0.0;
+      }
+      if( isNaN(gettingKh)) {
+        this.gettingMoneyRiel = 0.0;
+        gettingKh = 0.0;
+      }
+      let exchangeRate = parseInt( this.exchangeRate);
+      if( isNaN(exchangeRate)) {
+        exchangeRate = 4100;
+        this.exchangeRate = 4100;
+      }
+
+      let getting = gettingUsd +  gettingKh/ exchangeRate;
       return getting;
     },
     updateReturnMoney(){
@@ -390,6 +407,9 @@ export default {
         }
         return '';
     },
+    deleteInput(event){
+        console.log('delete input', event);
+    },  
 
     buildPrintItems(){
       this.printItems = [];
