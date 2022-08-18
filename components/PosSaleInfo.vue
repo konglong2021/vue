@@ -1,8 +1,8 @@
 <template>
-<div>
+<div style="overflow-y:auto;max-height:650px;">
     <div style="padding-top:20px"></div>
-     <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;">
-        <div class="full-content margin-bottom-20">
+     <b-form enctype="multipart/form-data" >
+        <div class="full-content">
           <div class="container-row-form width-45-percentage float-left">
             <div class="form-row-content-detail">
               <div class="form-column-label">
@@ -52,7 +52,7 @@
           </div>
         </div>
         <div>
-            <div class="form-row-content-money">
+            <div class="form-row-content-money pull-left">
               <div class="form-column-label">
                 <label :for="'input-getting-money-usd'" class="label-input no-margin-bottom">ទទួលទឹកប្រាក់ ($)</label>
               </div>
@@ -64,7 +64,7 @@
                 v-model="gettingMoneyUsd"></b-form-input>
               </div>
             </div>
-            <div class="form-row-content-money">
+            <div class="form-row-content-money pull-left">
               <div class="form-column-label">
                 <label :for="'input-getting-money-riel'" class="label-input no-margin-bottom">ទទួលទឹកប្រាក់ (៛)</label>
               </div>
@@ -77,6 +77,7 @@
                    v-model="gettingMoneyRiel"></b-form-input>
               </div>
             </div>
+            <div style="clear:both"></div>
         </div>
         <div style="display: inline-block;margin-top: 25px;width: 90%;">
             <div class="total-wrapper pull-left">
@@ -179,7 +180,7 @@
       <div style="margin-bottom: 30px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; display:inline-block">
         <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center;">{{ $t('title') }}</h1>
       </div>
-      <div class="full-content margin-bottom-20">
+      <div class="full-content">
         <div class="container-row-form width-60-percentage float-left">
           <div class="form-row-content-detail row-content-view" v-if="invoiceNumber">
             <label class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">វិក័យប័ត្រលេខ</label>
@@ -585,12 +586,12 @@ export default {
 </script>
 <style scoped>
 .total {
-  font-weight: bold;
-  font-size: 23px;
-  border-bottom: 1px solid #ccc;
-  padding: 5px 0px;
-  width: 100%;
-  display: inline-block;
+    font-weight: bold;
+    font-size: 20px;
+    border-bottom: 1px solid #ccc;
+    padding: 2px 0px;
+    width: 100%;
+    display: inline-block;
 }
 .total-wrapper  {
   width: 100%;
@@ -608,7 +609,7 @@ export default {
   min-width: 200px !important;
 }
 .line {
-  margin:  20px 0px;
+  margin:  1px 0px;
   padding: 5px 0px;
   border-bottom: 2px solid #000;
 }

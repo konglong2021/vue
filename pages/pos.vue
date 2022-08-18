@@ -52,6 +52,7 @@
                               <pos-sale-info :products="productSelectList" 
                                   @updateListProduct="updateListProduct"
                               ></pos-sale-info>
+                              <div style="clear:both"></div>
                           </div>
                         </b-tab>
                           <b-tab title="ផលិតផល">
@@ -358,7 +359,7 @@ export default {
   .product-list{
       border-left: 2px solid #000;
       background: #eff3f6;
-    height: calc(100vh - 70px);
+      overflow: auto;
   }
   .content-product-select .user-select-none{
     user-select: none !important;
