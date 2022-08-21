@@ -54,11 +54,11 @@
                             <div class="report-head">
                                 <b-row>
                                     <b-col>
-                                    <p>  ចំនួន ប្រតិបត្តការ ៖​  {{pTotalTran}} </p>
+                                    <p class="rp-total">  ចំនួន ប្រតិបត្តការ ៖​  {{ $util.formatInt(pTotalTran)}} </p>
                                     </b-col>
                                     <b-col>
-                                        <p>
-                                        សរុប ការលក់ ($) ៖​   {{pTotalMoney}}
+                                        <p class="rp-total">
+                                        សរុប ការលក់ ($) ៖​   {{ $util.format(pTotalMoney)}}
                                         </p>
                                     </b-col>
                                 </b-row>
@@ -179,6 +179,7 @@ export default {
         };
     },
     mounted() {
+        console.log( this.$util.format(200.0001) );
         const today = new Date();
         const day   = 1;
         const month = today.getMonth();
@@ -189,6 +190,7 @@ export default {
         console.log( this.fromDate);
         this.isLoading = false;
         this.getOrders();
+        
 
     },
     watch:{

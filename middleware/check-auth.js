@@ -11,6 +11,7 @@ export default async ({ $axios, store }) => {
     }
   }
   if (!store.getters['auth/check'] && token) {
+    console.log('auth check!' , token);
     await store.dispatch('auth/fetchUser');
   }
 }

@@ -86,7 +86,7 @@
                       {{ $t('title_total_no_tax') }} :  
                   </div>
                   <div class="pull-right">
-                      {{format(subTotal)}} USD
+                      {{$util.format(subTotal)}} USD
                   </div>
               </div>
               <div style="clear:both"></div>
@@ -95,7 +95,7 @@
                    {{ $t('title_total_no_tax_add_discount') }} :
                 </div>
                 <div class="pull-right"> 
-                    {{ format( subTotalWithDiscount) }} USD
+                    {{ $util.format( subTotalWithDiscount) }} USD
                 </div>  
               </div>
               <div style="clear:both"> </div>
@@ -105,7 +105,7 @@
                 {{ $t('title_total_with_tax_usd') }}:
                 </div> 
                 <div class="pull-right">
-                  {{format(grandTotalUsd)}}
+                  {{$util.format(grandTotalUsd)}}
                     USD
                 </div>
               </div>
@@ -115,7 +115,7 @@
                 {{ $t('title_total_with_tax_riel') }}:
                 </div> 
                 <div class="pull-right">
-                   {{format(grandTotalKh)}} Riel
+                   {{$util.format(grandTotalKh)}} Riel
                 </div>
               </div>
               <div style="clear:both"> </div>
@@ -134,7 +134,7 @@
                           v-model="inputReturnUsd"></b-form-input>
                     </div>
                     <div class="pull-right" v-if="!showInputReturn">
-                        {{format( returnMoneyUsd)}}
+                        {{$util.format( returnMoneyUsd)}}
                     </div>
                     <div style="clear:both"></div>
                     
@@ -147,7 +147,7 @@
                     លុយត្រូវអាប់ (៛) :
                 </div> 
                   <div class="pull-right">
-                       {{format( returnMoneyKh)}}
+                       {{$util.format( returnMoneyKh)}}
                   </div> 
                   <div style="clear:both;"></div>
                 </div>
@@ -228,9 +228,9 @@
         <span style="display: block; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{$t('title_total_in_usd')}} : 
         {{subTotalPrint}} USD</span>
         <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">
-        {{$t('title_total_after_vat_in_usd')}}  {{ format(grandTotalUsdPrint)}} :  USD</span>
+        {{$t('title_total_after_vat_in_usd')}}  {{ $util.format(grandTotalUsdPrint)}} :  USD</span>
         <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" 
-        v-if="exchangeRate">{{$t('title_total_in_riel')}} : {{ format(grandTotalKhPrint)}} Riel</span>
+        v-if="exchangeRate">{{$t('title_total_in_riel')}} : {{ $util.format(grandTotalKhPrint)}} Riel</span>
       </div>
     </div>
 </div>
@@ -312,21 +312,12 @@ export default {
    },
   methods:
   {
-    format( num){
-        return Number.parseFloat( num).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    },
+   
     cancelInputReturn(){
         this.showInputReturn = false;
         this.inputReturnUsd = this.returnMoneyUsd;
     },
-    roundKhDown( num){
-      if( num % 100 > 0) {
-          let minus  = num % 100;
-          return num - minus;
-      }
-      return num;
-
-    },
+  
     roundKhMoney(num){
       if( num % 100 > 0) {
           let plus = 100 - num % 100;
@@ -334,19 +325,17 @@ export default {
       }
       return num;
     },
-    isInt(n){
-      return Number(n) === n && n % 1 === 0;
-    },
+  
 
     updateInputReturn(){
-        debugger;
+      
         this.showInputReturn = false;
         this.returnMoneyUsd = parseFloat(this.inputReturnUsd);
         let getting = this.gettingMoney();
         let remain = getting  - this.grandTotalUsd;
         if( remain - this.returnMoneyUsd > 0) {
             let kh = ( remain - this.returnMoneyUsd )  * this.exchangeRate;
-            this.returnMoneyKh = this.roundKhDown( kh);
+            this.returnMoneyKh = this.$util.roundKhDown( kh);
         }
         
 
@@ -356,9 +345,6 @@ export default {
           this.showInputReturn = true;
           this.inputReturnUsd = this.returnMoneyUsd;        
         }
-    },
-     cloneObject(obj) {
-      return JSON.parse(JSON.stringify(obj));
     },
     gettingMoney(){
       let gettingUsd = parseFloat( this.gettingMoneyUsd);
@@ -381,18 +367,18 @@ export default {
       return getting;
     },
     updateReturnMoney(){
-      debugger;
+    
       this.returnMoneyKh  = 0.0;
       this.returnMoneyUsd = 0.0;
       let getting = this.gettingMoney();
       let remain = 0;
       if( getting > this.grandTotalUsd) {
          remain = getting - this.grandTotalUsd;
-         if( !this.isInt( remain)) 
+         if( !this.$util.isInt( remain)) 
          {
             let num = parseInt( remain);
             let extra = remain - num;
-            this.returnMoneyKh = this.roundKhDown(  extra * this.exchangeRate );
+            this.returnMoneyKh = this.$util.roundKhDown(  extra * this.exchangeRate );
             this.returnMoneyUsd  = num;
          }
          else {
@@ -436,12 +422,12 @@ export default {
        
     },
     async submitPayment(){
-      debugger;
+      
       let self = this;
       let getting = this.gettingMoney();
       if( getting < this.grandTotalUsd) {
           let message = self.$t('not_enough_money');
-          message = message +" ( " + this.format( this.grandTotalUsd - getting) +" USD ) ";
+          message = message +" ( " + this.$util.format( this.grandTotalUsd - getting) +" USD ) ";
           self.$toast.error(message).goAway(2000);
       }
 
@@ -528,6 +514,7 @@ export default {
 
   mounted(){
      this.getCustomerList();
+      console.log( this.$util.format(2020)); 
   },
   data() {
     return {

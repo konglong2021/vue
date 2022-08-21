@@ -732,3 +732,7 @@ body {
   width: 80%;
   padding: 20px;
 }
+.rp-total {
+  font-weight: bold;
+  font-size: 20px;
+}

@@ -83,6 +83,7 @@ export default {
     '~/plugins/input-text-sentence-case',
     '~/plugins/focus',
     '~/plugins/can',
+    '~/plugins/util',
   ],
 
   axios: {
