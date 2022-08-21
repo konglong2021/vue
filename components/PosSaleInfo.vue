@@ -26,6 +26,16 @@
                  class="input-content" v-model="exchangeRate"></b-form-input>
               </div>
             </div>
+               <div class="form-row-content-detail">
+              <div class="form-column-label">
+                <label :for="'input-exchange-rate'" class="label-input no-margin-bottom">REFERENCE</label>
+              </div>
+              <div class="form-column-input">
+                <b-form-input
+               
+                 class="input-content" v-model="ref"></b-form-input>
+              </div>
+            </div>
             
           </div>
           <div class="container-row-form width-45-percentage float-right">
@@ -211,6 +221,10 @@
           <div class="form-row-content-detail row-content-view">
             <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ថ្ងៃខែឆ្នាំលក់ : </label>
             <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ getFullDate() }}</strong>
+          </div>
+            <div class="form-row-content-detail row-content-view">
+            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">REFERENCE </label>
+            <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ order.ref }}</strong>
           </div>
         </div>
       </div>
@@ -451,6 +465,7 @@ export default {
       dataSubmit.return_money_usd = self.returnMoneyUsd;
       dataSubmit.exchange_rate = self.exchangeRate; 
       dataSubmit.discount = self.discount;
+      dataSubmit.ref = self.ref;
       this.buildPrintItems();     
       await this.$axios.post('/api/sale', dataSubmit).then(function (response) {
         if(response.data.success === true){
@@ -458,6 +473,10 @@ export default {
           self.invoiceNumber = response.data.order["invoice_id"];
           self.showPrintReceipt = true;
           self.$emit("updateListProduct", []);
+          self.order = dataSubmit;
+          self.ref = '';
+          self.discount = 0.0;
+
         }
       })
         .catch(function (error) {
@@ -555,6 +574,7 @@ export default {
         customers:[],
         discount : 0.0,
         vat:0.0,
+        ref:'',
         order:{
           vat:0,
           distcount:0
