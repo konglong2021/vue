@@ -447,8 +447,7 @@ export default {
 
       let dataSubmit = {};
       dataSubmit.customer_id = self.order.customer;
-      dataSubmit.vat = self.order.vat;
-      dataSubmit.discount = self.order.discount;
+      dataSubmit.vat = self.vat;
       dataSubmit.warehouse_id = this.$store.$cookies.get('storeItem');
       dataSubmit.items = [];  
       for (let index=0; index < self.products.length ; index++){
@@ -465,6 +464,7 @@ export default {
       dataSubmit.return_money_kh = self.returnMoneyKh;
       dataSubmit.return_money_usd = self.returnMoneyUsd;
       dataSubmit.exchange_rate = self.exchangeRate; 
+      dataSubmit.discount = self.discount;
       this.buildPrintItems();     
       await this.$axios.post('/api/sale', dataSubmit).then(function (response) {
         if(response.data.success === true){
@@ -587,7 +587,7 @@ export default {
 <style scoped>
 .total {
     font-weight: bold;
-    font-size: 20px;
+    font-size: 13px;
     border-bottom: 1px solid #ccc;
     padding: 2px 0px;
     width: 100%;
@@ -597,12 +597,12 @@ export default {
   width: 100%;
 }
 .form-row-content-money input {
-  height: 50px;
-    font-size: 30px;
+  height: 30px;
+    font-size: 20px;
     width: 100%;
 }
 .form-row-content-money label {
-  font-size: 30px;
+  font-size: 20px;
   min-width: 200px !important;
 }
 .form-row-content-money .form-column-label {
