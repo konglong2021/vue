@@ -10,9 +10,9 @@
             <b-col lg="4">
               <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
                 <div class="card-body">
-                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculatePrice(items) }} ($)</h4>
+                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ dataCard.paid }} ($)</h4>
                   <div>
-                    ប្រាក់ចំនេញ សម្រាប់ថ្ងៃនេះ
+                    ប្រាក់ទូទាត់រួចរាល់ សម្រាប់ថ្ងៃនេះ
                   </div>
                 </div>
               </div>
@@ -20,9 +20,9 @@
             <b-col lg="4">
               <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
                 <div class="card-body">
-                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculateImportPrice(items) }} ($)</h4>
+                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculate(dataCard) }} ($)</h4>
                   <div>
-                    ប្រាក់ដើម សម្រាប់ថ្ងៃនេះ
+                    ប្រាក់មិនទាន់ទូទាត់ សម្រាប់ថ្ងៃនេះ
                   </div>
                 </div>
               </div>
@@ -30,7 +30,7 @@
             <b-col lg="4">
               <div class="card border-1 border-left-3 border-left-accent text-center mb-lg-0 card-border-class">
                 <div class="card-body">
-                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ calculateSalePrice (items) }} ($)</h4>
+                  <h4 class="h2 mb-0" style="margin-bottom: 10px !important;">{{ dataCard.grandtotal }} ($)</h4>
                   <div>
                     ប្រាក់លក់សរុប សម្រាប់ថ្ងៃនេះ
                   </div>
@@ -40,7 +40,7 @@
           </b-row>
         </b-container>
       </div>
-      <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">      
+      <div style="width: 100%; display: inline-block; overflow:hidden; padding-top: 2rem;padding-bottom: 2rem;">
         <b-container>
           <!--
           <div style="display:inline-block;width:100%; margin-bottom: 20px;">
@@ -64,9 +64,8 @@
           <b-list-group>
             <b-list-group-item href="/report-daily-orders"  active variant="primary"> របាយការ ការលក់</b-list-group-item>
             <b-list-group-item href="/report-daily-imports"  active variant="primary"> របាយការ ការនាំចូល</b-list-group-item>
-
           </b-list-group>
-        
+
         </b-container>
       </div>
     </div>
@@ -98,7 +97,8 @@ export default {
           warehouse: this.$store.$cookies.get('storeItem'),
           orders: [],
           purchases: [],
-          dateFilter: this.getFullDate()
+          dateFilter: this.getFullDate(),
+          dataCard: {}
         }
     },
     methods:{
@@ -107,13 +107,6 @@ export default {
           this.getProductList(warehouse);
           this.getAllOrderData((this.dateFilter ? this.dateFilter : this.getFullDate()) , warehouse);
         }
-      },
-      calculate(items){
-        let total = [];
-        Object.entries(items).forEach(([key, val]) => {
-          total.push(val.grandtotal ? parseFloat(val.grandtotal) : 0) ;
-        });
-        return total.reduce(function(total, num){ return total + num }, 0);
       },
       async getCustomerList(){
         let self = this;
@@ -289,52 +282,31 @@ export default {
         let yyyy = today.getFullYear();
         return (yyyy + "-" + month + "-" + day);
       },
-      calculatePrice($list){
-        let totalSalePrice = [];
-        let totalImportPrice = [];
-
-        Object.entries($list).forEach(([key, val]) => {
-          totalSalePrice.push(val.sub_total_sale_price);
-        });
-        Object.entries($list).forEach(([key, val]) => {
-          totalImportPrice.push(val.sub_total_import_price);
-        });
-
-        let totalImport = totalImportPrice.reduce(function(total, num) {
-            return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
-          , 0);
-        let totalSale = totalSalePrice.reduce(function(total, num) {
-            return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
-          , 0);
-        const lastPrice = (parseFloat(totalSale) - parseFloat(totalImport));
-        return parseFloat(lastPrice.toFixed(2));
-      },
-      calculateImportPrice($list){
-        let totalImportPrice = [];
-        Object.entries($list).forEach(([key, val]) => {
-          totalImportPrice.push(val.sub_total_import_price);
-        });
-
-        return totalImportPrice.reduce(function(total, num) {
-            return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
-          , 0);
-      },
-      calculateSalePrice($list){
-        let totalSalePrice = [];
-        Object.entries($list).forEach(([key, val]) => {
-          totalSalePrice.push(val.sub_total_sale_price);
-        });
-
-        return totalSalePrice.reduce(function(total, num) {
-            return parseFloat((parseFloat(total) + parseFloat(num)).toFixed(2)) }
-          , 0);
-      },
       changeFilterDate(filterDate){
         this.getAllOrderData(filterDate, (this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
-      }
-},
+      },
+      async getDataToDisplayInCards(){
+        let self = this;
+        await self.$axios.get('/api/sellreport').then(function (response) {
+          if(response && response.hasOwnProperty("data")){
+            let data = response.data[0];
+            self.dataCard = self.cloneObject(data);
+          }
+          console.log(response);
+        })
+        .catch(function (error) {
+            self.$toast.error("getting data error ").goAway(2000);
+            console.log(error);
+        });
+      },
+      calculate(dataCard){
+        let total = (parseFloat(dataCard.grandtotal) - parseFloat(dataCard.paid));
+        return (dataCard && dataCard.grandtotal) ? total.toFixed(2) : 0;
+      },
+    },
 
     mounted() {
+      this.getDataToDisplayInCards();
       this.getProductList();
       this.getCustomerList();
       this.getWareHouseList();
