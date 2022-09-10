@@ -72,7 +72,6 @@
                   </tr>
                   </tbody>
                 </table>
-
                 <b-table id="my-table-purchase" class="table table-striped table-bordered table-purchase"
                          v-if="items"
                          sticky-header="true"
@@ -390,78 +389,13 @@ export default {
                 }
                 let qty = parseInt(purchaseDetailItem["quantity"]);
                 let unitprice = parseFloat(purchaseDetailItem["unitprice"]);
-                subtotal = subtotal + (qty * unitprice);
-                grand_total = grand_total + parseFloat(grand_total + subtotal);
-
+                subtotal = (subtotal + (qty * unitprice));
+                grand_total = grand_total + parseFloat(qty * unitprice);
               }
               itemData["date"] = date;
               itemData["subtotal"] = subtotal.toFixed(2);
               itemData["grand_total"] = grand_total.toFixed(2);
               self.items.push(itemData);
-
-              //itemPurchase[purchaseItem.id] = [];
-              /*if(purchaseItem.hasOwnProperty("purchasedetails") && purchaseItem["purchasedetails"] && purchaseItem["purchasedetails"].length > 0){
-                for(let indexProduct = 0; indexProduct < purchaseItem["purchasedetails"].length; indexProduct++){
-                  let purchaseDetailData = [];
-                  let purchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
-                  let product = self.products.find(item => item.id === purchaseDetailItem.product_id);
-
-                  if(product !== null && product !== undefined){
-                    let createdDate = new Date(purchaseDetailItem.created_at);
-                    let dd = createdDate.getDate();
-                    let mm = createdDate.getMonth() + 1;
-                    let day = (dd < 10) ? ('0' + dd) : dd;
-                    let month = (mm < 10) ? ('0' + mm) : mm;
-                    let yyyy = createdDate.getFullYear();
-                    purchaseDetailData["date"] = (day + "/" + month + "/" + yyyy);
-                    purchaseDetailData["name"] = (product["en_name"] + " " + product["kh_name"]);
-                    purchaseDetailData["quantity"] = parseInt(purchaseDetailItem["quantity"]);
-                    purchaseDetailData["unitprice"] = parseFloat(purchaseDetailItem["unitprice"]);
-                    purchaseDetailData["saleprice"] = parseFloat(product["sale_price"]);
-                    purchaseDetailData["product_id"] = product["id"] ;
-                    purchaseDetailData["purchase_id"] = purchaseItem["id"];
-                    const subtotal = parseFloat(purchaseDetailItem["unitprice"]) * parseInt(purchaseDetailItem["quantity"]);
-                    purchaseDetailData["subtotal"] = subtotal.toFixed(2);
-                    itemPurchase[purchaseItem.id].push(purchaseDetailData);
-                  }
-                }
-              }
-              if(itemPurchase[purchaseItem.id] && itemPurchase[purchaseItem.id].length > 0){
-                let grandTotal = itemPurchase[purchaseItem.id].reduce((sum, transaction) => {
-                  return sum = (parseFloat(sum) + parseFloat(transaction.subtotal));
-                }, 0);
-                for(let i=0; i< itemPurchase[purchaseItem.id].length; i++){
-                  let itemData = [];
-                  if(i === 0){
-                    itemData["id"] = itemPurchase[purchaseItem.id][i].purchase_id ? itemPurchase[purchaseItem.id][i].purchase_id : purchaseItem.id;
-                    itemData["purchase_id"] = itemPurchase[purchaseItem.id][i].purchase_id ? itemPurchase[purchaseItem.id][i].purchase_id : purchaseItem.id;
-                    itemData["purchase_by"] = user.name;
-                    itemData["supplier"] =  supplier["text"];
-                    itemData["batch"] =  purchaseItem["batch"];
-                    itemData["vat"] =  purchaseItem["vat"] ? purchaseItem["vat"] : 0;
-
-                    itemData["product_id"] = itemPurchase[purchaseItem.id][i].product_id;
-                    itemData["name"] = itemPurchase[purchaseItem.id][i].name;
-                    itemData["quantity"] = itemPurchase[purchaseItem.id][i]["quantity"];
-                    itemData["unitprice"] = parseFloat(itemPurchase[purchaseItem.id][i]["unitprice"]);
-                    itemData["saleprice"] = parseFloat(itemPurchase[purchaseItem.id][i]["saleprice"]);
-                    itemData["date"] = itemPurchase[purchaseItem.id][i]["date"];
-                    itemData["lengthDetail"] = itemPurchase[purchaseItem.id].length;
-                    itemData["subtotal"] = parseFloat(itemPurchase[purchaseItem.id][i]["subtotal"]);
-                    itemData["grand_total"] = grandTotal;
-                  }
-                  else {
-                    itemData["id"] = itemPurchase[purchaseItem.id][i].purchase_id ? itemPurchase[purchaseItem.id][i].purchase_id : purchaseItem.id;
-                    itemData["product_id"] = itemPurchase[purchaseItem.id][i].product_id;
-                    itemData["name"] = itemPurchase[purchaseItem.id][i].name;
-                    itemData["quantity"] = itemPurchase[purchaseItem.id][i]["quantity"];
-                    itemData["unitprice"] = parseFloat(itemPurchase[purchaseItem.id][i]["unitprice"]);
-                    itemData["saleprice"] = parseFloat(itemPurchase[purchaseItem.id][i]["saleprice"]);
-                    itemData["subtotal"] = parseFloat(itemPurchase[purchaseItem.id][i]["subtotal"]);
-                  }
-                  self.items.push(itemData);
-                }
-              }*/
             }
           }
         })
