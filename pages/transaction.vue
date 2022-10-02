@@ -77,12 +77,6 @@
                       </template>
                     </b-table>
                   </div>
-<!--                  <b-pagination-->
-<!--                          v-model="currentPage"-->
-<!--                          :total-rows="rows"-->
-<!--                          :per-page="perPage"-->
-<!--                          aria-controls="my-table"-->
-<!--                  ></b-pagination>-->
                 </div>
               </div>
               <h3 class="text-center color-info" v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
@@ -275,10 +269,10 @@
                       :tbody-tr-class="rowClass"
             >
               <template #cell(qty)="row">
-                <b-form-input ref="inputQty" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" v-on:change="updatedDataOfCurrentProduct(row.item.qty, row.item, 'qty')" :autofocus="true"></b-form-input>
+                <b-form-input :ref="'inputQty' + row.item.id" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" v-on:change="updatedDataOfCurrentProduct(row.item.qty, row.item, 'qty')"></b-form-input>
               </template>
               <template #cell(price)="row">
-                <b-form-input ref="inputPrice" type="number" class="input-content" v-bind:class="'content-input-price-'+row.item.id" v-model="row.item.price" v-on:change="updatedDataOfCurrentProduct(row.item.price, row.item, 'price')" :autofocus="true"></b-form-input>
+                <b-form-input :ref="'inputPrice' + row.item.id" type="number" class="input-content" v-bind:class="'content-input-price-'+row.item.id" v-model="row.item.price" v-on:change="updatedDataOfCurrentProduct(row.item.price, row.item, 'price')"></b-form-input>
               </template>
               <template #cell(action)="row">
                 <b-button size="md" class="btn-no-background-danger" @click="removeProductFromListOfOrder(row.item,  $event.target)">
@@ -607,9 +601,10 @@
                 data["qty"] = parseInt(orderDetailList[indexOrder]["quantity"]);
                 data["price"] = orderDetailList[indexOrder]["sellprice"];
                 let total = (parseFloat(orderDetailList[indexOrder]["sellprice"]) * parseInt(orderDetailList[indexOrder]["quantity"]));
-                data["total"] = total;
+                data["total"] = total.toFixed(2);
                 data["discount"] = discount > 0 ? (discount) : 0;
-                data["total_after_discount"] = total - (total * (discount / 100));
+                let total_after_discount = total - (total * (discount / 100));
+                data["total_after_discount"] = total_after_discount.toFixed(2);
                 orderDetailArray.push(data);
               }
             }
@@ -617,7 +612,6 @@
           this.itemsProductDetail = this.cloneObject(orderDetailArray);
         }
         this.$nextTick(() => {
-          //this.onSubmitToPrint();
           this.$refs["detail-payment-form-modal"].show();
         });
       },
@@ -712,6 +706,10 @@
             }
             this.$set(this.itemsProductDetail, indexItem, itemTemp);
           }
+
+          this.$nextTick(() => {
+            this.$refs['inputQty'+ productItemAdd.id].focus();
+          });
         }
       },
       rowClass(item, type) {
@@ -1053,8 +1051,8 @@
                 itemOrder["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
                 itemOrder["grandtotal"] = grandtotal.toFixed(2);
                 itemOrder["receive"] = orderItem["receive"];
-                itemData["status"] = parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"]) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
-                itemData["status_code"] = parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"]) ? "complete" : "pending";
+                itemOrder["status"] = parseFloat(orderItem["receive"]) === parseFloat(orderItem["grandtotal"]) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
+                itemOrder["status_code"] = parseFloat(orderItem["receive"]) === parseFloat(orderItem["grandtotal"]) ? "complete" : "pending";
                 orderItems.push(itemOrder);
               }
             }
