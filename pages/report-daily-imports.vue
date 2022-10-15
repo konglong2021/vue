@@ -224,7 +224,7 @@ export default {
                         let data = response.data;
                         if( data.success){
                             if( type === 'excel') {
-                                debugger;
+                                //debugger;
                                 var url = data.data;
                                 window.open( url,'_newtab');
                                 return;

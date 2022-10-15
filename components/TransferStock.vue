@@ -81,13 +81,55 @@
             :items="listStockOut"
             :fields="listStockOutFields"
             head-variant="light"
-          ></b-table>
+          >
+            <template #cell(actions)="row">
+              <b-button v-can="'pos_access'" size="sm" title="View data" class="btn-no-background" @click="viewDataDetail(row.item)">
+                <i class="fa fa-eye"></i>
+              </b-button>
+            </template>
+          </b-table>
         </div>
         <div v-if="listStockOut.length === 0"><h2 class="text-center color-info">មិនមានទិន្នន័យទេ</h2></div>
+        <b-modal id="modal-detail-transfer" ref="modal-detail-transfer" size="lg" modal-class="payment-form-modal"
+                 ok-only ok-variant="secondary" footer-class="justify-content-center"
+                ok-title="បិទ" title="ពត៍មានការផ្ទេរទំនិញ" no-close-on-backdrop>
+          <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;">
+            <div class="full-content margin-bottom-20">
+              <div class="container-row-form width-60-percentage float-left">
+                <div class="form-row-content-detail row-content-view">
+                  <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ថ្ងៃខែផ្ទេរ : </label>
+                  <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ transferItemDetail.date }}</strong>
+                </div>
+                <div class="form-row-content-detail row-content-view">
+                  <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">Reference : </label>
+                  <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ transferItemDetail.ref }}</strong>
+                </div>
+              </div>
+              <div class="container-row-form width-29-percentage float-right">
+                <div class="form-row-content-detail row-content-view">
+                  <label :for="'input-discount'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ឃ្លាំងចាស់ : </label>
+                  <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ transferItemDetail.warehouse_from }}</strong>
+                </div>
+                <div class="form-row-content-detail row-content-view">
+                  <label :for="'input-vat'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ឃ្លាំងផ្ទេរទៅកាន់ : </label>
+                  <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ transferItemDetail.warehouse_to }}</strong>
+                </div>
+              </div>
+            </div>
+            <b-table class="table table-striped table-bordered table-payment scroll-table-content" responsive style="z-index: 1;"
+                     sticky-header="true"
+                     :items="itemsProductDetail"
+                     :fields="fieldsProductDetail"
+                     head-variant="light"
+            >
+            </b-table>
+          </b-form>
+        </b-modal>
       </div>
     </div>
-  </div>
 
+
+  </div>
 </template>
 
 <script>
@@ -123,6 +165,7 @@ export default {
       handler(value){
         if(value === true){
           this.showContent = value;
+          console.log(this.listStockOut);
         }
       },
       deep: true,
@@ -146,9 +189,9 @@ export default {
         { key: 'date', label: 'ថ្ងៃខែផ្ទេរ'},
         { key: 'warehouse_from', label: 'ឃ្លាំងចាស់'},
         { key: 'warehouse_to', label: 'ឃ្លាំងផ្ទេរទៅកាន់'},
-        { key: 'product', label: this.$t('label_product_name') },
         { key: 'ref', label: ' Reference'},
-        { key: 'quantity', label: this.$t('label_quantity')},
+        { key: 'actions', label: this.$t('title_action')},
+
       ],
       transfer: {
         from_warehouse: null,
@@ -158,6 +201,13 @@ export default {
         ref: null
       },
       items: [],
+      itemsProductDetail: [],
+      transferItemDetail: {},
+      fieldsProductDetail: [
+        { key: 'number', label: 'លេខរៀង', thClass: "header-th", thStyle : "font-size: 17px;"},
+        { key: 'product', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 17px;"},
+        { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
+      ],
     }
   },
   methods: {
@@ -214,8 +264,85 @@ export default {
     },
     changeFilterDate(filterDate){
       this.$emit("changeFilterDate", {filterDate: filterDate});
-      //this.getAllOrderData(filterDate, (this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
-    }
+    },
+    async viewDataDetail(item){
+      let self = this;
+      this.transferItemDetail = item;
+      this.itemsProductDetail = [];
+      let dataDetailArray = [];
+      if(item.hasOwnProperty("ref")){
+        await self.$axios.post('/api/groupStockOut' ,{ref: item.ref} ).then(function (response) {
+          if(response && response.hasOwnProperty("data") && response.data){
+            if(response.data.length > 0){
+              let index = 0;
+              for (let itemDetail of response.data){
+                let productIdSelected = itemDetail["product_id"];
+                let data = {number: 0, product: null, qty: 0};
+                let productItem = null;
+                if(self.products && self.products.length > 0){
+                  for(let k=0; k < self.products.length; k++){
+                    if(productIdSelected === self.products[k].value){
+                      productItem = self.cloneObject(self.products[k]);
+                      break;
+                    }
+                  }
+                }
+
+                if(productItem){
+                  data.number = (index + 1);
+                  data.product = productItem.name;
+                  data.qty = parseInt(itemDetail["quantity"]);
+                  dataDetailArray.push(data);
+                }
+                index++;
+              }
+            }
+            self.itemsProductDetail = self.cloneObject(dataDetailArray);
+          }
+        }).catch(function (error) {
+          self.$toast.error("getting data error ").goAway(2000);
+          console.log(error);
+        });
+      }
+      /*
+      if(this.listStockOut && this.listStockOut.length > 0){
+        for(let index =0; index < this.listStockOut.length; index++){
+          if(this.listStockOut[index]["id"] === item.order_id){
+            dataDetailList = this.cloneObject(this.listStockOut[index]["products"]);
+            break;
+          }
+        }
+        if(dataDetailList && dataDetailList.length > 0){
+          for(let indexOrder = 0; indexOrder < dataDetailList.length; indexOrder++){
+            let productIdSelected = dataDetailList[indexOrder]["product_id"];
+            let data = {};
+            let productItem = null;
+
+            if(this.productList && this.productList.length > 0){
+              for(let k=0; k < this.productList.length; k++){
+                if(productIdSelected === this.productList[k].id){
+                  productItem = this.cloneObject(this.productList[k]);
+                  break;
+                }
+              }
+            }
+            if(productItem){
+              data["number"] = (indexOrder + 1);
+              data["product"] = productItem["product"];
+              data["qty"] = parseInt(dataDetailList[indexOrder]["quantity"]);
+              dataDetailArray.push(data);
+            }
+          }
+        }
+        this.itemsProductDetail = this.cloneObject(dataDetailArray);
+      }*/
+      this.$nextTick(() => {
+        this.$refs["modal-detail-transfer"].show();
+      });
+    },
+    cloneObject(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    },
   },
   mounted() {
   }
@@ -232,6 +359,7 @@ export default {
   .width-70-percentage{
     width: 70% !important;
   }
+
   @media (min-width: 1200px){
     .container-form {
       max-width: 1140px;

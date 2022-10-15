@@ -104,7 +104,7 @@
             </b-row>
             <b-row class="my-1">
               <div class="label-content-user"><label class="label-input">ជ្រើសរើសឃ្លាំងគោល</label></div>
-              <b-col sm="4"><b-form-select class="input-content font-size-15" v-model="user.warehouse_id" 
+              <b-col sm="4"><b-form-select class="input-content font-size-15" v-model="user.warehouse_id"
               :options="warehouses"></b-form-select></b-col>
             </b-row>
             <b-row>
@@ -220,6 +220,7 @@
                 item["address"] = data[index]["profile"]["address"];
                 item["birthdate"] = data[index]["profile"]["birthdate"];
                 item["profile_id"] = data[index]["profile"]["id"];
+                item["warehouse_id"] = data[index]["profile"]["warehouse_id"];
                 item["gender"] = data[index]["profile"]["gender"];
               }
               self.items.push(item);
@@ -234,23 +235,6 @@
         let formData = new FormData();
         let self = this, dataSubmit = {}, rolesId = [], dataSubmitProfile ={};
         let profileId = self.user.profile_id;
-        /*dataSubmit["name"] = (self.user["firstname"] + " " + self.user["lastname"]);
-        dataSubmit["password"] = self.user.password;
-        dataSubmit["email"] = self.user["email"];
-        dataSubmit["warehouse_id"] = self.user["warehouse_id"];
-
-        self.user["role"].forEach((value, index ) => {
-          rolesId.push(value["value"]);
-        });
-        dataSubmit["roles"] = rolesId;
-        dataSubmit["firstname"] = self.user["firstname"];
-        dataSubmit["lastname"] = self.user["lastname"];
-        dataSubmit["gender"] =  self.user["gender"];
-        dataSubmit["occupation"] = self.user["occupation"];
-        dataSubmit["phone"] =  self.user["phone"];
-        dataSubmit["birthdate"] =  self.user["birthdate"];
-        dataSubmit["address"] =  self.user["address"];*/
-        debugger;
         self.user["role"].forEach((value, index ) => {
           rolesId.push(value["value"]);
         });
@@ -274,25 +258,40 @@
           formData.append("_method", "PUT");
           self.$axios.post('/api/user/' + self.user.id, formData)
             .then(function (response) {
-              let dataReturn = response.data;
-              self.items.forEach((value, index ) => {
-                if(value.id === dataReturn.id){
-                  value["username"] = dataReturn["email"];
-                  value["name"] = dataReturn["name"];
-                  value["state"] = "Active";
-                  value["last_login"] = "";
-                  value["email"] = dataReturn["email"];
-                  value["id"] = dataReturn["id"];
-                  if (dataReturn.hasOwnProperty("roles") && dataReturn["roles"]["length"] > 0) {
-                    dataReturn.roles.forEach((valueRole, indexRole ) => {
-                      value["role"] = valueRole["id"];
-                      value["roles"] = valueRole["title"];
-                    });
+              self.$toast.success("Submit data successfully").goAway(2000);
+              let dataReturn = self.cloneObject(response.data);
+              if(dataReturn && dataReturn.hasOwnProperty("user") && dataReturn.user){
+                for(let item of self.items){
+                  if(item.id === dataReturn.user.id){
+                    item["username"] = dataReturn.user["email"];
+                    item["name"] = dataReturn.user["name"];
+                    item["state"] = "Active";
+                    item["last_login"] = "";
+                    item["email"] = dataReturn.user["email"];
+                    item["id"] = dataReturn.user["id"];
+                    if (dataReturn.hasOwnProperty("roles") && dataReturn["roles"]["length"] > 0) {
+                      dataReturn.roles.forEach((valueRole, indexRole ) => {
+                        item["role"] = valueRole["id"];
+                        item["roles"] = valueRole["title"];
+                      });
+                    }
+                    if(dataReturn.hasOwnProperty("profile") && dataReturn["profile"]){
+                      item["firstname"] = dataReturn["profile"]["firstname"];
+                      item["lastname"] = dataReturn["profile"]["lastname"];
+                      item["occupation"] = dataReturn["profile"]["occupation"];
+                      item["phone"] = dataReturn["profile"]["phone"];
+                      item["email"] = dataReturn["profile"]["email"];
+                      item["address"] = dataReturn["profile"]["address"];
+                      item["birthdate"] = dataReturn["profile"]["birthdate"];
+                      item["profile_id"] = dataReturn["profile"]["id"];
+                      item["warehouse_id"] = dataReturn["profile"]["warehouse_id"];
+                      item["gender"] = dataReturn["profile"]["gender"];
+                    }
                   }
                 }
-              });
+              }
             }).catch(function (error) {
-              self.$toast.success("Data is getting error").goAway(2000);
+              self.$toast.error("Data is getting error").goAway(2000);
               console.log(error);
             });
         }
@@ -300,7 +299,7 @@
           await self.$axios.post('/api/user', formData).then(function (response) {
             formData.append("user_id", response.data.user["id"]);
           }).catch(function (error) {
-            debugger;
+            //debugger;
             console.log(error);
             self.$toast.error("Submit data getting error").goAway(3000);
           });
@@ -361,8 +360,10 @@
         userObj["username"] = item.username;
         userObj["email"] = item.email;
         let rolesList = [];
-        for (let index=0; index < item["rolesList"].length; index++){
-          rolesList.push({name: item["rolesList"][index]['title'], value: item["rolesList"][index]['id']});
+        if(item && item.hasOwnProperty("rolesList") && item["rolesList"] && item["rolesList"].length){
+          for (let index=0; index < item["rolesList"].length; index++){
+            rolesList.push({name: item["rolesList"][index]['title'], value: item["rolesList"][index]['id']});
+          }
         }
         userObj["role"] = this.cloneObject(rolesList);
         userObj["firstname"] = item["firstname"];
@@ -373,6 +374,7 @@
         userObj["address"] = item["address"];
         userObj["birthdate"] = item["birthdate"];
         userObj["profile_id"] = item["profile_id"];
+        userObj["warehouse_id"] = item["warehouse_id"];
         userObj["gender"] = item["gender"];
         this.user = this.cloneObject(userObj);
         this.showModal();

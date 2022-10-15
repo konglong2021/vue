@@ -141,28 +141,21 @@ export default {
       self.isLoading = true;
       self.listDataStockOut = [];
       if(!$dateFilter){
-        await self.$axios.get('/api/stockout').then(function (response) {
+        await self.$axios.get('/api/groupStockOut').then(function (response) {
           self.isLoading = false;
           if(response && response.hasOwnProperty("data") && response.data){
             let data = response["data"];
-            let dataArray = Object.keys(data).map(key => {
-              return data[key];
-            });
-
-            if(dataArray && dataArray.length > 0){
-              for(let index=0; index < dataArray.length; index++){
-                let item = dataArray[index];
-                let dataItem = {warehouse_from: null, warehouse_to: null, product: null, quantity: 0, ref: null};
+            if(data && data.length > 0){
+              for(let index=0; index < data.length; index++){
+                let item = data[index];
+                let dataItem = {warehouse_from: null, warehouse_to: null, ref: null};
                 let date = "";
                 if(item && item.created_at){
                   date = moment(item.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
                 }
-
                 dataItem.warehouse_from = item.from_warehouse.name + " (" + item.from_warehouse.address + ") ";
                 dataItem.warehouse_to = item.to_warehouse.name + " (" + item.to_warehouse.address + ") ";
-                dataItem.product = item.product.en_name + " - " + item.product.kh_name + "( " + item.product.code + ") ";
                 dataItem.ref = item.ref;
-                dataItem.quantity = parseInt(item.quantity);
                 dataItem["date"] = date;
                 self.listDataStockOut.push(dataItem);
               }
@@ -174,7 +167,7 @@ export default {
         });
       }
       else {
-        await self.$axios.get('/api/stockout/' + $dateFilter).then(function (response) {
+        await self.$axios.get('/api/groupStockOut/' + $dateFilter).then(function (response) {
           self.isLoading = false;
           if(response && response.hasOwnProperty("data") && response.data){
             let data = response["data"];

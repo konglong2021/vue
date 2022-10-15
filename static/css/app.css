@@ -723,7 +723,7 @@ body {
 }
 .table-footer {
   width: 80%;
-  
+
 }
 .table-footer p {
   margin-top: 20px;
@@ -735,4 +735,8 @@ body {
 .rp-total {
   font-weight: bold;
   font-size: 20px;
+}
+#modal-detail-transfer .scroll-table-content{
+  overflow-y: scroll;
+  max-height: calc(100vh - 300px);
 }

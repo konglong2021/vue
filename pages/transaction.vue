@@ -532,6 +532,7 @@
                 self.items.push(itemData);
                 self.orderItemList.push(itemData);
               }
+              console.log(self.items);
             }
           }
         }).catch(function (error) {
