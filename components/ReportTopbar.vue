@@ -14,12 +14,12 @@
             <span><i class="fa fa-calendar-plus-o" aria-hidden="true"></i>  {{ $t('title_report_menu_daily') }}</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" style="display: none">
           <a href="/report-monthly">
             <span> <i class="fa fa-calendar" aria-hidden="true"></i>  {{ $t('title_report_menu_monthly') }}</span>
           </a>
         </li>
-        <li class="menu-text-item">
+        <li class="menu-text-item" style="display: none">
           <a href="/balance">
             <span> <i class="fa fa-money" aria-hidden="true"></i>  {{ $t('title_balance_balance') }}</span>
           </a>

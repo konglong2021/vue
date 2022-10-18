@@ -2,7 +2,7 @@
   <div class="display-inline-block full-with" v-show="cashBalance">
       <div style="padding: 10px"></div>
         <div class="scanning-input" >
-          <b-form-input v-model="scanningInput" class="input-scanning" 
+          <b-form-input v-model="scanningInput" class="input-scanning"
             @keyup.enter="searchAndSelectedProduct(scanningInput)"
             placeholder="បញ្ចូលបារកូដទំនិញ"
            autofocus ref="scanningInput" ></b-form-input>
@@ -111,7 +111,7 @@
                 <label :for="'input-customer'" class="label-input no-margin-bottom">ឈ្មោះអតិថិជន</label>
               </div>
               <div class="form-column-input">
-                <b-form-select class="form-control input-content" v-model="order.customer" :options="customers" 
+                <b-form-select class="form-control input-content" v-model="order.customer" :options="customers"
                 @change="updateCustomerSelected(order.customer)"></b-form-select>
               </div>
             </div>
@@ -154,8 +154,8 @@
                 <label :for="'input-getting-money-usd'" class="label-input no-margin-bottom">ទទួលទឹកប្រាក់ ($)</label>
               </div>
               <div class="form-column-input">
-                <b-form-input 
-                :id="'input-getting-money-usd'" 
+                <b-form-input
+                :id="'input-getting-money-usd'"
                 type="number" class="input-content" v-model="getting_money_usd"></b-form-input>
               </div>
             </div>
@@ -169,7 +169,7 @@
             </div>
           </div>
         </div>
-   
+
         <b-table table-class="table-payment"
                  :items="items"
                  :fields="fields"
@@ -580,7 +580,7 @@ export default {
           let self = this;
          await self.$axios.get('/api/product_by_barcode/'+scanningInput).then(function (response) {
           if( response.data.hasOwnProperty("data")) {
-            debugger;
+            //debugger;
             let data = response.data;
             if( data.success){
             let product = data.data;
@@ -591,7 +591,7 @@ export default {
                 img : (product.image !== "no image" && product.image !== "no image created" ) ? self.generateImageUrlDisplay(product.image) : "images/no_icon.png",
                 code : product.code
               };
-   
+
                 self.$emit('selectProduct', productItem);
 
             }
@@ -604,7 +604,7 @@ export default {
                 self.$toast.error( data.message).goAway(2000);
               }
             }
-            
+
           }
           else{
             self.$toast.error("Not found data property"),goAway(2000);
@@ -780,7 +780,7 @@ export default {
     self.getCustomerList();
     self.$root.$on('print-receipt',()=>{
         self.items = self.cloneObject( self.products);
-        debugger
+        //debugger
         self.printInvoice();
     });
   },

@@ -25,7 +25,7 @@
       </div>
       <div class="product-list-body">
         <div class="scanning-input" >
-          <b-form-input v-model="scanningInput" class="input-scanning" 
+          <b-form-input v-model="scanningInput" class="input-scanning"
             @keyup.enter="searchAndSelectedProduct(scanningInput)"
            autofocus ref="scanningInput" ></b-form-input>
         </div>
@@ -231,7 +231,7 @@
             let productItem = this.products[index];
             if(productItem["code"] === scanningInput || productItem["name"] === scanningInput){
               foundItem = true;
-              debugger;
+              //debugger;
               this.$emit('selectProduct', productItem);
               this.scanningInput = null;
               break;

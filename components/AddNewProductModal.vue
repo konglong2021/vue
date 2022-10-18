@@ -125,13 +125,10 @@
         deep: true,
         handler: function(selectedProduct){
           this.product = selectedProduct;
-          //this.product['category'] = this.filterCategoriesData(selectedProduct["category_id"]);
         }
       }
     },
     mounted(){
-      //this.getBrands();
-      //this.getCategories();
     },
     methods: {
       checkForm: function (e) {

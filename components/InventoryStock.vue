@@ -51,13 +51,18 @@
           head-variant="light"
         >
           <template #cell(import_price)="row">
-            <b-form-input ref="inputImportPrice" type="number" class="input-content" v-bind:class="'content-input-import_price-'+row.item.id" v-model="row.item.import_price" :autofocus="true"></b-form-input>
+            <b-form-input :ref="'inputImportPrice' + row.item.id" type="number" class="input-content" v-bind:class="'content-input-import_price-'+row.item.id" v-model="row.item.import_price"></b-form-input>
           </template>
           <template #cell(sale_price)="row">
-            <b-form-input ref="inputSalePrice" type="number" class="input-content" v-bind:class="'content-input-sale_price-'+row.item.id" v-model="row.item.sale_price" :autofocus="true"></b-form-input>
+            <b-form-input :ref="'inputSalePrice'  + row.item.id" type="number" class="input-content" v-bind:class="'content-input-sale_price-'+row.item.id" v-model="row.item.sale_price"></b-form-input>
           </template>
           <template #cell(qty)="row">
-            <b-form-input ref="inputQty" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" :autofocus="true"></b-form-input>
+            <b-form-input :ref="'inputQty'  + row.item.id" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty"></b-form-input>
+          </template>
+          <template #cell(action)="row">
+            <b-button size="md" class="btn-no-background-danger" @click="removeProductFromListOfOrder(row.item,  $event.target)">
+              <i class="fa fa-trash"></i>
+            </b-button>
           </template>
         </b-table>
       </div>
@@ -125,6 +130,7 @@ export default {
         { key: 'import_price', label: this.$t('import_price') + ' ($)'},
         { key: 'sale_price', label: this.$t('label_sale_price') + ' ($)'},
         { key: 'qty', label: 'ចំនួន'},
+        { key: 'action', label: this.$t('title_action')},
       ],
     }
   },
@@ -168,6 +174,9 @@ export default {
           itemsData.unshift(productItem);
         }
         this.productItems = this.cloneObject(itemsData);
+        this.$nextTick(() => {
+          this.$refs['inputImportPrice'+ productItem.id].focus();
+        });
       }
       this.$forceUpdate();
     },
@@ -194,12 +203,19 @@ export default {
     addProductToListPurchase(){
 
     },
-
+    removeProductFromListOfOrder(item, $eventTarget){
+      let productFound = this.productItems.find(productItem => productItem.id === item.id);
+      let index = this.productItems.indexOf(productFound);
+      if(index > -1){
+        this.productItems.splice(index, 1);
+      }
+    },
     cloneObject(obj) {
       return JSON.parse(JSON.stringify(obj));
     },
   },
-
+  mounted() {
+  }
 }
 </script>
 
