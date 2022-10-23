@@ -1,30 +1,37 @@
 <template>
   <div>
-    <div class="main-inventory" v-if="!isLoading">
-      <report-topbar/>
+    <div class="main-report" v-if="!isLoading">
+      <report-topbar />
       <Nuxt />
     </div>
     <loading v-if="isLoading"></loading>
   </div>
 </template>
 <script>
-  export default {
-    data(){
-      return {
-        isLoading: true,
-      }
-    },
-    mounted() {
-      let self = this;
-      setTimeout(function(){
-        self.isLoading = false;
-      }, 500);
+export default {
+  data() {
+    return {
+      isLoading: true,
     }
+  },
+  mounted() {
+    let self = this;
+    setTimeout(function () {
+      self.isLoading = false;
+    }, 500);
   }
+}
 </script>
 <style>
-  .main-inventory{
-    background-color: #eff3f6;
-       height: 100vh;
-  }
+.main-report {
+  background-color: #868686;
+  padding-bottom: 20px;
+}
+
+.report-content {
+  font-family: Arial, "Khmer", sans-serif;
+  min-height: calc(100vh - 40px);
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
 </style>

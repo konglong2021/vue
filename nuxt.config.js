@@ -70,6 +70,7 @@ export default {
     middleware: ['local-auth', 'check-auth']
   },
   plugins: [
+    '~/plugins/util',
     '~/plugins/axios',
     '~/plugins/vue-input-mask',
     '~/plugins/number-only',
@@ -83,7 +84,7 @@ export default {
     '~/plugins/input-text-sentence-case',
     '~/plugins/focus',
     '~/plugins/can',
-    '~/plugins/util',
+   
   ],
 
   axios: {
