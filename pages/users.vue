@@ -16,7 +16,7 @@
                       <input class="form-control input-search-box" type="search" placeholder="ស្វែងរក...."/>
                     </div>
                   </b-col>
-                  <div class="btn-wrapper" v-can="'user_create'">
+                  <div v-can="'user_create'" class="btn-wrapper" >
                     <b-button href="#"  title="Add new Category" size="sm" variant="primary"
                               @click="showModal()">
                       បង្កើត អ្នកប្រើប្រាស់ថ្មី

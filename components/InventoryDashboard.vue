@@ -252,8 +252,9 @@ export default {
   data() {
     return {
       warehouse_id: null,
-      perPage: 9,
-      currentPage: 1,
+      currentPage: 0,
+      perPage: 10,
+      totalItems: 0,
       stockTransfer: { show: false },
       newProductModal: { showModal: false },
       purchaseModal: { show: false },
@@ -369,6 +370,13 @@ export default {
       handler(val) {
       }
     },
+    currentPage: {
+      handler: function(value) {
+        // this.fetchData().catch(error => {
+        //   console.error(error)
+        // })
+      }
+    }
   },
   computed: {
   },

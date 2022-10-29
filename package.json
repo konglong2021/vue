@@ -27,6 +27,7 @@
     "inputmask-core": "^2.2.0",
     "jquery": "^3.6.0",
     "jsbarcode": "^3.11.5",
+    "laravel-permissions": "^1.5.3",
     "nuxt": "^2.15.7",
     "nuxt-material-design-icons": "^1.0.4",
     "nuxt-vue-multiselect": "^1.0.4",

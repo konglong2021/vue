@@ -72,6 +72,7 @@ export default {
   plugins: [
     '~/plugins/util',
     '~/plugins/axios',
+    // '~/plugins/laravel-permissions',
     '~/plugins/vue-input-mask',
     '~/plugins/number-only',
     '~/plugins/vee-validate',
