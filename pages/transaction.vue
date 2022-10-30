@@ -50,38 +50,36 @@
             <div class="content-loading" v-if="isLoading">
               <div class="spinner-grow text-muted"></div>
             </div>
-            <div class="card" v-if="!isLoading">
-              <div class="card-body">
-                <div v-if="items">
-                  <div class="table-responsive" v-if="items.length > 0">
-                    <b-table id="my-table-stock" class="table table-striped table-bordered"
-                             v-if="items"
-                             :items="items"
-                             :fields="itemsFields"
-                             responsive
-                             head-variant="light"
-                    >
-                      <template #cell(status)="row">
-                        <div v-html="row.item.status"></div>
-                      </template>
-                      <template #cell(actions)="row">
-                        <b-button v-can="'pos_access'" size="sm" title="View data" class="btn-no-background" @click="viewOrderData(row.item)">
-                          <i class="fa fa-eye"></i>
-                        </b-button>
-                        <b-button v-can="'pos_edit'" size="sm" title="Edit order data" class="btn-no-background" @click="UpdateOrderData(row.item,  $event.target)">
-                          <i class="fa fa-edit"></i>
-                        </b-button>
-                        <b-button v-can="'pos_delete'" size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemoveOrder(row.item)">
-                          <i class="fa fa-trash"></i>
-                        </b-button>
-                      </template>
-                    </b-table>
-                  </div>
-                  <h3 class="text-center color-info" v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
-                  <div class="content-detail">
-                    <h5 v-if="product_select">ចំនួនលក់សរុបទាំងអស់ : {{ sumAllSaleProduct(items) }}</h5>
-                    <h5 v-if="product_select">សរុបទឹកប្រាក់ទាំងអស់ : {{ sumAllPriceSaleProduct(items) + "$"}}</h5>
-                  </div>
+            <div class="content-table-data" v-if="!isLoading">
+              <div v-if="items">
+                <div class="table-responsive" v-if="items.length > 0">
+                  <b-table id="my-table-stock" class="table table-striped table-bordered"
+                           v-if="items"
+                           :items="items"
+                           :fields="itemsFields"
+                           responsive
+                           head-variant="light"
+                  >
+                    <template #cell(status)="row">
+                      <div v-html="row.item.status"></div>
+                    </template>
+                    <template #cell(actions)="row">
+                      <b-button v-can="'pos_access'" size="sm" title="View data" class="btn-no-background" @click="viewOrderData(row.item)">
+                        <i class="fa fa-eye"></i>
+                      </b-button>
+                      <b-button v-can="'pos_edit'" size="sm" title="Edit order data" class="btn-no-background" @click="UpdateOrderData(row.item,  $event.target)">
+                        <i class="fa fa-edit"></i>
+                      </b-button>
+                      <b-button v-can="'pos_delete'" size="sm" title="Remove order data" class="btn-no-background-danger" @click="openConfirmToRemoveOrder(row.item)">
+                        <i class="fa fa-trash"></i>
+                      </b-button>
+                    </template>
+                  </b-table>
+                </div>
+                <h3 class="text-center color-info" v-if="items.length === 0">មិនមានទិន្នន័យនៃការលក់ទេ</h3>
+                <div class="content-detail">
+                  <h5 v-if="product_select">ចំនួនលក់សរុបទាំងអស់ : {{ sumAllSaleProduct(items) }}</h5>
+                  <h5 v-if="product_select">សរុបទឹកប្រាក់ទាំងអស់ : {{ sumAllPriceSaleProduct(items) + "$"}}</h5>
                 </div>
               </div>
             </div>
@@ -1205,6 +1203,12 @@
   }
   .content-table-scroll-stock{
     max-height: calc(100vh - 300px);
+  }
+  .content-table-data{
+    display: inline-block;
+    width: 100%;
+    overflow-y: auto;
+    max-height: calc(100vh - 255px);
   }
 
 </style>
