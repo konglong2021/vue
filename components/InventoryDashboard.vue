@@ -83,16 +83,17 @@
               </b-table>
             </div>
             <div class="full-content" v-if="stockTransfer.show === false">
-              <div class="card">
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <b-table id="my-table-stock" class="table table-striped table-bordered content-table-scroll-stock"
-                      v-if="!loadingFields.stockLoading && isShowStockTable" sticky-header="true" :items="stockItems"
-                      :fields="stockFields" head-variant="light">
-                    </b-table>
-                  </div>
+              <div class="content-table-data" v-if="!isLoading">
+                <div class="table-responsive">
+                  <b-table id="table-stock" class="table table-striped table-bordered"
+                           v-if="!loadingFields.stockLoading && isShowStockTable"
+                           :items="stockItems"
+                           :fields="stockFields"
+                           head-variant="light">
+                  </b-table>
                 </div>
               </div>
+              <b-pagination align="right" style="margin-top: 10px !important;" size="md" :disabled="loadingFields.stockLoading || !isShowStockTable" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
             </div>
           </div>
           <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
@@ -252,8 +253,9 @@ export default {
   data() {
     return {
       warehouse_id: null,
-      perPage: 9,
       currentPage: 1,
+      perPage: 10,
+      totalItems: 0,
       stockTransfer: { show: false },
       newProductModal: { showModal: false },
       purchaseModal: { show: false },
@@ -369,6 +371,12 @@ export default {
       handler(val) {
       }
     },
+    currentPage: {
+      handler: function(value) {
+        this.currentPage = value ? value : 1;
+        this.showStockTable();
+      }
+    }
   },
   computed: {
   },
@@ -379,7 +387,7 @@ export default {
       self.productListOptionForTransfer = [];
 
       await self.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))).then(function (response) {
-        if (response && response.hasOwnProperty("data")) {
+        if (response && response.hasOwnProperty("data") && response) {
           let dataResponse = response.data;
           if (dataResponse && dataResponse.length > 0) {
             for (let i = 0; i < dataResponse.length; i++) {
@@ -426,11 +434,11 @@ export default {
       let vm = this;
       vm.stockItems = [];
       vm.loadingFields.stockLoading = true;
-      vm.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')))
+      vm.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')) + "?page=" + vm.currentPage)
         .then(function (response) {
-          if (response.data) {
+          if (response.data && response.data.hasOwnProperty("data")) {
             vm.loadingFields.stockLoading = false;
-            let dataStock = response.data;
+            let dataStock = response.data.data;
             if (dataStock && dataStock.length > 0) {
               for (let i = 0; i < dataStock.length; i++) {
                 vm.stock = {};
@@ -448,6 +456,8 @@ export default {
               let dataForSort = vm.cloneObject(vm.stockItems);
               vm.stockItems.sort(vm.sortByName);
             }
+            vm.totalItems = response.data.total;
+            vm.perPage = response.data.per_page;
           }
         })
         .catch(function (error) {
@@ -1002,11 +1012,10 @@ export default {
       let self = this;
       self.stockItems = [];
       self.loadingFields.stockLoading = true;
-      console.log(self.warehouse, 'warehouse_id');
-      await self.$axios.post('/api/stock/search', { search: self.searchInput, warehouse_id: self.warehouse }).then(function (response) {
+      await self.$axios.post('/api/stock/search', { search: self.searchInput, warehouse_id: self.warehouse, page: self.currentPage }).then(function (response) {
         if (response.data) {
           self.loadingFields.stockLoading = false;
-          let dataStock = response.data;
+          let dataStock = response.data.data;
           if (dataStock && dataStock.length > 0) {
             for (let i = 0; i < dataStock.length; i++) {
               self.stock = {};
@@ -1097,5 +1106,11 @@ export default {
 
 .content-table-scroll-stock {
   max-height: calc(100vh - 300px);
+}
+.content-table-data{
+  display: inline-block;
+  width: 100%;
+  overflow-y: auto;
+  max-height: calc(100vh - 295px);
 }
 </style>
