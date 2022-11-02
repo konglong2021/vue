@@ -84,7 +84,9 @@
               </div>
             </div>
           </div>
-          <b-pagination align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
+          <div v-if="!filterDate && (!customer_select || (customer_select && !customer_select.value))" class="display-inline-block full-with">
+            <b-pagination align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
+          </div>
         </div>
       </div>
       <div id="invoice-print-pos-again" style="padding-left: 15px!important; display: none; width: 95%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
@@ -486,63 +488,70 @@
         self.isLoading = true;
         self.items = [];
         let api = ($filterDate ? ("/saletoday/" + $filterDate) : ("/salebywarehouse"));
-        let fullApi = (api + ("/" + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))) + "?page=" + self.currentPage);
+        let fullApi = (api + ("/" + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))) + ($filterDate== null ? ("?page=" + self.currentPage) : ""));
         await self.$axios.get('/api' + fullApi).then(function (response) {
           self.isLoading = false;
-          if(response && response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")){
-            self.orders = response.data.data;
-            self.orderList = self.cloneObject(response.data.data);
-            if(self.orders.length > 0){
-              for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
-                let orderItem = self.orders[indexOrder];
-                let date = "";
-                if(orderItem && orderItem.created_at){
-                  date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
-                }
+          if($filterDate){
+            self.orders = response.data;
+            self.orderList = self.cloneObject(response.data);
+          }
+          else {
+            if(response && response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")){
+              self.orders = response.data.data;
+              self.orderList = self.cloneObject(response.data.data);
 
-                let customerItem = self.filterDataCustomerList(orderItem.customer_id);
-                let user = self.cloneObject(self.$store.$cookies.get('user'));
-                let itemData = [];
-                let grandtotal = 0;
-                let subtotal = 0;
-                let status_code = 'pending';
-
-                for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
-                  let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
-
-                  subtotal = subtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                  if(orderItem["discount"] > 0){
-                    let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                    grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
-                  }
-                  else {
-                    grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                  }
-                }
-
-                itemData["subtotal"] = subtotal.toFixed(2);
-                itemData["grandtotal"] = grandtotal.toFixed(2);
-                itemData["date"] = date;
-                itemData["order_id"] = orderItem.id;
-                itemData["sale_by"] = user.name;
-                if(customerItem){
-                  itemData["customer"] = customerItem["name"];
-                }
-                itemData["invoice_id"] = orderItem["invoice_id"];
-                itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-                itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
-                itemData["receive"] = orderItem["receive"];
-                itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
-                if(parseFloat(itemData["receive"]) === grandtotal){
-                  status_code = 'complete';
-                }
-                itemData["status_code"] = status_code;
-                self.items.push(itemData);
-                self.orderItemList.push(itemData);
-              }
-              self.totalItems = response.data.total;
-              self.perPage = response.data.per_page;
             }
+          }
+          if(self.orders.length > 0){
+            for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
+              let orderItem = self.orders[indexOrder];
+              let date = "";
+              if(orderItem && orderItem.created_at){
+                date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+              }
+
+              let customerItem = self.filterDataCustomerList(orderItem.customer_id);
+              let user = self.cloneObject(self.$store.$cookies.get('user'));
+              let itemData = [];
+              let grandtotal = 0;
+              let subtotal = 0;
+              let status_code = 'pending';
+
+              for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
+                let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
+
+                subtotal = subtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                if(orderItem["discount"] > 0){
+                  let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                  grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
+                }
+                else {
+                  grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                }
+              }
+
+              itemData["subtotal"] = subtotal.toFixed(2);
+              itemData["grandtotal"] = grandtotal.toFixed(2);
+              itemData["date"] = date;
+              itemData["order_id"] = orderItem.id;
+              itemData["sale_by"] = user.name;
+              if(customerItem){
+                itemData["customer"] = customerItem["name"];
+              }
+              itemData["invoice_id"] = orderItem["invoice_id"];
+              itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
+              itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
+              itemData["receive"] = orderItem["receive"];
+              itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
+              if(parseFloat(itemData["receive"]) === grandtotal){
+                status_code = 'complete';
+              }
+              itemData["status_code"] = status_code;
+              self.items.push(itemData);
+              self.orderItemList.push(itemData);
+            }
+            self.totalItems = response.data.total;
+            self.perPage = response.data.per_page;
           }
         }).catch(function (error) {
           console.log(error);
@@ -1019,29 +1028,41 @@
       },
       selectionChangeCustomer($obj){
         if($obj){
-          this.items = [];
-          let orderItems = [];
-          this.isLoading = true;
-          if(this.orders && this.orders.length > 0) {
-            this.isLoading = false;
-            for (let index = 0; index < this.orders.length; index++) {
-              let itemOrder = {};
+          this.filterOrderDataByCustomer($obj["value"]);
+        }
+        else {
+          this.getAllOrderData();
+        }
+        this.$forceUpdate();
+      },
+      async filterOrderDataByCustomer($customerId){
+        let self = this;
+        self.isLoading = true;
+        self.items = [];
+        await self.$axios.get('/api/saleByWarehouseAndUser/' + $customerId + "/" + self.$store.$cookies.get('storeItem')).then(function (response) {
+          self.isLoading = false;
+            if(response && response.hasOwnProperty('data') && response.data.hasOwnProperty("data")){
+              self.orders = response.data.data;
+              self.orderList = self.cloneObject(response.data.data);
+              if(self.orders.length > 0){
+                for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
+                  let orderItem = self.orders[indexOrder];
+                  let date = "";
+                  if(orderItem && orderItem.created_at){
+                    date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+                  }
 
-              let orderItem = this.orders[index];
-              let customer = this.customersList.find(customer => customer.id === orderItem.customer_id);
-              if (customer && customer["id"] === $obj["value"]) {
-                let date = "";
-                if(orderItem && orderItem.created_at){
-                  date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
-                }
+                  let customerItem = self.filterDataCustomerList(orderItem.customer_id);
+                  let user = self.cloneObject(self.$store.$cookies.get('user'));
+                  let itemData = [];
+                  let grandtotal = 0;
+                  let subtotal = 0;
+                  let status_code = 'pending';
 
-                let customerItem = this.filterDataCustomerList(orderItem.customer_id);
-                let user = this.cloneObject(this.$store.$cookies.get('user'));
-                let grandtotal = 0;
-                if (orderItem.hasOwnProperty("orderdetails") && orderItem.orderdetails.length > 0) {
-                  for (let indexOrderDetail = 0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++) {
+                  for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
                     let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
 
+                    subtotal = subtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                     if(orderItem["discount"] > 0){
                       let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                       grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
@@ -1050,29 +1071,33 @@
                       grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                     }
                   }
+
+                  itemData["subtotal"] = subtotal.toFixed(2);
+                  itemData["grandtotal"] = grandtotal.toFixed(2);
+                  itemData["date"] = date;
+                  itemData["order_id"] = orderItem.id;
+                  itemData["sale_by"] = user.name;
+                  if(customerItem){
+                    itemData["customer"] = customerItem["name"];
+                  }
+                  itemData["invoice_id"] = orderItem["invoice_id"];
+                  itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
+                  itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
+                  itemData["receive"] = orderItem["receive"];
+                  itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
+                  if(parseFloat(itemData["receive"]) === grandtotal){
+                    status_code = 'complete';
+                  }
+                  itemData["status_code"] = status_code;
+                  self.items.push(itemData);
+                  self.orderItemList.push(itemData);
                 }
-                itemOrder["order_id"] = orderItem.id;
-                itemOrder["sale_by"] = user.name;
-                if (customerItem) {
-                  itemOrder["customer"] = customerItem["name"];
-                }
-                itemOrder["invoice_id"] = orderItem["invoice_id"];
-                itemOrder["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-                itemOrder["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
-                itemOrder["grandtotal"] = grandtotal.toFixed(2);
-                itemOrder["receive"] = orderItem["receive"];
-                itemOrder["status"] = parseFloat(orderItem["receive"]) === parseFloat(orderItem["grandtotal"]) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
-                itemOrder["status_code"] = parseFloat(orderItem["receive"]) === parseFloat(orderItem["grandtotal"]) ? "complete" : "pending";
-                orderItems.push(itemOrder);
               }
             }
-          }
-          this.items = this.cloneObject(orderItems);
-        }
-        else {
-          this.getAllOrderData();
-        }
-        this.$forceUpdate();
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
       },
       selectedStatusSale(status_select){
         this.items = this.orderItemList.filter(data=> data.status_code === status_select);
