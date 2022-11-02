@@ -70,13 +70,8 @@ export default {
 
           self.$store.commit('auth/setToken', token);
           self.$store.commit('auth/setUser', user);
-          if(response.data && response.data.hasOwnProperty('permission') && response.data.permission){
-              let permission = response.data.permission;
-              let permissions = [];
-              for (let index=0; index< permission.permissions.length;index++){
-                  permissions.push(permission.permissions[index]["title"]);
-              }
-              self.$store.commit('auth/setPermissions', permissions);
+          if(response && response.data && response.data.hasOwnProperty('permissions') && response.data.permissions.length > 0){
+            self.$store.commit('auth/setPermissions', response.data.permissions);
           }
           if(user && user.hasOwnProperty("profile") && user.profile && user.profile.warehouse_id){
             self.$store.commit('auth/setStoreItem', user.profile.warehouse_id);

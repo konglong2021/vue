@@ -83,7 +83,7 @@
               </b-table>
             </div>
             <div class="full-content" v-if="stockTransfer.show === false">
-              <div class="content-table-data" v-if="!isLoading">
+              <div class="content-table-data">
                 <div class="table-responsive">
                   <b-table id="table-stock" class="table table-striped table-bordered"
                            v-if="!loadingFields.stockLoading && isShowStockTable"
@@ -1007,7 +1007,6 @@ export default {
       }
     },
     async searchStock() {
-      this.isLoading = true;
       this.items = [];
       let self = this;
       self.stockItems = [];
@@ -1027,9 +1026,10 @@ export default {
               self.stock.code = product["code"];
               self.stock.image = product["image"];
               self.stock.sale_price = product["sale_price"].toString();
-              //self.stockItems.push(self.stock);
               self.stockItems.unshift(self.stock);
             }
+            self.totalItems = response.data.total;
+            self.perPage = response.data.per_page;
           }
         }
       }).catch(function (error) {
