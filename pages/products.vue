@@ -315,7 +315,7 @@
                   let month = (mm < 10) ? ('0' + mm) : mm;
                   let yyyy = createdDate.getFullYear();
                   itemData["date"] = (day + "/" + month + "/" + yyyy);
-                  itemData["no"] = index;
+                  itemData["no"] = (index + 1);
                   itemData["quantity"] = item["quantity"];
                   itemData["unitprice"] = item["unitprice"];
                   purchaseDetails.push(itemData);
