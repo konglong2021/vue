@@ -64,6 +64,7 @@
                 <!-- check this url : https://bootstrap-vue.org/docs/components/table#tables -->
               </b-table>
             </div>
+            <b-pagination align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
           </div>
           <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="numberPrint > 0" :id="'barcode-' + barcodeItem.code">
             <div v-if="barcodeItem.code.length > 12">
@@ -88,41 +89,59 @@
           title="Product View" title-class="text-center mx-auto" hide-footer
         >
           <b-form enctype="multipart/form-data" v-if="productView !== null && productView !== undefined">
-            <div class="product-data data">
-              <b-row class="my-1">
-                <b-col sm="4"><label :for="'input-enname'" class="label-input label-margin-top">ឈ្មោះទំនិញជាអង់គ្លេស</label></b-col>
-                <b-col sm="4">
-                  <b-form-input :id="'input-enname'" type="text" v-model="productView.en_name" class="input-content input-no-background" disabled></b-form-input>
-                </b-col>
-              </b-row>
-              <b-row class="my-1">
-                <b-col sm="4"><label :for="'input-khname'" class="label-input label-margin-top">ឈ្មោះទំនិញជាខ្មែរ</label></b-col>
-                <b-col sm="4">
-                  <b-form-input :id="'input-khname'" type="text" v-model="productView.kh_name" class="input-content input-no-background" disabled></b-form-input>
-                </b-col>
-              </b-row>
-              <b-row class="my-1">
-                <b-col sm="4"><label :for="'input-category'" class="label-input label-margin-top">ប្រភេទទំនិញ</label></b-col>
-                <b-col sm="4">
-                  <b-form-input :id="'input-category'" class="input-content input-no-background" v-model="productView.category" disabled></b-form-input>
-                </b-col>
-              </b-row>
-              <b-row class="my-1">
-                <b-col sm="4"><label :for="'input-sale_price'" class="label-input label-margin-top">តម្លៃលក់</label></b-col>
-                <b-col sm="4">
-                  <b-form-input :id="'input-sale_price'" type="number" class="input-content input-no-background" v-model="productView.sale_price" disabled></b-form-input>
-                </b-col>
-              </b-row>
-              <b-row class="my-1">
-                <b-col sm="4"><label :for="'input-description'" class="label-input label-margin-top">ការពិពណ៌នា</label></b-col>
-                <b-col sm="4">
-                  <b-form-textarea :id="'input-description'" class="input-content input-no-background" v-model="productView.description" disabled></b-form-textarea>
-                </b-col>
-              </b-row>
-            </div>
-            <div v-if="productView.image !== null" class="product-data image">
-              <div class="pro-item">
-                <img :src="generateImageUrlDisplay(productView.image)">
+           <div style="display: inline-block; width: 100%;">
+             <div class="product-data data">
+               <b-row class="my-1">
+                 <b-col sm="4"><label :for="'input-enname'" class="label-input label-margin-top">ឈ្មោះទំនិញជាអង់គ្លេស</label></b-col>
+                 <b-col sm="4">
+                   <b-form-input :id="'input-enname'" type="text" v-model="productView.en_name" class="input-content input-no-background" disabled></b-form-input>
+                 </b-col>
+               </b-row>
+               <b-row class="my-1">
+                 <b-col sm="4"><label :for="'input-khname'" class="label-input label-margin-top">ឈ្មោះទំនិញជាខ្មែរ</label></b-col>
+                 <b-col sm="4">
+                   <b-form-input :id="'input-khname'" type="text" v-model="productView.kh_name" class="input-content input-no-background" disabled></b-form-input>
+                 </b-col>
+               </b-row>
+               <b-row class="my-1">
+                 <b-col sm="4"><label :for="'input-category'" class="label-input label-margin-top">ប្រភេទទំនិញ</label></b-col>
+                 <b-col sm="4">
+                   <b-form-input :id="'input-category'" class="input-content input-no-background" v-model="productView.category" disabled></b-form-input>
+                 </b-col>
+               </b-row>
+               <b-row class="my-1">
+                 <b-col sm="4"><label :for="'input-sale_price'" class="label-input label-margin-top">តម្លៃលក់</label></b-col>
+                 <b-col sm="4">
+                   <b-form-input :id="'input-sale_price'" type="number" class="input-content input-no-background" v-model="productView.sale_price" disabled></b-form-input>
+                 </b-col>
+               </b-row>
+               <b-row class="my-1">
+                 <b-col sm="4"><label :for="'input-description'" class="label-input label-margin-top">ការពិពណ៌នា</label></b-col>
+                 <b-col sm="4">
+                   <b-form-textarea :id="'input-description'" class="input-content input-no-background" v-model="productView.description" disabled></b-form-textarea>
+                 </b-col>
+               </b-row>
+             </div>
+             <div v-if="productView.image !== null" class="product-data image">
+               <div class="pro-item">
+                 <img :src="generateImageUrlDisplay(productView.image)">
+               </div>
+             </div>
+           </div>
+
+            <div style="display: inline-block; width: 100%;">
+              <div class="content-loading" v-if="isLoadingPurchaseDetail">
+                <div class="spinner-grow text-muted"></div>
+              </div>
+              <div v-if="!isLoadingPurchaseDetail">
+                <b-table
+                  class="content-table-scroll-product"
+                  id="tableau"
+                  sticky-header="true"
+                  :items="purchaseDetails"
+                  :fields="fieldsPurchaseDetail"
+                  head-variant="light"
+                ></b-table>
               </div>
             </div>
           </b-form>
@@ -166,8 +185,9 @@
           showModal: false,
         },
         searchInput: null,
-        perPage: 3,
         currentPage: 1,
+        perPage: 10,
+        totalItems: 0,
         items: [],
         fields: [
           {key: 'name', label: this.$t('label_name')},
@@ -189,10 +209,17 @@
         responseProductList: [],
         brandList: [],
         productView: {},
-        totalRows: 0,
         numberPrint: 0,
         barcodeItem: null,
         barcodeListToPrint: [],
+        purchaseDetails: [],
+        fieldsPurchaseDetail: [
+          {key: 'no', label: this.$t('label_no')},
+          {key: 'date', label: this.$t('label_date_sale'),},
+          {key: 'quantity', label: this.$t('label_quantity')},
+          {key: 'unitprice', label: this.$t('label_unit_price') + " ($)"},
+          ],
+        isLoadingPurchaseDetail: false,
       }
     },
     watch: {
@@ -203,6 +230,7 @@
       },
       currentPage: {
         handler: function (value) {
+          this.currentPage = value ? value : 1;
           this.getListProducts().catch(error => {
             console.error(error)
           });
@@ -213,46 +241,46 @@
       async getListProducts() {
         let self = this;
         self.isLoading = true;
-        await self.$axios.get('/api/product').then(function (response) {
-        if (response.hasOwnProperty("data")) {
-          self.isLoading = false;
-          let items = [];
-          self.responseProductList = response.data;
-          for (let index = 0; index < response.data.length; index++) {
-            let productItem = response.data[index];
-            let newItem = {};
-            let brands = [];
-            if (productItem["brands"] && productItem["brands"].length > 0) {
-              for (let i = 0; i < productItem["brands"].length; i++) {
-                brands.push(productItem["brands"][i]["name"]);
+        await self.$axios.get('/api/product/1' + ("?page=" + self.currentPage)).then(function (response) {
+          if (response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")) {
+            self.isLoading = false;
+            let items = [];
+            self.responseProductList = response.data.data;
+            for (let index = 0; index < response.data.data.length; index++) {
+              let productItem = response.data.data[index];
+              let newItem = {};
+              let brands = [];
+              if (productItem["brands"] && productItem["brands"].length > 0) {
+                for (let i = 0; i < productItem["brands"].length; i++) {
+                  brands.push(productItem["brands"][i]["name"]);
+                }
               }
+              newItem['id'] = productItem["id"];
+              newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
+              newItem['brand'] = brands.join(", ");
+              newItem['loyalty'] = "N/A";
+              newItem['image'] = productItem["image"];
+              newItem['brands'] = productItem["brands"];
+              if (productItem.hasOwnProperty("categories")) {
+                newItem['category_name'] = productItem["categories"]["name"];
+                newItem["categories"] = self.cloneObject(productItem["categories"]);
+              }
+              newItem['description'] = productItem["description"];
+              newItem['sale_price'] = productItem["sale_price"];
+              newItem['code'] = productItem["code"];
+              newItem["en_name"] = productItem["en_name"];
+              newItem["kh_name"] = productItem["kh_name"];
+              items.push(newItem);
             }
-            newItem['id'] = productItem["id"];
-            newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
-            newItem['brand'] = brands.join(", ");
-            newItem['loyalty'] = "N/A";
-            newItem['image'] = productItem["image"];
-            newItem['brands'] = productItem["brands"];
-
-            if (productItem.hasOwnProperty("categories")) {
-              newItem['category_name'] = productItem["categories"]["name"];
-              newItem["categories"] = self.cloneObject(productItem["categories"]);
-            }
-            newItem['description'] = productItem["description"];
-            newItem['sale_price'] = productItem["sale_price"];
-            newItem['code'] = productItem["code"];
-            newItem["en_name"] = productItem["en_name"];
-            newItem["kh_name"] = productItem["kh_name"];
-            items.push(newItem);
+            self.items = self.cloneObject(items);
+            self.items.sort(self.sortByName);
+            self.totalItems = response.data.total;
+            self.perPage = response.data.per_page;
           }
-          self.items = self.cloneObject(items);
-          self.items.sort(self.sortByName);
-        }
-        })
-          .catch(function (error) {
+        }).catch(function (error) {
             console.log(error);
             self.$toast.error("Submit data getting error").goAway(3000);
-          });
+        });
       },
       sortByName(a, b) {
         if (a.kh_name === b.kh_name){
@@ -266,7 +294,40 @@
       },
       viewDetail(item, index, target) {
         this.productView = item;
+        this.showDetailPriceProduct(item.id);
         this.$refs['view-product-form-modal'].show();
+      },
+      async showDetailPriceProduct($productId){
+        let self = this;
+        self.isLoadingPurchaseDetail = true;
+        await self.$axios.get('/api/product/history/' + $productId).then(function (response) {
+          if (response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data") ) {
+            if(response.data.data.length > 0){
+              self.isLoadingPurchaseDetail = false;
+              let index =0;
+              let purchaseDetails = [];
+              for(let item of response.data.data){
+                let itemData = {};
+                  let createdDate = new Date(item["created_at"]);
+                  let dd = createdDate.getDate();
+                  let mm = createdDate.getMonth() + 1;
+                  let day = (dd < 10) ? ('0' + dd) : dd;
+                  let month = (mm < 10) ? ('0' + mm) : mm;
+                  let yyyy = createdDate.getFullYear();
+                  itemData["date"] = (day + "/" + month + "/" + yyyy);
+                  itemData["no"] = index;
+                  itemData["quantity"] = item["quantity"];
+                  itemData["unitprice"] = item["unitprice"];
+                  purchaseDetails.push(itemData);
+                index++;
+              }
+              self.purchaseDetails = self.cloneObject(purchaseDetails);
+            }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("Submit data getting error").goAway(3000);
+        });
       },
       adjustProduct(item, index, target) {
         this.newProductModal.showModal = true;
@@ -319,45 +380,53 @@
       async searchProduct() {
         this.isLoading = true;
         this.items = [];
-        const response = await this.$axios.post('/api/product/search', {search: this.searchInput});
-        if (response) {
-          this.isLoading = false;
-          if (response.data && response.hasOwnProperty("data") && response.data.length > 0) {
-            let items = [];
-            this.responseProductList = response.data;
-            for (let index = 0; index < response.data.length; index++) {
-              let productItem = response.data[index];
-              let newItem = {};
-              let brands = [];
-              if (productItem["brands"] && productItem["brands"].length > 0) {
-                for (let i = 0; i < productItem["brands"].length; i++) {
-                  brands.push(productItem["brands"][i]["name"]);
+        let self = this;
+        if(self.searchInput){
+          await self.$axios.post('/api/product/search', {search: self.searchInput}).then(function (response) {
+            self.isLoading = false;
+            if (response && response.hasOwnProperty("data")) {
+              let items = [];
+              self.responseProductList = response.data;
+              for (let index = 0; index < response.data.length; index++) {
+                let productItem = response.data[index];
+                let newItem = {};
+                let brands = [];
+                if (productItem["brands"] && productItem["brands"].length > 0) {
+                  for (let i = 0; i < productItem["brands"].length; i++) {
+                    brands.push(productItem["brands"][i]["name"]);
+                  }
                 }
-              }
-              newItem['id'] = productItem["id"];
-              newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
-              newItem['brand'] = brands.join(", ");
-              newItem['loyalty'] = "N/A";
-              newItem['image'] = productItem["image"];
-              newItem['brands'] = productItem["brands"];
+                newItem['id'] = productItem["id"];
+                newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
+                newItem['brand'] = brands.join(", ");
+                newItem['loyalty'] = "N/A";
+                newItem['image'] = productItem["image"];
+                newItem['brands'] = productItem["brands"];
 
-              if (productItem.hasOwnProperty("categories")) {
-                newItem['category_name'] = productItem["categories"]["name"];
-                newItem["categories"] = this.cloneObject(productItem["categories"]);
-              }
+                if (productItem.hasOwnProperty("categories")) {
+                  newItem['category_name'] = productItem["categories"]["name"];
+                  newItem["categories"] = self.cloneObject(productItem["categories"]);
+                }
 
-              newItem['description'] = productItem["description"];
-              newItem['sale_price'] = productItem["sale_price"];
-              newItem['code'] = productItem["code"];
-              newItem["en_name"] = productItem["en_name"];
-              newItem["kh_name"] = productItem["kh_name"];
-              items.push(newItem);
+                newItem['description'] = productItem["description"];
+                newItem['sale_price'] = productItem["sale_price"];
+                newItem['code'] = productItem["code"];
+                newItem["en_name"] = productItem["en_name"];
+                newItem["kh_name"] = productItem["kh_name"];
+                items.push(newItem);
+              }
+              self.items = self.cloneObject(items);
+              self.totalItems = items.length;
             }
-            this.items = this.cloneObject(items);
-          }
-          else {
-            this.items = [];
-          }
+          }).catch(function (error) {
+            console.log(error);
+            self.$toast.error("getting data error ").goAway(2000);
+          });
+        }
+        else {
+          self.items = [];
+          self.totalItems = 0;
+          self.perPage = 10;
         }
       },
       handleClick(e) {
@@ -427,6 +496,6 @@
     width: 100%;
   }
   .content-table-scroll-product{
-    max-height: calc(100vh - 165px);
+    max-height: calc(100vh - 170px);
   }
 </style>

@@ -616,7 +616,7 @@ export default {
       vm.productList = [];
       vm.loadingFields.productListLoading = true;
 
-      const response = await this.$axios.get('/api/product');
+      const response = await this.$axios.get('/api/product/0');
       if (response) {
         if (response && response.hasOwnProperty("data")) {
           let dataResponse = response.data;

@@ -120,5 +120,6 @@ export default {
   "stock_transfer":"ផ្ទេរទំនិញ",
   "label_date":"ថ្ងៃខែ",
   "label_firstname":"នាមខ្លួន",
-  "label_lastname":"នាមត្រកូល"
+  "label_lastname":"នាមត្រកូល",
+  "label_no":"លេខរៀង"
 };

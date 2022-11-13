@@ -120,5 +120,6 @@ export default {
   "stock_transfer":"Stock Transfer",
   "label_date":"Date",
   "label_firstname":"First Name",
-  "label_lastname":"Last Name"
+  "label_lastname":"Last Name",
+  "label_no":"No"
 };
