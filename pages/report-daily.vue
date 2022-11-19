@@ -63,7 +63,7 @@
           -->
           <b-list-group>
             <b-list-group-item href="/report-daily-orders"  active variant="primary"> របាយការ ការលក់</b-list-group-item>
-            <b-list-group-item href="/report-daily-imports"  active variant="primary"> របាយការ ការនាំចូល</b-list-group-item>
+            <b-list-group-item v-can="'pos_access_report_imports'" href="/report-daily-imports"  active variant="primary"> របាយការ ការនាំចូល</b-list-group-item>
           </b-list-group>
 
         </b-container>
