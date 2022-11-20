@@ -45,7 +45,7 @@
                   </div>
                 </template>
                 <template #cell(actions)="row">
-                  <b-button v-can="'product_access'" size="sm" variant="primary" title="View Inventory History Detail"
+                  <b-button v-can="'product_view'" size="sm" variant="primary" title="View Inventory History Detail"
                     @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
                     <i class="fa fa-eye"></i>
                   </b-button>

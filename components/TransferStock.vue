@@ -276,7 +276,13 @@ export default {
             if(response.data.length > 0){
               let index = 0;
               for (let itemDetail of response.data){
-                let productIdSelected = itemDetail["product_id"];
+                let data = {number: 0, product: null, qty: 0};
+                data.number = (index + 1);
+                data.product = (itemDetail["product"].en_name + " " + itemDetail["product"].kh_name);
+                data.qty = parseInt(itemDetail["quantity"]);
+                dataDetailArray.push(data);
+
+                /*let productIdSelected = itemDetail["product_id"];
                 let data = {number: 0, product: null, qty: 0};
                 let productItem = null;
                 if(self.products && self.products.length > 0){
@@ -293,7 +299,7 @@ export default {
                   data.product = productItem.name;
                   data.qty = parseInt(itemDetail["quantity"]);
                   dataDetailArray.push(data);
-                }
+                }*/
                 index++;
               }
             }

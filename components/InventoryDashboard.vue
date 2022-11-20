@@ -1,5 +1,5 @@
 <template>
-  <div class="inventory-dashboard-content main-page-content" v-can="'inventory_access'">
+  <div class="inventory-dashboard-content main-page-content">
     <div class="full-content">
       <div class="control-panel">
         <div class="panel-top">
@@ -16,19 +16,19 @@
                       v-model="searchInput" @keyup.enter="searchStock()" @change="handleClick" />
                   </div>
                 </b-col>
-                <div class="btn-wrapper margin-right-20-percentage">
+                <div class="btn-wrapper margin-right-20-percentage" v-can="'inventory_access'">
                   <b-button href="#" title="Add new Product" size="sm" variant="primary" @click="showModal()">
                     <span class="margin-span-btn">{{$t('title_new_product')}}</span>
                     <i class="fa fa-plus" aria-hidden="true"></i>
                   </b-button>
                 </div>
-                <div class="btn-wrapper margin-right-20-percentage">
+                <div class="btn-wrapper margin-right-20-percentage" v-can="'inventory_access'">
                   <b-button href="#" title="Add new Supplier" size="sm" variant="primary" @click="showSupplierModal()">
                     <span class="margin-span-btn">{{$t('title_new_supplier')}}</span>
                     <i class="fa fa-plus" aria-hidden="true"></i>
                   </b-button>
                 </div>
-                <div class="btn-wrapper">
+                <div class="btn-wrapper" v-can="'inventory_access'">
                   <b-button href="#" title="Add new WareHouse" size="sm" variant="primary"
                     @click="showWareHouseModal()">
                     <span class="margin-span-btn">{{$t('title_new_warehouse')}}</span>
@@ -46,7 +46,7 @@
           <div class="spinner-grow text-muted"></div>
         </div>
         <div class="content-data" v-if="!loadingFields.stockLoading && !loadingFields.productListLoading">
-          <div class="btn-wrapper margin-btn" v-if="!isShowFormAddProductInPurchase">
+          <div class="btn-wrapper margin-btn" v-if="!isShowFormAddProductInPurchase" v-can="'inventory_access'">
             <b-button v-if="stockTransfer.show === false" href="#" size="sm" variant="primary"
               title="Add new purchase record" @click="showPurchaseModal()">
               <span class="margin-span-btn">{{$t('stock_in')}}</span>
@@ -65,8 +65,8 @@
           </div>
           <div class="display-inline-block full-with" v-if="!isShowFormAddProductInPurchase">
             <transfer-stock v-model="stockTransfer" :warehouseOption="warehouseOption"
-              :products="productListOptionForTransfer" :productList="productListForTransfer"></transfer-stock>
-            <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
+              :products="productListOptionForTransfer" :productList="productListForTransfer" v-can="'inventory_access'"></transfer-stock>
+            <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading" v-can="'inventory_access'">
               <h4 class="font-700">{{$t('product_list')}}</h4>
               <b-table :items="items" :fields="fields" stacked="md" show-empty small>
                 <template #cell(actions)="row">
@@ -96,7 +96,7 @@
               <b-pagination align="right" style="margin-top: 10px !important;" size="md" :disabled="loadingFields.stockLoading || !isShowStockTable" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
             </div>
           </div>
-          <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
+          <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading" v-can="'inventory_view'">
             <inventory-stock :productList="productList" :warehouses="warehouses" :suppliers="suppliers"
               :products="products" :purchase="purchase" @submitPurchase="submitPurchase($event)"
               @discardPurchase="discardPurchase($event)" :vats="vats" />
@@ -387,6 +387,7 @@ export default {
       self.productListOptionForTransfer = [];
 
       await self.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))).then(function (response) {
+        console.log(self.productListForTransfer);
         if (response && response.hasOwnProperty("data") && response) {
           let dataResponse = response.data;
           if (dataResponse && dataResponse.length > 0) {
@@ -412,6 +413,7 @@ export default {
               }
             }
           }
+          console.log(self.productListForTransfer);
         }
       }).catch(function (error) {
         console.log(error);

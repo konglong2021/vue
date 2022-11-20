@@ -9,7 +9,7 @@
     </div>
     <div class="content-menu-text">
       <ul class="list-menu-text">
-        <li class="menu-text-item" v-can="'inventory_access'">
+        <li class="menu-text-item" v-can="'inventory_view'">
           <a href="/inventory">
             <span><i class="fa fa-balance-scale" aria-hidden="true"></i> {{ $t('title_inventory') }}</span>
           </a>

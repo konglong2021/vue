@@ -97,7 +97,7 @@
                 <b-table style="max-height: calc(100vh - 500px) !important; font-family: 'Arial', 'Khmer', sans-serif; "
                   sticky-header="true" head-variant="light" table-class="table-product-detail" :items="transactions"
                   :fields="fields" striped hover></b-table>
-                <h3 class="text-danger">សរុបទឹកប្រាក់ត្រូវសង : {{ calulateTotal (transactions) + "($)"}}</h3>
+                <h3 class="text-danger">សរុបទឹកប្រាក់ត្រូវសង : {{ totalNotPaid + "($)"}}</h3>
               </div>
               <div class="display-inline-block full-with" v-if="transactions && transactions.length === 0">
                 <h2 class="text-center color-info">មិនមានទិន្នន័យអ្នកជំពាក់ទេ</h2>
@@ -110,9 +110,8 @@
   </b-container>
 </template>
 <script>
-import { ValidationProvider } from "vee-validate";
-import { getTypeOf } from "static/js/amcharts/plugins/export/libs/jszip/jszip";
 
+import { ValidationProvider } from "vee-validate";
 export default {
   middleware: "local-auth",
   layout: 'posui',
@@ -144,7 +143,9 @@ export default {
       isSubmit: false,
       paymentMethodOption: [{ text: "បង់លុយសុទ្ធ", value: "Cash" }, { text: "វេរតាម ធនាគារ ABA", value: "transfer_aba" }],
       paymentMethod: null,
-      transactionsAlreadyPaid: []
+      transactionsAlreadyPaid: [],
+      transactionFilterByCustomer: [],
+      totalNotPaid: 0,
     }
   },
   methods: {
@@ -242,17 +243,12 @@ export default {
               let itemAlreadyAdd = self.transactions.find(order => order.order_id === item.order_id);
               let ArrayTransactionOrder = dataResponse.filter(order => order.order_id === item.order_id);
               let totalPaidArray = [];
-              console.log(ArrayTransactionOrder);
-
               Object.entries(ArrayTransactionOrder).forEach(([key, val]) => {
                 totalPaidArray.push(parseFloat(val.paid));
               });
               const totalAllPaidOfOrderId = totalPaidArray.reduce(function (total, num) {
                 return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
               }, 0);
-
-              console.log(totalAllPaidOfOrderId);
-
               if (!itemAlreadyAdd) {
                 let created_at = new Date(item["created_at"]);
                 let dd = created_at.getDate();
@@ -317,7 +313,9 @@ export default {
               }
             }
           }
-          self.transactions.sort(self.compare);
+          self.transactionFilterByCustomer = $customerId ? self.cloneObject(self.transactions) : [];
+          //self.transactions.sort(self.compare);
+          self.totalNotPaid = self.calulateTotal (self.transactions);
         }
       }).catch(function (error) {
         self.$toast.error("getting data error ").goAway(2000);
@@ -348,7 +346,9 @@ export default {
     },
     selectionChangeCustomer($obj) {
       if ($obj) {
+        this.transactionFilterByCustomer = [];
         this.getListAllDebt($obj["value"]);
+
       } else {
         this.getListAllDebt();
       }
@@ -356,6 +356,8 @@ export default {
     },
     removeElement() {
       this.$forceUpdate();
+      this.transactionFilterByCustomer = [];
+      this.getListAllDebt();
     },
     cloneObject($obj) {
       return JSON.parse(JSON.stringify($obj));
@@ -401,7 +403,6 @@ export default {
     },
     checkToEnableBtn() {
       this.submit = (this.paymentMethod === null || this.payment === 0);
-      console.log(this.submit);
     },
     async submitPayment() {
       let self = this;
@@ -434,12 +435,26 @@ export default {
           if (newTransactions && newTransactions.length > 0) {
             await self.$axios.post('/api/transaction', { transactions: newTransactions }).then(function (response) {
               self.$toast.success("Submit data successfully").goAway(2000);
-              self.customer_select = null;
+              if(response.data && response.data.hasOwnProperty("data") && response.data.data.length > 0){
+                let paidArray = [];
+                Object.entries(response.data.data).forEach(([key, val]) => {
+                  paidArray.push(parseFloat(val.paid));
+                });
+                const totalGrandTotalArray = paidArray.reduce(function (total, num) {
+                  return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
+                }, 0);
+
+                console.log(totalGrandTotalArray);
+                self.totalNotPaid = (self.totalNotPaid - totalGrandTotalArray);
+                //this.transactionFilterByCustomer
+              }
+              console.log(response.data.data);
+              //self.customer_select = null;
               self.payment = 0;
               self.paymentMethod = null;
               self.isSubmit = false;
 
-              self.getListAllDebt();
+              //self.getListAllDebt();
             }).catch(function (error) {
               self.$toast.error("getting data error ").goAway(2000);
               console.log(error);

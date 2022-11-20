@@ -827,7 +827,7 @@ body {
 }
 
 #modal-detail-transfer .scroll-table-content {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: calc(100vh - 300px);
 }
 
