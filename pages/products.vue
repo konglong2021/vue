@@ -69,19 +69,17 @@
             :id="'barcode-' + barcodeItem.code">
             <div v-if="barcodeItem.code.length > 12">
               <div v-for="item in barcodeListToPrint">
-                <span style="text-align: center !important;">{{ barcodeItem.name }}</span>
+                <span style="text-align: center !important; font-size: 12px;">{{ barcodeItem.name }}</span>
                 <barcode :value="item" height='65' width="2" paddingTop="0" marginTop="0" marginBottom="0" fontSize="12"
                   paddingBottom="0" marginLeft="0"></barcode>
-                <span style="text-align: center !important; font-weight: 900;">តម្លៃ USD : {{ barcodeItem.sale_price
-                }}</span>
+                <span style="text-align: center !important; font-weight: 600; font-size: 15px;">តម្លៃ USD : {{ barcodeItem.sale_price}}</span>
               </div>
             </div>
             <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="barcodeItem.code.length <= 12">
               <div v-for="item in barcodeListToPrint">
-                <span style="margin-left:12px; text-align: center !important; display: block;">{{ barcodeItem.name
-                }}</span>
-                <barcode :value="item" height='65' width="2" marginTop="0" marginBottom="0" fontSize="10"></barcode>
-                <span style="margin-left:8px; text-align: center !important; display: block; font-weight: 900;">តម្លៃ
+                <span style="margin-left:8px; text-align: center !important; display: block; font-size: 12px;">{{ barcodeItem.name }}</span>
+                <barcode :value="item" height='65' width="2" marginTop="0" marginBottom="0" marginLeft="0" fontSize="12"></barcode>
+                <span style="margin-left:8px; text-align: center !important; display: block; font-weight: 600; font-size: 15px;">តម្លៃ
                   USD : {{ barcodeItem.sale_price }}</span>
               </div>
             </div>
@@ -236,9 +234,7 @@ export default {
           'scrollbars=no'
         ],
         styles: [
-          'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
-          'https://unpkg.com/kidlat-css/css/kidlat.css',
-          // '~/static/css/app.css',
+          '../static/css/print.css',
         ],
         autoClose: true,
       },
