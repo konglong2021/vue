@@ -228,6 +228,20 @@ export default {
         { key: 'unitprice', label: this.$t('label_unit_price') + " ($)" },
       ],
       isLoadingPurchaseDetail: false,
+
+      optionStyleHtmlToPaper: {
+        specs: [
+          'fullscreen=yes',
+          'titlebar=no',
+          'scrollbars=no'
+        ],
+        styles: [
+          'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
+          'https://unpkg.com/kidlat-css/css/kidlat.css',
+          // '~/static/css/app.css',
+        ],
+        autoClose: true,
+      },
     }
   },
   watch: {
@@ -444,7 +458,8 @@ export default {
       }
     },
     barcodePrint() {
-      this.$htmlToPaper(("barcode-" + this.barcodeItem.code));
+      //this.$htmlToPaper(("barcode-" + this.barcodeItem.code));
+      this.$htmlToPaper(("barcode-" + this.barcodeItem.code), this.optionStyleHtmlToPaper);
       this.barcodeItem = {};
       this.numberPrint = 0;
     },
