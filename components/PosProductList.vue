@@ -9,7 +9,7 @@
                   <div class="input-group input-group-sm search-content">
                     <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>
                     <input
-                      class="form-control input-search-box" type="search" placeholder="Search..."  v-model="searchInput"
+                      class="form-control input-search-box" type="search" placeholder="ស្វែងរកទំនិញ..."  v-model="searchInput"
                       @keyup.enter="searchProduct()" v-inputTextUppercase
                     />
                   </div>
@@ -27,7 +27,7 @@
         <div class="scanning-input" >
           <b-form-input v-model="scanningInput" class="input-scanning"
             @keyup.enter="searchAndSelectedProduct(scanningInput)"
-           autofocus ref="scanningInput" ></b-form-input>
+           autofocus ref="scanningInput" placeholder="បញ្ចូលបារកូដទំនិញ..."></b-form-input>
         </div>
         <div v-if="!productLoading && warehouse" >
           <div class="content-product" v-if="products && products.length > 0">
@@ -81,8 +81,9 @@
         let vm = this;
         vm.products = [];
         vm.productLoading = true;
+        let $cookiesWarehouse = vm.$store.$cookies.get('storeItem');
         if($warehouse){
-          await vm.$axios.get('/api/stockbywarehouse/' + $warehouse).then(function (response) {
+          await vm.$axios.post('/api/stockbywarehouse',{'warehouse' : $cookiesWarehouse, pagination: false}).then(function (response) {
             if(response && response.hasOwnProperty("data")){
               vm.productLoading = false;
               let dataResponse = response.data;
@@ -179,7 +180,8 @@
       async searchProduct(){
           let $warehouse = this.$store.$cookies.get('storeItem');
           let self = this;
-          await self.$axios.get('/api/stockbywarehouse/' + $warehouse + "/" + self.searchInputData).then(function (response) {
+          await self.$axios.post('/api/stockbywarehouse', {'warehouse' : $warehouse, pagination: false, "search": self.searchInputData})
+            .then(function (response) {
               if(response.data && response.hasOwnProperty("data") && response.data.length > 0){
                   let items = [];
                   self.responseProductList = response.data;

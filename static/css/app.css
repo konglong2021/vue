@@ -653,6 +653,9 @@ body {
 .font-size-22 {
   font-size: 22px;
 }
+.font-size-14{
+  font-size: 14px;
+}
 
 .content-multiple-select .multiselect__placeholder {
   color: #000000;

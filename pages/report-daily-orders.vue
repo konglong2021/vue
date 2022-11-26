@@ -101,15 +101,10 @@
                             </table>
                             <div class="table-footer">
                                 <b-row>
-
-
                                     <b-col cols="2">
-
                                         <p>
                                             <b-form-select v-model="pPerPage" :options="perPageList"></b-form-select>
                                         </p>
-
-
                                     </b-col>
                                     <b-col cols="2">
                                         <p>
@@ -125,17 +120,10 @@
                                         <b-pagination @change="onPageChanged" v-model="currentPage" :total-rows="rows"
                                             :per-page="perPage" aria-controls="my-table"></b-pagination>
                                     </b-col>
-
-
                                 </b-row>
                             </div>
                             <div>
-
-
-
-
                             </div>
-
                         </div>
                     </div>
                     <div></div>

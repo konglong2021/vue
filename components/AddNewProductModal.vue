@@ -1,10 +1,11 @@
 <template>
     <div>
-      <b-modal id="modal-create-product" ref="product-form-modal" size="lg"
-               @hidden="onReset" cancel-title="បោះបង់"
-               @ok="handleSubmit" ok-title="រក្សាទុក" title="បង្កើតទំនិញថ្មី"
-               :ok-disabled="!product.brand || !product.category || !product.sale_price"
-               no-close-on-backdrop
+      <b-modal
+        id="modal-create-product" ref="product-form-modal" size="lg"
+        @hidden="onReset" cancel-title="បោះបង់"
+        @ok="handleSubmit" ok-title="រក្សាទុក" title="បង្កើតទំនិញថ្មី"
+        :ok-disabled="!product.brand || !product.category || !product.sale_price"
+        no-close-on-backdrop
       >
         <b-form enctype="multipart/form-data" @submit.stop.prevent="onSubmit">
           <div class="full-content">
@@ -114,7 +115,7 @@
          //watch value change sent from parent component
          handler(value){
            if(value===true){
-              this.$refs['product-form-modal'].show();
+             this.$refs['product-form-modal'].show();
              this.getBrands();
              this.getCategories();
            }
@@ -235,7 +236,7 @@
         formData.append("category_id", vm.product.category);
         formData.append("description", vm.product.description);
         formData.append("image", vm.uploadFile);
-        formData.append("sale_price", vm.product.sale_price);
+        formData.append("sale_price", '0');
         if(vm.product.code){
           formData.append("code", vm.product.code);
         }
@@ -243,29 +244,25 @@
 
         if(vm.product.hasOwnProperty("id") && vm.product.id){
           formData.append("_method", "PUT");
-
           vm.$toast.info("Data starting submit").goAway(1500);
+          let sale_price = 0;
+          const responseUpdateProduct = await vm.$axios.post('/api/product-price/update', { "warehouse": vm.$store.$cookies.get('storeItem'), "product_id": vm.product.id, "sale_price": vm.product.sale_price});
+          if (responseUpdateProduct && responseUpdateProduct.hasOwnProperty("data") && responseUpdateProduct.data.hasOwnProperty("data")) {
+            sale_price = parseFloat(responseUpdateProduct["data"]["data"]["sale_price"]);
+          }
           await vm.$axios.post('/api/product/' + vm.product.id, formData)
             .then(function (response) {
               if(response){
                 vm.$toast.success("Submit data successfully").goAway(2000);
                if(response.hasOwnProperty("data") && response.data){
-                 let Brands = vm.cloneObject(response.data.Brands);
+                 let Brands = vm.cloneObject(response.data["Brands"]);
                  let itemProduct = vm.cloneObject(response.data.product);
+                 itemProduct["sale_price"] = sale_price;
+                 //itemProduct["sale_price"] = vm.updateProductPrice(vm.$store.$cookies.get('storeItem'), vm.product.id, vm.product.sale_price);
                  vm.$emit("checkingProductAdd", {itemProduct: vm.cloneObject(itemProduct), brands: Brands});
                }
                 vm.hideModal();
-                vm.product =
-                  {
-                    en_name: '',
-                    kh_name: '',
-                    category: null,
-                    brand: null,
-                    description: '',
-                    image: null,
-                    sale_price: 0,
-                    code: null,
-                  };
+                vm.product = {en_name: '', kh_name: '', category: null, brand: null, description: '', image: null, sale_price: 0, code: null};
               }
             })
             .catch(function (error) {
@@ -275,6 +272,51 @@
         }
         else {
           vm.$toast.info("Data starting submit").goAway(1500);
+          const responseProduct = await vm.$axios.post('/api/product', formData);
+          if(responseProduct){
+            vm.$toast.success("Submit data successfully").goAway(2000);
+            if(responseProduct.hasOwnProperty("data")){
+              let brandList = responseProduct.data.hasOwnProperty("Brands") ? responseProduct.data.Brands : [];
+              let itemProduct = vm.cloneObject(responseProduct.data.product);
+              let newDataBrand = [];
+
+              if(responseProduct.data.hasOwnProperty("Brands")){
+                let brandList = vm.cloneObject(responseProduct.data.Brands);
+                if(brandList.length > 0){
+                  let responseBrandName = [];
+                  let responseBrand = [];
+                  for(let k=0; k < brands.length; k++){
+                    let itemResponseBrand = vm.cloneObject(vm.selectedBrandList(brands[k]));
+                    let itemData = {"name": itemResponseBrand["name"], "id": itemResponseBrand["value"]};
+                    responseBrandName.push(itemResponseBrand["name"]);
+                    responseBrand.push(itemData);
+                  }
+                  itemProduct["brands"] = vm.cloneObject(responseBrand);
+                  itemProduct["brand"] = responseBrandName.join(", ");
+                }
+              }
+              if(responseProduct.data.product.hasOwnProperty("category_id")){
+                itemProduct["category_name"]= vm.filterCategoriesData(itemProduct["category_id"]);
+              }
+              if(!itemProduct.hasOwnProperty("name")){
+                itemProduct['name'] = itemProduct["en_name"] + " (" + itemProduct["kh_name"] + ")";
+              }
+              itemProduct['loyalty'] = "N/A";
+              let sale_price = 0;
+              const responseUpdateProduct = await vm.$axios.post('/api/product-price/update', { "warehouse": vm.$store.$cookies.get('storeItem'), "product_id": itemProduct.id, "sale_price": vm.product.sale_price});
+              if (responseUpdateProduct && responseUpdateProduct.hasOwnProperty("data") && responseUpdateProduct.data.hasOwnProperty("data")) {
+                sale_price = parseFloat(responseUpdateProduct["data"]["data"]["sale_price"]);
+                itemProduct["sale_price"] = sale_price;
+              }
+
+              vm.$emit("checkingProductAdd", {itemProduct: itemProduct, brands: brandList});
+              vm.hideModal();
+            }
+          }
+          else {
+            vm.$toast.error("Submit data getting error").goAway(3000);
+          }
+          /*
           await vm.$axios.post('/api/product', formData)
             .then(function (response) {
               if(response){
@@ -312,6 +354,7 @@
               console.log(error);
               vm.$toast.error("Submit data getting error").goAway(3000);
             });
+          */
         }
       },
       selectedBrandList(item){
@@ -331,6 +374,7 @@
         this.product = {};
       },
       viewDetail($data){
+        console.log($data);
         console.log("data",$data);
       },
       generateImageUrlDisplay(img){

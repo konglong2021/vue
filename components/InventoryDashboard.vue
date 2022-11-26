@@ -386,40 +386,37 @@ export default {
       self.productListForTransfer = [];
       self.productListOptionForTransfer = [];
 
-      await self.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))).then(function (response) {
-        console.log(self.productListForTransfer);
-        if (response && response.hasOwnProperty("data") && response) {
-          let dataResponse = response.data;
-          if (dataResponse && dataResponse.length > 0) {
-            for (let i = 0; i < dataResponse.length; i++) {
-              let productList = dataResponse[i].product;
-              if (productList && productList.length > 0) {
-                for (let index = 0; index < productList.length; index++) {
+      await self.$axios.post('/api/stockbywarehouse',{'warehouse' : self.$store.$cookies.get('storeItem'), pagination: false})
+        .then(function (response) {
+          if (response && response.hasOwnProperty("data")) {
+            let dataResponse = response.data;
+            if (dataResponse && dataResponse.length > 0) {
+              for (let i = 0; i < dataResponse.length; i++) {
+                let productList = dataResponse[i];
+                if (productList && productList.length > 0) {
+                  for (let index = 0; index < productList.length; index++) {
+                    let productOptionItem = { name: '', value: null };
+                    productOptionItem.name = (productList[index].en_name + " - " + productList[index].kh_name + " (" + productList[index].code + ")");
+                    productOptionItem.value = productList[index].product_id;
+                    self.productListForTransfer.unshift(productList[index]);
+                    self.productListOptionForTransfer.unshift(productOptionItem);
+                  }
+                }
+                else if (productList && productList.hasOwnProperty("id")) {
                   let productOptionItem = { name: '', value: null };
-                  productOptionItem.name = (productList[index].en_name + " - " + productList[index].kh_name + " (" + productList[index].code + ")");
-                  productOptionItem.value = productList[index].id;
-
-                  self.productListForTransfer.unshift(productList[index]);
+                  productOptionItem.name = (productList.en_name + " - " + productList.kh_name + " (" + productList.code + ")");
+                  productOptionItem.value = productList.product_id;
+                  self.productListForTransfer.unshift(productList);
                   self.productListOptionForTransfer.unshift(productOptionItem);
                 }
               }
-              else if (productList && productList.hasOwnProperty("id")) {
-                let productOptionItem = { name: '', value: null };
-                productOptionItem.name = (productList.en_name + " - " + productList.kh_name + " (" + productList.code + ")");
-                productOptionItem.value = productList.id;
-
-                self.productListForTransfer.unshift(productList);
-                self.productListOptionForTransfer.unshift(productOptionItem);
-              }
             }
           }
-          console.log(self.productListForTransfer);
-        }
-      }).catch(function (error) {
-        console.log(error);
-        self.$toast.error("getting data error ").goAway(2000);
-      });
-    },
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
+      },
     generateImageUrlDisplay(img) {
       if (typeof window !== "undefined") {
         return window.location.protocol + "//" + window.location.hostname + ":8000/" + "storage/img/" + img;
@@ -436,7 +433,7 @@ export default {
       let vm = this;
       vm.stockItems = [];
       vm.loadingFields.stockLoading = true;
-      vm.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')) + "?page=" + vm.currentPage)
+      vm.$axios.post('/api/stockbywarehouse'+ (this.currentPage ? "?page=" + this.currentPage : ""),{'warehouse' : vm.$store.$cookies.get('storeItem'), pagination: true})
         .then(function (response) {
           if (response.data && response.data.hasOwnProperty("data")) {
             vm.loadingFields.stockLoading = false;
@@ -444,15 +441,14 @@ export default {
             if (dataStock && dataStock.length > 0) {
               for (let i = 0; i < dataStock.length; i++) {
                 vm.stock = {};
-                let product = dataStock[i]["product"];
                 vm.stock.id = dataStock[i]["id"];
-                vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
+                vm.stock.store = dataStock[i]["warehouse"];
                 vm.stock.product_qty = dataStock[i]["total"].toString();
-                vm.stock.en_name = product["en_name"];
-                vm.stock.kh_name = product["kh_name"];
-                vm.stock.code = product["code"];
-                vm.stock.image = product["image"];
-                vm.stock.sale_price = product["sale_price"].toString();
+                vm.stock.en_name = dataStock[i]["en_name"];
+                vm.stock.kh_name = dataStock[i]["kh_name"];
+                vm.stock.code = dataStock[i]["code"];
+                vm.stock.image = dataStock[i]["image"];
+                vm.stock.sale_price = dataStock[i]["sale_price"].toString();
                 vm.stockItems.push(vm.stock);
               }
               let dataForSort = vm.cloneObject(vm.stockItems);
@@ -819,7 +815,7 @@ export default {
         for (let index = 0; index < productItems.length; index++) {
           let purchaseDetailItem = {};
           let productTotalPrice = 0;
-
+          purchaseDetailItem["sale_price"] = productItems[index]["sale_price"];
           purchaseDetailItem['product_id'] = productItems[index]['id'];
           purchaseDetailItem['unitprice'] = productItems[index]['import_price'];
           purchaseDetailItem['quantity'] = productItems[index]['qty'];
@@ -836,60 +832,31 @@ export default {
         vm.isShowFormAddProductInPurchase = false;
 
         vm.$toast.info("Data starting submit").goAway(1500);
-
-        for (let indexProduct = 0; indexProduct < productItems.length; indexProduct++) {
-          let productData = vm.productList.find(item => item.id = productItems[indexProduct].id);
-          if (
-            productData && productData.sale_price
-            && productItems[indexProduct].sale_price
-            && parseFloat(productItems[indexProduct].sale_price) !== parseFloat(productData.sale_price)
-          ) {
-            await this.$axios.put('/api/updatesaleprice/' + productItems[indexProduct].id, { sale_price: productItems[indexProduct].sale_price })
-              .then(function (response) {
-                if (response && response.hasOwnProperty("data")) {
-                }
-              })
-              .catch(function (error) {
-                console.log(error);
-                vm.$toast.success("Submit data getting error").goAway(3000);
-              });
-          }
-        }
         await this.$axios.post('/api/purchase', dataSubmit)
           .then(function (response) {
             if (response && response.hasOwnProperty("data")) {
               vm.isShowStockTable = true;
               vm.loadingFields.stockLoading = false;
               vm.purchase = {};
-              vm.$toast.success("Submit data successfully").goAway(2000);
-              if (response && response.data && response.data.message) {
-                vm.$axios.get('/api/stock')
-                  .then(function (response) {
-                    if (response.data) {
-                      vm.stockItems = [];
-                      let dataStock = response.data;
-                      if (dataStock && dataStock.length > 0) {
-                        for (let i = 0; i < dataStock.length; i++) {
-                          vm.stock = {};
-                          let product = dataStock[i]["product"];
-                          vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
-                          vm.stock.product_qty = dataStock[i]["total"].toString();
-                          vm.stock.en_name = product["en_name"];
-                          vm.stock.kh_name = product["kh_name"];
-                          vm.stock.code = product["code"];
-                          vm.stock.image = product["image"];
-                          vm.stock.sale_price = product["sale_price"].toString();
-                          // vm.stockItems.push(vm.stock);
-                          vm.stockItems.unshift(vm.stock);
-                        }
-                      }
-                    }
-                  })
-                  .catch(function (error) {
-                    vm.$toast.error("getting data error ").goAway(2000);
-                    console.log(error);
-                  });
+              let items = response.data["items"];
+              let purchase = response.data["purchase"];
+              for(let item of items){
+                let productItem = vm.productList.find(product => product.id === item.product_id);
+                let warehouse = vm.warehouseList.find(warehouse => warehouse.id === purchase.warehouse_id);
+                if(productItem){
+                  let stockItem = {};
+                  stockItem.id = purchase["id"];
+                  stockItem.store = (warehouse["name"] + " (" + warehouse["address"] + ")");
+                  stockItem.product_qty = item["quantity"].toString();
+                  stockItem.en_name = productItem["en_name"];
+                  stockItem.kh_name = productItem["kh_name"];
+                  stockItem.code = productItem["code"];
+                  stockItem.image = productItem["image"];
+                  stockItem.sale_price = item["sale_price"].toString();
+                  vm.stockItems.push(stockItem);
+                }
               }
+              vm.$toast.success("Submit data successfully").goAway(2000);
             }
           })
           .catch(function (error) {
@@ -912,6 +879,7 @@ export default {
           purchaseDetailItem['product_id'] = vm.items[index]['id'];
           purchaseDetailItem['unitprice'] = vm.items[index]['import_price'];
           purchaseDetailItem['quantity'] = vm.items[index]['qty'];
+          purchaseDetailItem["sale_price"] = vm.items[index]["sale_price"];
           productTotalPrice = parseInt(vm.items[index]['qty']) * parseFloat(this.items[index]['import_price']);
           subtotal += productTotalPrice;
           purchaseDetail.unshift(purchaseDetailItem);
@@ -925,58 +893,32 @@ export default {
         vm.isShowFormAddProductInPurchase = false;
 
         vm.$toast.info("Data starting submit").goAway(1500);
-        // for(let indexProduct =0; indexProduct < vm.items.length; indexProduct++){
-        //   let productData = vm.productList.find(item => item.id = vm.items[indexProduct].id);
-        //   if(
-        //           productData && productData.sale_price
-        //           && vm.items[indexProduct].sale_price
-        //           && parseFloat(vm.items[indexProduct].sale_price) !== parseFloat(productData.sale_price)
-        //   ){
-        //     await this.$axios.put('/api/updatesaleprice/' + vm.items[indexProduct].id, {sale_price : vm.items[indexProduct].sale_price})
-        //             .then(function (response) {
-        //               if(response && response.hasOwnProperty("data")){
-        //               }
-        //             })
-        //             .catch(function (error) {
-        //               console.log(error);
-        //               vm.$toast.success("Submit data getting error").goAway(3000);
-        //             });
-        //   }
-        // }
-
         await this.$axios.post('/api/purchase', dataSubmit)
           .then(function (response) {
             if (response && response.hasOwnProperty("data")) {
               vm.isShowStockTable = true;
               vm.loadingFields.stockLoading = false;
               vm.purchase = {};
+              let items = response.data["items"];
+              let purchase = response.data["purchase"];
+              for(let item of items){
+                let productItem = vm.productList.find(product => product.id === item.product_id);
+                let warehouse = vm.warehouseList.find(warehouse => warehouse.id === purchase.warehouse_id);
+                if(productItem){
+                  let stockItem = {};
+                  stockItem.id = purchase["id"];
+                  stockItem.store = (warehouse["name"] + " (" + warehouse["address"] + ")");
+                  stockItem.product_qty = item["quantity"].toString();
+                  stockItem.en_name = productItem["en_name"];
+                  stockItem.kh_name = productItem["kh_name"];
+                  stockItem.code = productItem["code"];
+                  stockItem.image = productItem["image"];
+                  stockItem.sale_price = item["sale_price"].toString();
+                  vm.stockItems.push(stockItem);
+                }
+              }
               vm.$toast.success("Submit data successfully").goAway(2000);
               if (response && response.data && response.data.message) {
-                vm.$axios.get('/api/stock')
-                  .then(function (response) {
-                    if (response.data) {
-                      vm.stockItems = [];
-                      let dataStock = response.data;
-                      if (dataStock && dataStock.length > 0) {
-                        for (let i = 0; i < dataStock.length; i++) {
-                          vm.stock = {};
-                          let product = dataStock[i]["product"];
-                          vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
-                          vm.stock.product_qty = dataStock[i]["total"].toString();
-                          vm.stock.en_name = product["en_name"];
-                          vm.stock.kh_name = product["kh_name"];
-                          vm.stock.code = product["code"];
-                          vm.stock.image = product["image"];
-                          vm.stock.sale_price = product["sale_price"].toString();
-                          vm.stockItems.unshift(vm.stock);
-                        }
-                      }
-                    }
-                  })
-                  .catch(function (error) {
-                    vm.$toast.error("getting data error ").goAway(2000);
-                    console.log(error);
-                  });
               }
             }
           })
@@ -1013,21 +955,21 @@ export default {
       let self = this;
       self.stockItems = [];
       self.loadingFields.stockLoading = true;
-      await self.$axios.post('/api/stock/search', { search: self.searchInput, warehouse_id: self.warehouse, page: self.currentPage }).then(function (response) {
-        if (response.data) {
+      await self.$axios.post('/api/stockbywarehouse'+ (this.currentPage ? "?page=" + this.currentPage : ""), { search: self.searchInput, warehouse: self.warehouse, pagination: true }).then(function (response) {
+        if (response.data && response.data.hasOwnProperty("data")) {
           self.loadingFields.stockLoading = false;
           let dataStock = response.data.data;
           if (dataStock && dataStock.length > 0) {
             for (let i = 0; i < dataStock.length; i++) {
               self.stock = {};
-              let product = dataStock[i]["product"];
-              self.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
+              //let product = dataStock[i]["product"];
+              self.stock.store = dataStock[i]["warehouse"];
               self.stock.product_qty = dataStock[i]["total"].toString();
-              self.stock.en_name = product["en_name"];
-              self.stock.kh_name = product["kh_name"];
-              self.stock.code = product["code"];
-              self.stock.image = product["image"];
-              self.stock.sale_price = product["sale_price"].toString();
+              self.stock.en_name = dataStock[i]["en_name"];
+              self.stock.kh_name = dataStock[i]["kh_name"];
+              self.stock.code = dataStock[i]["code"];
+              self.stock.image = dataStock[i]["image"];
+              self.stock.sale_price = dataStock[i]["sale_price"].toString();
               self.stockItems.unshift(self.stock);
             }
             self.totalItems = response.data.total;
@@ -1072,7 +1014,6 @@ export default {
     }
   },
   mounted() {
-
     this.getListProductForTransferStock();
     this.getProductList();
     this.getAllWarehouse();

@@ -89,36 +89,6 @@
           </div>
         </div>
       </div>
-      <div id="invoice-print-pos-again" style="padding-left: 15px!important; display: none; width: 95%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
-<!--        <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center; font-size: 25px;">{{ $t('title') }}</h1>-->
-        <span style="margin-bottom: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center; font-size: 23px;">{{ $t('title') }}</span><br/><br/>
-<!--        <span v-for="item in itemsProductDetail">-->
-<!--          <span style="font-size: 13px;!important;">{{ item.name }}</span>-->
-<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.qty }}</span>-->
-<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.price }}</span>-->
-<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.total }}</span>-->
-<!--          <br/>-->
-<!--        </span>-->
-        <table>
-          <thead>
-          <tr>
-            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 70% !important;">ឈ្មោះទំនិញ</th>
-            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">ចំនួន</th>
-            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">តម្លៃ</th>
-          </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in itemsProductDetail" style="font-size: 16px !important; width: 99% !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">
-              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 70% !important;">{{ item.name }}</td>
-              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">{{ item.qty }}</td>
-              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">{{ item.price }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <hr>
-        <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span><br/>
-        <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span>
-      </div>
       <b-modal id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
                @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
                @ok="onSubmitToPrint" ok-title="ព្រីនចេញ" title="ការលក់" no-close-on-backdrop>
@@ -170,56 +140,62 @@
 
           </div>
         </b-form>
-
-        <div id="invoice-print-again" style="margin: 15px; display: none; width: 95%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
-          <div style="margin-bottom: 30px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; display:inline-block; width: 100%;">
-            <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center;">{{ $t('title') }}</h1>
-          </div>
-          <div class="full-content margin-bottom-20">
-            <div class="container-row-form width-60-percentage float-left">
-              <div class="form-row-content-detail row-content-view">
-                <label class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">វិក័យប័ត្រលេខ</label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{order.invoice_id}}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-customer'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ឈ្មោះអតិថិជន : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{order.customer}}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">លក់ដោយ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ $store.$cookies.get('user').name }}</strong>
-              </div>
-            </div>
-            <div class="container-row-form width-29-percentage float-right">
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-vat'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ពន្ធ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ order.vat !== 0 ? order.vat + "%": 0 }}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-discount'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">បញ្ចុះតម្លៃ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ order.discount + "%" }}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ថ្ងៃខែឆ្នាំលក់ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ getFullDate() }}</strong>
-              </div>
-            </div>
-          </div>
-          <b-table style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" table-class="table-payment"
-                   :items="itemsProductDetail"
-                   :fields="fieldsProductDetailPrint"
-                   stacked="md"
-                   show-empty
-                   small
-          ></b-table>
-          <div style="display: inline-block;float: right; margin-top: 25px; margin-right: 75px;">
-            <span style="display: block; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{$t('title_total_in_usd')}} : {{ order.subtotal }} USD</span>
-            <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{$t('title_total_after_vat_in_usd')}} : {{ order.grandtotal }} USD</span>
-          </div>
+        <div id="invoice-print-pos-again" style="padding-top : 35px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
+          <h6 class="text-center" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
+          <table style="font-size: 10px; margin-bottom: 20px;">
+            <tbody>
+            <tr>
+              <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">វិក័យប័ត្រលេខ : {{ order.invoice_id }}</td>
+            </tr>
+            <tr>
+              <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">ថ្ងៃខែឆ្នាំលក់ : {{ order.date }}</td>
+            </tr>
+            <tr>
+              <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">លក់ដោយ : {{ order.customer }}</td>
+            </tr>
+            </tbody>
+          </table>
+          <table style="text-align: center;">
+            <thead style="">
+              <tr>
+                <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle;">ឈ្មោះទំនិញ</th>
+                <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 5%;">ចំនួន</th>
+                <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 20%;">តម្លៃ($)</th>
+                <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 25%;">សរុប($)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item of itemsProductDetail">
+                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.name }}</td>
+                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.qty }}</td>
+                <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.price }}</td>
+                <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.total }}</td>
+              </tr>
+              <tr>
+                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;" colspan="2">សរុបមុនកាត់ពន្ធ ($)</td>
+                <td style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial'; border-top:1px solid black !important;" colspan="2">{{ order.grandtotal }}</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ ($) (10%)</td>
+                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ order.priceDiscount }}</td>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបូកបញ្ចូលពន្ធ ($)</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ order.subtotal }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ calculateToRiel(order.subtotal, order.exchange_rate) }}</th>
+              </tr>
+            </tbody>
+          </table>
+          <footer style="font-family: 'Arial', 'Khmer', sans-serif; text-align:center; font-size: 10px; margin-top: 45px;">
+            <p style="text-align:center; margin-bottom: 0; padding-bottom: 0;">ទំនិញទិញហើយ មិនអាចប្តុរជាទឹកប្រាក់វិញបានទេ</p>
+            <p style="text-align:center; margin-bottom: 0; padding-bottom: 0; margin-top: 4px; padding-top: 0">អរគុណសម្រាប់ការគាំទ្រ</p>
+          </footer>
         </div>
       </b-modal>
-      <b-modal
-              id="modal-edit-payment" ref="edit-payment-form-modal" size="lg" modal-class="payment-form-modal"
+      <b-modal id="modal-edit-payment" ref="edit-payment-form-modal" size="lg" modal-class="payment-form-modal"
               @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
               @ok="handleSubmit" ok-title="កែប្រែ" title="ការលក់" no-close-on-backdrop>
         <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;" @submit.stop.prevent="onSubmitEditPayment">
@@ -357,9 +333,7 @@
             'scrollbars=no'
           ],
           styles: [
-            'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
-            'https://unpkg.com/kidlat-css/css/kidlat.css',
-            // '~/static/css/app.css',
+            '../static/css/invoice-print.css',
           ],
           autoClose: true,
         },
@@ -540,6 +514,7 @@
               }
               itemData["invoice_id"] = orderItem["invoice_id"];
               itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
+              itemData["priceDiscount"] = (orderItem["discount"] > 0 ? (parseFloat(parseFloat(orderItem["discount"])/100) * parseFloat(itemData["grandtotal"])) : 0);
               itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
               itemData["receive"] = orderItem["receive"];
               itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
@@ -585,6 +560,7 @@
         return JSON.parse(JSON.stringify(obj));
       },
       viewOrderData(item){
+        console.log(item);
         this.order = item;
         this.itemsProductDetail = [];
         let discount = 0;
@@ -896,7 +872,7 @@
       },
       onResetPrint(){},
       onSubmitToPrint(){
-        //this.$htmlToPaper("invoice-print-again", this.optionStyleHtmlToPaper);
+        // this.$htmlToPaper("invoice-print-again", this.optionStyleHtmlToPaper);
         this.$htmlToPaper("invoice-print-pos-again", this.optionStyleHtmlToPaper);
       },
 
@@ -1141,7 +1117,12 @@
       },
       calculateToRiel($totalPriceAsUSD, $exchangeRate){
         let total = (parseFloat($totalPriceAsUSD) * parseFloat($exchangeRate));
-        return total.toFixed(2);
+        let fixedTotal = total.toFixed(2);
+        let parts = fixedTotal.toString().split(".");
+        const numberPart = parts[0];
+        const decimalPart = parts[1];
+        const thousands = /\B(?=(\d{3})+(?!\d))/g;
+        return numberPart.replace(thousands, ",") + (decimalPart ? "." + decimalPart : "");
       },
   },
     mounted() {
@@ -1235,5 +1216,132 @@
     overflow-y: auto;
     max-height: calc(100vh - 255px);
   }
+  @media print {
+    @page {
+      size: 57mm 200mm;
+      margin-top: 5mm;
+      margin-left: 5mm;
+      margin-right: 5mm;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Times New Roman', sans-serif;
+    }
+
+    table {
+      width: 100%;
+    }
+
+    tr {
+      width: 100%;
+
+    }
+
+    h1 {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    #logo {
+      width: 60%;
+      text-align: center;
+      -webkit-align-content: center;
+      align-content: center;
+      padding: 5px;
+      /*margin: 2px;*/
+      display: block;
+      margin: 0 auto;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      -webkit-align-content: center;
+      align-content: center;
+      vertical-align: middle;
+    }
+
+    .items thead {
+      text-align: center;
+    }
+
+    .center-align {
+      text-align: center;
+    }
+
+    .bill-details td {
+      font-size: 10px;
+    }
+
+    .receipt {
+      font-size: medium;
+    }
+
+    .items .heading {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      border-top:1px solid black;
+      margin-bottom: 4px;
+      border-bottom: 1px solid black;
+      vertical-align: middle;
+    }
+
+    .items thead tr th:first-child,
+    .items tbody tr td:first-child {
+      width: 47%;
+      min-width: 47%;
+      max-width: 47%;
+      word-break: break-all;
+      text-align: left;
+    }
+
+    .items td {
+      font-size: 11px;
+      text-align: right;
+      vertical-align: bottom;
+    }
+
+    .price::before {
+      content: "\20B9";
+      font-family: "Arial";
+      text-align: right;
+    }
+
+    .sum-up {
+      text-align: right !important;
+    }
+    .total {
+      font-size: 11px;
+      border-top:1px dashed black !important;
+      border-bottom:1px dashed black !important;
+    }
+    .total.text, .total.price {
+      text-align: right;
+    }
+    .total.price::before {
+      content: "\20B9";
+    }
+    .line {
+      border-top:1px solid black !important;
+    }
+    .heading.rate {
+      width: 20%;
+    }
+    .heading.amount {
+      width: 25%;
+    }
+    .heading.qty {
+      width: 5%
+    }
+    p {
+      padding: 1px;
+      margin: 0;
+    }
+    section, footer {
+      font-size: 10px;
+    }
+  }
+
 
 </style>

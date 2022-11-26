@@ -16,7 +16,7 @@
         </li>
         <li class="menu-text-item" v-can="'inventory_access'">
           <a href="/purchases">
-            <span><i class="fa fa-recycle" aria-hidden="true"></i>  ប្រតិបត្តការបញ្ចូលក្នុងស្តុក</span>
+            <span><i class="fa fa-recycle" aria-hidden="true"></i>  ប្រតិបត្តការ</span>
           </a>
         </li>
         <li class="menu-text-item" v-can="'inventory_access'">

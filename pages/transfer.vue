@@ -17,14 +17,14 @@
                         <input class="form-control input-search-box" type="search" placeholder="Search..." v-model="searchInput" @keyup.enter="searchProduct()" @change="handleClick" />
                       </div>
                     </b-col>
-                    <div>
-                      <div class="form-column-label">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
-                      <div class="form-column-input width-50-percentage">
+                    <div style="display: inline-block; overflow: hidden; margin-right: 10px;">
+                      <div class="form-column-label" style="vertical-align: text-bottom; width: 155px;">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
+                      <div class="form-column-input width-50-percentage" style="vertical-align: text-bottom;">
                         <b-form-input type="date" v-model="dateFilter" v-on:change="changeFilterDate(dateFilter)"></b-form-input>
                       </div>
                     </div>
                     <div class="btn-wrapper">
-                      <b-button style="padding: 7px 10px;" href="#"  title="Add new Transfer" size="sm" variant="primary" @click="addTransferStock()">
+                      <b-button style="padding: 7px 10px;" href="#" title="Add new Transfer" size="sm" variant="primary" @click="addTransferStock()">
                         <i class="fa fa-truck" aria-hidden="true"></i>
                         <span class="margin-span-btn">{{ 'បន្ថែម' + $t('stock_transfer')}}</span>
                       </b-button>
@@ -102,30 +102,19 @@ export default {
       self.productListForTransfer = [];
       self.productListOptionForTransfer = [];
 
-      await self.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))).then(function (response) {
+      await self.$axios.post('/api/stockbywarehouse', {warehouse : self.$store.$cookies.get('storeItem'), pagination: false})
+      .then(function (response) {
         if(response && response.hasOwnProperty("data")){
           let dataResponse = response.data;
           if(dataResponse && dataResponse.length > 0){
             self.totalRows = response.data.length;
 
             for(let i=0; i < dataResponse.length; i++){
-              let productList = dataResponse[i].product;
-              if(productList && productList.length > 0){
-                for(let index=0; index < productList.length; index++){
-                  let productOptionItem =  { name: '', value: null};
-                  productOptionItem.name = (productList[index].en_name + " - " + productList[index].kh_name + " (" + productList[index].code + ")");
-                  productOptionItem.value = productList[index].id;
-
-                  self.productListForTransfer.unshift(productList[index]);
-                  self.productListOptionForTransfer.unshift(productOptionItem);
-                }
-              }
-              else if(productList && productList.hasOwnProperty("id")){
+              if(dataResponse[i].hasOwnProperty("product_id") && dataResponse[i].product_id){
                 let productOptionItem =  { name: '', value: null};
-                productOptionItem.name = (productList.en_name + " - " + productList.kh_name + " (" + productList.code + ")");
-                productOptionItem.value = productList.id;
-
-                self.productListForTransfer.unshift(productList);
+                productOptionItem.name = (dataResponse[i].en_name + " - " + dataResponse[i].kh_name + " (" + dataResponse[i].code + ")");
+                productOptionItem.value = dataResponse[i].product_id;
+                self.productListForTransfer.unshift(dataResponse[i]);
                 self.productListOptionForTransfer.unshift(productOptionItem);
               }
             }
@@ -167,8 +156,10 @@ export default {
         });
       }
       else {
-        await self.$axios.get('/api/groupStockOut/' + $dateFilter).then(function (response) {
+        await self.$axios.get('/api/stockout/' + $dateFilter).then(function (response) {
           self.isLoading = false;
+          console.log(response);
+
           if(response && response.hasOwnProperty("data") && response.data){
             let data = response["data"];
             let dataArray = Object.keys(data).map(key => {

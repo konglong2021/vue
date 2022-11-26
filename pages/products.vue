@@ -45,15 +45,15 @@
                   </div>
                 </template>
                 <template #cell(actions)="row">
-                  <b-button v-can="'product_view'" size="sm" variant="primary" title="View Inventory History Detail"
+                  <b-button v-can="'product_view'" size="sm" variant="primary" title="View Product Data Detail"
                     @click="viewDetail(row.item, row.index, $event.target)" class="mr-1">
                     <i class="fa fa-eye"></i>
                   </b-button>
-                  <b-button v-can="'product_edit'" size="sm" title="Adjust invetory stock" variant="success"
+                  <b-button v-can="'product_edit'" size="sm" title="Product edit" variant="success"
                     @click="adjustProduct(row.item, row.index, $event.target)">
                     <i class="fa fa-edit"></i>
                   </b-button>
-                  <b-button v-can="'product_access'" size="sm" title="Print barcode" variant="primary"
+                  <b-button v-if="row.item.sale_price" v-can="'product_access'" size="sm" title="Print barcode" variant="primary"
                     @click="barcodeInputNumberPrint(row.item)">
                     <i class="fa fa-print"></i>
                   </b-button>
@@ -62,7 +62,7 @@
               </b-table>
             </div>
             <b-pagination align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading"
-              :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number>
+              :total-rows="totalItems" v-model="currentPage" :per-page="perPage" @change="changePage(currentPage)" first-number last-number>
             </b-pagination>
           </div>
           <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="numberPrint > 0"
@@ -141,7 +141,7 @@
               </div>
             </div>
 
-            <div style="display: inline-block; width: 100%;">
+            <div v-can="'product_view_history'" style="display: inline-block; width: 100%;">
               <div class="content-loading" v-if="isLoadingPurchaseDetail">
                 <div class="spinner-grow text-muted"></div>
               </div>
@@ -182,231 +182,93 @@
   </b-container>
 </template>
 <script>
-export default {
-  middleware: "local-auth",
-  layout: 'inventoryui',
-  data() {
-    return {
-      newProductModal: {
-        showModal: false,
-      },
-      searchInput: null,
-      currentPage: 1,
-      perPage: 10,
-      totalItems: 0,
-      items: [],
-      fields: [
-        { key: 'name', label: this.$t('label_name') },
-        {
-          key: 'code', label: this.$t('title_barcode'),
-          tdAttr: (_, __, { name, code }) => ({
-            id: `${code}`
-          }), tdClass: 'td-code'
+  export default {
+    middleware: "local-auth",
+    layout: 'inventoryui',
+    data() {
+      return {
+        newProductModal: {
+          showModal: false,
         },
-        { key: 'category_name', label: this.$t('title_category') },
-        { key: 'brand', label: this.$t('title_brand') },
-        { key: 'loyalty', label: 'Loyalty' },
-        { key: 'sale_price', label: this.$t('label_unit_price') },
-        { key: 'actions', label: this.$t('title_action') }
-      ],
-      category: {}, //new item for category
-      isLoading: false,
-      productItemSelected: {},
-      responseProductList: [],
-      brandList: [],
-      productView: {},
-      numberPrint: 0,
-      barcodeItem: null,
-      barcodeListToPrint: [],
-      purchaseDetails: [],
-      fieldsPurchaseDetail: [
-        { key: 'no', label: this.$t('label_no') },
-        { key: 'date', label: this.$t('label_date_import'), },
-        { key: 'quantity', label: this.$t('label_quantity') },
-        { key: 'unitprice', label: this.$t('label_unit_price') + " ($)" },
-      ],
-      isLoadingPurchaseDetail: false,
-
-      optionStyleHtmlToPaper: {
-        specs: [
-          'fullscreen=yes',
-          'titlebar=no',
-          'scrollbars=no'
+        searchInput: null,
+        currentPage: 1,
+        perPage: 10,
+        totalItems: 0,
+        items: [],
+        fields: [
+          { key: 'name', label: this.$t('label_name') },
+          {
+            key: 'code', label: this.$t('title_barcode'),
+            tdAttr: (_, __, { name, code }) => ({
+              id: `${code}`
+            }), tdClass: 'td-code'
+          },
+          { key: 'category_name', label: this.$t('title_category') },
+          { key: 'brand', label: this.$t('title_brand') },
+          { key: 'loyalty', label: 'Loyalty' },
+          { key: 'sale_price', label: this.$t('label_unit_price') },
+          { key: 'actions', label: this.$t('title_action') }
         ],
-        styles: [
-          '../static/css/print.css',
+        category: {}, //new item for category
+        isLoading: false,
+        productItemSelected: {},
+        responseProductList: [],
+        brandList: [],
+        productView: {},
+        numberPrint: 0,
+        barcodeItem: null,
+        barcodeListToPrint: [],
+        purchaseDetails: [],
+        fieldsPurchaseDetail: [
+          { key: 'no', label: this.$t('label_no') },
+          { key: 'date', label: this.$t('label_date_import'), },
+          { key: 'quantity', label: this.$t('label_quantity') },
+          { key: 'unitprice', label: this.$t('label_unit_price') + " ($)" },
         ],
-        autoClose: true,
+        isLoadingPurchaseDetail: false,
+        optionStyleHtmlToPaper: {
+          specs: [
+            'fullscreen=yes',
+            'titlebar=no',
+            'scrollbars=no'
+          ],
+          styles: [
+            '../static/css/print.css',
+          ],
+          autoClose: true,
+        },
+      }
+    },
+    watch: {
+      newProductModal: {
+        handler(val) {
+        },
+        deep: true
       },
-    }
-  },
-  watch: {
-    newProductModal: {
-      handler(val) {
+      currentPage: {
+        handler: function (newValue, oldValue) {
+          this.currentPage = newValue ? newValue : 1;
+          this.getListProducts().catch(error => {
+            console.error(error)
+          });
+        }
+      }
+    },
+    methods: {
+      changePage(currentPage){
+        console.log(currentPage);
       },
-      deep: true
-    },
-    currentPage: {
-      handler: function (value) {
-        this.currentPage = value ? value : 1;
-        this.getListProducts().catch(error => {
-          console.error(error)
-        });
-      }
-    }
-  },
-  methods: {
-    async getListProducts() {
-      let self = this;
-      self.isLoading = true;
-      await self.$axios.get('/api/product/1' + ("?page=" + self.currentPage)).then(function (response) {
-        if (response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")) {
-          self.isLoading = false;
-          let items = [];
-          self.responseProductList = response.data.data;
-          for (let index = 0; index < response.data.data.length; index++) {
-            let productItem = response.data.data[index];
-            let newItem = {};
-            let brands = [];
-            if (productItem["brands"] && productItem["brands"].length > 0) {
-              for (let i = 0; i < productItem["brands"].length; i++) {
-                brands.push(productItem["brands"][i]["name"]);
-              }
-            }
-            newItem['id'] = productItem["id"];
-            newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
-            newItem['brand'] = brands.join(", ");
-            newItem['loyalty'] = "N/A";
-            newItem['image'] = productItem["image"];
-            newItem['brands'] = productItem["brands"];
-            if (productItem.hasOwnProperty("categories")) {
-              newItem['category_name'] = productItem["categories"]["name"];
-              newItem["categories"] = self.cloneObject(productItem["categories"]);
-            }
-            newItem['description'] = productItem["description"];
-            newItem['sale_price'] = productItem["sale_price"];
-            newItem['code'] = productItem["code"];
-            newItem["en_name"] = productItem["en_name"];
-            newItem["kh_name"] = productItem["kh_name"];
-            items.push(newItem);
-          }
-          self.items = self.cloneObject(items);
-          self.items.sort(self.sortByName);
-          self.totalItems = response.data.total;
-          self.perPage = response.data.per_page;
-        }
-      }).catch(function (error) {
-        console.log(error);
-        self.$toast.error("Submit data getting error").goAway(3000);
-      });
-    },
-    sortByName(a, b) {
-      if (a.kh_name === b.kh_name) {
-        return a.en_name > b.en_name ? 1 : -1;
-      }
-      return a.kh_name > b.kh_name ? 1 : -1;
-    },
-    showModal() {
-      this.newProductModal.showModal = true;
-      this.productItemSelected = {};
-    },
-    viewDetail(item, index, target) {
-      this.productView = item;
-      this.showDetailPriceProduct(item.id);
-      this.$refs['view-product-form-modal'].show();
-    },
-    async showDetailPriceProduct($productId) {
-      let self = this;
-      self.isLoadingPurchaseDetail = true;
-      await self.$axios.get('/api/product/history/' + $productId).then(function (response) {
-        if (response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")) {
-          if (response.data.data.length > 0) {
-            self.isLoadingPurchaseDetail = false;
-            let index = 0;
-            let purchaseDetails = [];
-            for (let item of response.data.data) {
-              let itemData = {};
-              let createdDate = new Date(item["created_at"]);
-              let dd = createdDate.getDate();
-              let mm = createdDate.getMonth() + 1;
-              let day = (dd < 10) ? ('0' + dd) : dd;
-              let month = (mm < 10) ? ('0' + mm) : mm;
-              let yyyy = createdDate.getFullYear();
-              itemData["date"] = (day + "/" + month + "/" + yyyy);
-              itemData["no"] = (index + 1);
-              itemData["quantity"] = item["quantity"];
-              itemData["unitprice"] = item["unitprice"];
-              purchaseDetails.push(itemData);
-              index++;
-            }
-            self.purchaseDetails = self.cloneObject(purchaseDetails);
-          }
-        }
-      }).catch(function (error) {
-        console.log(error);
-        self.$toast.error("Submit data getting error").goAway(3000);
-      });
-    },
-    adjustProduct(item, index, target) {
-      this.newProductModal.showModal = true;
-      this.productItemSelected = {};
-      this.productItemSelected.id = item["id"];
-      this.productItemSelected.en_name = item["en_name"];
-      this.productItemSelected.kh_name = item["kh_name"];
-      this.productItemSelected.image = item["image"];
-      let brandList = [];
-      if (item["brands"] && item["brands"].length > 0) {
-        for (let index = 0; index < item["brands"].length; index++) {
-          brandList.push({ name: item["brands"][index]['name'], value: item["brands"][index]['id'] });
-        }
-        this.productItemSelected.brand = brandList;
-      }
-      if (item.hasOwnProperty("categories") && item["categories"]["id"]) {
-        this.productItemSelected.category = item["categories"]["id"];
-      }
-      this.productItemSelected.description = item["description"];
-      this.productItemSelected.sale_price = item["sale_price"];
-      this.productItemSelected.code = item["code"];
-    },
-    async checkingProductAdd($event) {
-      let foundItem = false, indexItem = null, self = this;
-      if ($event && $event.hasOwnProperty("brands") && $event.hasOwnProperty("itemProduct")) {
-        let brands = $event.brands;
-        let itemProduct = this.cloneObject($event.itemProduct);
-        if (self.items.length > 0) {
-          for (let i = 0; i < self.items.length; i++) {
-            if (itemProduct.id === self.items[i].id) {
-              foundItem = true;
-              self.items[indexItem] = itemProduct;
-              break;
-            }
-          }
-        }
-        if (foundItem === false) {
-          self.items.unshift(itemProduct);
-        }
-      }
-    },
-    generateImageUrlDisplay(img) {
-      if (typeof window !== "undefined") {
-        return window.location.protocol + "//" + window.location.hostname + ":8000/" + "storage/img/" + img;
-      }
-    },
-    cloneObject(obj) {
-      return JSON.parse(JSON.stringify(obj));
-    },
-    async searchProduct() {
-      this.isLoading = true;
-      this.items = [];
-      let self = this;
-      if (self.searchInput) {
-        await self.$axios.post('/api/product/search', { search: self.searchInput }).then(function (response) {
-          self.isLoading = false;
-          if (response && response.hasOwnProperty("data")) {
+      async getListProducts() {
+        let self = this;
+        self.isLoading = true;
+        await self.$axios.post('/api/product-price/list'+ (this.currentPage ? "?page=" + this.currentPage : ""),{warehouse : self.$store.$cookies.get('storeItem'), pagination: true}).then(function (response) {
+          if (response.hasOwnProperty("data") && response.data.hasOwnProperty("data")) {
+            self.isLoading = false;
             let items = [];
-            self.responseProductList = response.data;
-            for (let index = 0; index < response.data.length; index++) {
-              let productItem = response.data[index];
+            let productList = response.data.data;
+            self.responseProductList = productList;
+            for (let index = 0; index < productList.length; index++) {
+              let productItem = productList[index];
               let newItem = {};
               let brands = [];
               if (productItem["brands"] && productItem["brands"].length > 0) {
@@ -420,67 +282,219 @@ export default {
               newItem['loyalty'] = "N/A";
               newItem['image'] = productItem["image"];
               newItem['brands'] = productItem["brands"];
-
               if (productItem.hasOwnProperty("categories")) {
                 newItem['category_name'] = productItem["categories"]["name"];
                 newItem["categories"] = self.cloneObject(productItem["categories"]);
               }
-
               newItem['description'] = productItem["description"];
-              newItem['sale_price'] = productItem["sale_price"];
               newItem['code'] = productItem["code"];
               newItem["en_name"] = productItem["en_name"];
               newItem["kh_name"] = productItem["kh_name"];
+              if(productItem.hasOwnProperty("product_price") && productItem["product_price"].length > 0){
+                newItem['sale_price'] = productItem["product_price"][0]["sale_price"];
+              }
               items.push(newItem);
             }
             self.items = self.cloneObject(items);
-            self.totalItems = items.length;
+            self.items.sort(self.sortByName);
+            self.totalItems = response.data.total;
+            self.perPage = response.data.per_page;
           }
         }).catch(function (error) {
           console.log(error);
-          self.$toast.error("getting data error ").goAway(2000);
+          self.$toast.error("Submit data getting error").goAway(3000);
         });
-      }
-      else {
-        self.items = [];
-        self.totalItems = 0;
-        self.perPage = 10;
-      }
-    },
-    handleClick(e) {
-      if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
-        this.searchInput = '';
-        this.getListProducts();
-      }
-    },
-    barcodePrint() {
-      //this.$htmlToPaper(("barcode-" + this.barcodeItem.code));
-      this.$htmlToPaper(("barcode-" + this.barcodeItem.code), this.optionStyleHtmlToPaper);
-      this.barcodeItem = {};
-      this.numberPrint = 0;
-    },
-    barcodeInputNumberPrint(item) {
-      this.barcodeItem = item;
-      this.$refs['input-number-barcode-modal'].show();
-    },
-    updateNumberBarcodePrint(input) {
-      this.barcodeListToPrint = [];
-      if (input > 0) {
-        for (let i = 1; i <= input; i++) {
-          this.barcodeListToPrint.push(this.barcodeItem.code);
+      },
+      sortByName(a, b) {
+        if (a.kh_name === b.kh_name) {
+          return a.en_name > b.en_name ? 1 : -1;
         }
+        return a.kh_name > b.kh_name ? 1 : -1;
+      },
+      showModal() {
+        this.newProductModal.showModal = true;
+        this.productItemSelected = {};
+      },
+      viewDetail(item, index, target) {
+        this.productView = item;
+        console.log(item);
+        this.showDetailPriceProduct(item.id);
+        this.$refs['view-product-form-modal'].show();
+      },
+      async showDetailPriceProduct($productId) {
+        let self = this;
+        self.isLoadingPurchaseDetail = true;
+        await self.$axios.get('/api/product/history/' + $productId).then(function (response) {
+          if (response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")) {
+            if (response.data.data.length > 0) {
+              self.isLoadingPurchaseDetail = false;
+              let index = 0;
+              let purchaseDetails = [];
+              for (let item of response.data.data) {
+                let itemData = {};
+                let createdDate = new Date(item["created_at"]);
+                let dd = createdDate.getDate();
+                let mm = createdDate.getMonth() + 1;
+                let day = (dd < 10) ? ('0' + dd) : dd;
+                let month = (mm < 10) ? ('0' + mm) : mm;
+                let yyyy = createdDate.getFullYear();
+                itemData["date"] = (day + "/" + month + "/" + yyyy);
+                itemData["no"] = (index + 1);
+                itemData["quantity"] = item["quantity"];
+                itemData["unitprice"] = item["unitprice"];
+                purchaseDetails.push(itemData);
+                index++;
+              }
+              self.purchaseDetails = self.cloneObject(purchaseDetails);
+            }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("Submit data getting error").goAway(3000);
+        });
+      },
+      adjustProduct(item, index, target) {
+        this.newProductModal.showModal = true;
+        this.productItemSelected = {};
+        this.productItemSelected.id = item["id"];
+        this.productItemSelected.en_name = item["en_name"];
+        this.productItemSelected.kh_name = item["kh_name"];
+        this.productItemSelected.image = item["image"];
+        let brandList = [];
+        if (item["brands"] && item["brands"].length > 0) {
+          for (let index = 0; index < item["brands"].length; index++) {
+            brandList.push({ name: item["brands"][index]['name'], value: item["brands"][index]['id'] });
+          }
+          this.productItemSelected.brand = brandList;
+        }
+        if (item.hasOwnProperty("categories") && item["categories"]["id"]) {
+          this.productItemSelected.category = item["categories"]["id"];
+        }
+        this.productItemSelected.description = item["description"];
+        this.productItemSelected.sale_price = item["sale_price"];
+        this.productItemSelected.code = item["code"];
+      },
+      async checkingProductAdd($event) {
+        let foundItem = false, indexItem = null, self = this;
+        if ($event && $event.hasOwnProperty("brands") && $event.hasOwnProperty("itemProduct")) {
+          let brands = $event.brands;
+          let itemProduct = this.cloneObject($event.itemProduct);
+          if (self.items.length > 0) {
+            let findingItem = self.items.find(productFind => productFind.id === itemProduct.id);
+            if(findingItem !== undefined){
+              foundItem = true;
+              let indexFound = self.items.indexOf(findingItem);
+              self.items[indexFound]["sale_price"] = itemProduct["sale_price"];
+              self.items[indexFound] = itemProduct;
+            }
+          }
+          if (foundItem === false) {
+            self.items.unshift(itemProduct);
+          }
+        }
+      },
+      whenDepsChange(update){
+
+      },
+      generateImageUrlDisplay(img) {
+        if (typeof window !== "undefined") {
+          return window.location.protocol + "//" + window.location.hostname + ":8000/" + "storage/img/" + img;
+        }
+      },
+      cloneObject(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      },
+      async searchProduct() {
+        this.isLoading = true;
+        this.items = [];
+        let self = this;
+        if (self.searchInput) {
+          await self.$axios.post('/api/product/search', { search: self.searchInput ,warehouse : self.$store.$cookies.get('storeItem'), pagination : true}).then(function (response) {
+            self.isLoading = false;
+            if (response) {
+              let items = [];
+              let responseData = (response.hasOwnProperty("data") && response.data.hasOwnProperty("data")) ? response.data.data : (response.hasOwnProperty("data") ? response.data : response);
+              self.responseProductList = responseData;
+              if(responseData && responseData.length > 0){
+                for (let index = 0; index < responseData.length; index++) {
+                  let productItem = responseData[index];
+                  let newItem = {};
+                  let brands = [];
+                  if (productItem["brands"] && productItem["brands"].length > 0) {
+                    for (let i = 0; i < productItem["brands"].length; i++) {
+                      brands.push(productItem["brands"][i]["name"]);
+                    }
+                  }
+                  newItem['id'] = productItem["id"];
+                  newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
+                  newItem['brand'] = brands.join(", ");
+                  newItem['loyalty'] = "N/A";
+                  newItem['image'] = productItem["image"];
+                  newItem['brands'] = productItem["brands"];
+
+                  if (productItem.hasOwnProperty("categories")) {
+                    newItem['category_name'] = productItem["categories"]["name"];
+                    newItem["categories"] = self.cloneObject(productItem["categories"]);
+                  }
+
+                  newItem['description'] = productItem["description"];
+                  if(productItem.hasOwnProperty("product_price")){
+                    newItem['sale_price'] = productItem["product_price"][0]["sale_price"];
+                  }
+                  newItem['code'] = productItem["code"];
+                  newItem["en_name"] = productItem["en_name"];
+                  newItem["kh_name"] = productItem["kh_name"];
+                  items.push(newItem);
+                }
+                self.items = self.cloneObject(items);
+                self.totalItems = items.length;
+              }
+            }
+          }).catch(function (error) {
+            console.log(error);
+            self.$toast.error("getting data error ").goAway(2000);
+          });
+        }
+        else {
+          self.items = [];
+          self.totalItems = 0;
+          self.perPage = 10;
+        }
+      },
+      handleClick(e) {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+          this.searchInput = '';
+          this.getListProducts();
+        }
+      },
+      barcodePrint() {
+        //this.$htmlToPaper(("barcode-" + this.barcodeItem.code));
+        this.$htmlToPaper(("barcode-" + this.barcodeItem.code), this.optionStyleHtmlToPaper);
+        this.barcodeItem = {};
+        this.numberPrint = 0;
+      },
+      barcodeInputNumberPrint(item) {
+        this.barcodeItem = item;
+        this.$refs['input-number-barcode-modal'].show();
+      },
+      updateNumberBarcodePrint(input) {
+        this.barcodeListToPrint = [];
+        if (input > 0) {
+          for (let i = 1; i <= input; i++) {
+            this.barcodeListToPrint.push(this.barcodeItem.code);
+          }
+        }
+      },
+    },
+    mounted() {
+      this.getListProducts();
+    },
+    computed: {
+      rows() {
+        return this.items.length
       }
     },
-  },
-  mounted() {
-    this.getListProducts();
-  },
-  computed: {
-    rows() {
-      return this.items.length
-    }
-  },
-}
+  }
 </script>
 
 <style scoped>
@@ -521,6 +535,6 @@ export default {
 }
 
 .content-table-scroll-product {
-  max-height: calc(100vh - 170px);
+  max-height: calc(100vh - 235px);
 }
 </style>
