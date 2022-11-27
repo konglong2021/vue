@@ -56,8 +56,13 @@
           </div>
         </div>
         <b-modal id="modal-create-supplier" ref="supplier-form-modal" size="lg"
-                 @hidden="onResetSupplier" :cancel-title="$t('label_cancel_button')" no-close-on-backdrop
-                 @ok="handleOnSubmitSupplier" :ok-title="$t('label_save_button')" :title="$t('title_new_supplier')">
+                 @hidden="onResetSupplier"
+                 :cancel-title="$t('label_cancel_button')"
+                 no-close-on-backdrop
+                 :ok-only="isViewData"
+                 @ok="handleOnSubmitSupplier" :ok-title="isViewData ? $t('label_close_button') : $t('label_save_button')"
+                 :title="isViewData ? $t('title_view_supplier') : (supplier.id ? $t('title_edit_supplier') : $t('title_new_supplier'))"
+        >
           <b-form enctype="multipart/form-data" @submit.stop.prevent="onSubmitSupplier">
             <div class="full-content">
             </div>
@@ -65,25 +70,25 @@
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-name'" class="label-input">{{ $t('label_name') }}</label></b-col>
                 <b-col sm="8">
-                  <b-form-input :id="'input-name'" type="text" v-model="supplier.name" class="input-content"></b-form-input>
+                  <b-form-input :id="'input-name'" type="text" v-model="supplier.name" class="input-content" :disabled="isViewData"></b-form-input>
                 </b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-address'" class="label-input">{{ $t('label_address') }}</label></b-col>
                 <b-col sm="8">
-                  <b-form-input :id="'input-address'" type="text" v-model="supplier.address" class="input-content"></b-form-input>
+                  <b-form-input :id="'input-address'" type="text" v-model="supplier.address" class="input-content" :disabled="isViewData"></b-form-input>
                 </b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-email'" class="label-input">{{ $t('label_email') }}</label></b-col>
                 <b-col sm="8">
-                  <b-form-input :id="'input-email'" type="email" v-model="supplier.email" class="input-content"></b-form-input>
+                  <b-form-input :id="'input-email'" type="email" v-model="supplier.email" class="input-content" :disabled="isViewData"></b-form-input>
                 </b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-phone'" class="label-input">{{ $t('label_phone') }}</label></b-col>
                 <b-col sm="8">
-                  <b-form-input :id="'input-phone'" class="input-content" v-model="supplier.phone"></b-form-input>
+                  <b-form-input :id="'input-phone'" class="input-content" v-model="supplier.phone" :disabled="isViewData"></b-form-input>
                 </b-col>
               </b-row>
             </div>
@@ -114,22 +119,25 @@
         isLoading : true,
         maskDate: [/\d/, /\d/, '/', /\d/, /\d/, '/', /\d/, /\d/, /\d/, /\d/],
         searchInput: null,
+        isViewData: false,
       }
     },
     watch : {
-      currentPage: {
-        handler: function(value) {
-          this.getAllSupplier().catch(error => {
-            console.error(error)
-          });
-        }
-      }
+      // currentPage: {
+      //   handler: function(value) {
+      //     this.getAllSupplier().catch(error => {
+      //       console.error(error)
+      //     });
+      //   }
+      // }
     },
     methods:{
       showModal(){
+        this.isViewData = false;
         this.$refs['supplier-form-modal'].show();
       },
       hideModalSupplier(){
+        this.isViewData = false;
         this.$refs['supplier-form-modal'].hide();
       },
       async getAllSupplier(){
@@ -146,8 +154,10 @@
           });
       },
       handleOnSubmitSupplier(bvModalEvent){
-        bvModalEvent.preventDefault();
-        this.onSubmitSupplier();
+        if(!this.isViewData){
+          bvModalEvent.preventDefault();
+          this.onSubmitSupplier();
+        }
       },
       onSubmitSupplier(){
         let vm = this;
@@ -192,8 +202,13 @@
       onResetSupplier(){
         this.supplier = {};
       },
-      viewDetail(item, index, target){},
+      viewDetail(item, index, target){
+        this.isViewData = true;
+        this.supplier = item;
+        this.$refs['supplier-form-modal'].show();
+      },
       editData(item, index, target){
+        this.isViewData = false;
         this.supplier = item;
         this.$refs['supplier-form-modal'].show();
       },
@@ -206,7 +221,8 @@
         self.items = [];
         await this.$axios.post('/api/supplier/search', {search: this.searchInput}).then(function (response) {
           if(response && response.hasOwnProperty("data")){
-            self.items = vm.cloneObject(response.data);
+            self.isLoading = false;
+            self.items = self.cloneObject(response.data);
           }
         }).catch(function (error) {
           console.log(error);

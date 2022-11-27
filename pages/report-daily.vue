@@ -144,7 +144,7 @@ export default {
         let vm = this;
         vm.products = [];
 
-        await vm.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem'))).then(function (response) {
+        await vm.$axios.post('/api/stockbywarehouse/',{ "warehouse": ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')), paginate: false}).then(function (response) {
           if(response && response.hasOwnProperty("data")){
             let dataResponse = response.data;
             if(dataResponse && dataResponse.length > 0){
@@ -154,7 +154,7 @@ export default {
                 if(productList && productList.length > 0){
                   for(let index=0; index < productList.length; index++){
                     let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
-                    productItem.id = productList[index].id;
+                    productItem.id = productList[index].product_id;
                     productItem.en_name = productList[index].en_name;
                     productItem.kh_name = productList[index].kh_name;
                     productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
@@ -166,7 +166,7 @@ export default {
                 }
                 else if(productList && productList.hasOwnProperty("id")){
                   let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
-                  productItem.id = productList.id;
+                  productItem.id = productList.product_id;
                   productItem.name = productList.en_name + " (" + productList.kh_name + ")";
                   productItem.en_name = productList.en_name;
                   productItem.kh_name = productList.kh_name;

@@ -497,8 +497,11 @@
                 }
 
                 newItem['description'] = productItem["description"];
-                if(productItem.hasOwnProperty("product_price")){
+                if(productItem.hasOwnProperty("product_price") && productItem["product_price"] && productItem["product_price"].length > 0){
                   newItem['sale_price'] = productItem["product_price"][0]["sale_price"];
+                  newItem["warehouse_id"] = productItem["product_price"][0]["warehouse_id"];
+                  let warehouseItem = self.warehouseList.find(w => w.id === productItem["product_price"][0]["warehouse_id"]);
+                  newItem["warehouse"] = (productItem["warehouse"] ? productItem["warehouse"] : (warehouseItem["name"] + " (" + warehouseItem["address"] + ")"));
                 }
                 newItem['code'] = productItem["code"];
                 newItem["en_name"] = productItem["en_name"];

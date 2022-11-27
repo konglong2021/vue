@@ -20,18 +20,10 @@
             <b-row>
               <b-col sm="12">
                 <div v-if="errors.length">
-                  <b class="text-danger">Please input all data:</b>
+                  <b class="text-danger">បញ្ចូលទិន្នន័យទាំងអស់!!!!!:</b>
                 </div>
               </b-col>
             </b-row>
-<!--            <b-row class="my-1">-->
-<!--              <b-col sm="4"><label :for="'warehouse'" class="label-input">ឃ្លាំងទំនិញ</label></b-col>-->
-<!--              <b-col sm="8">-->
-<!--                  <b-form-select-->
-<!--                    :id="'warehouse'" class="form-control input-content"-->
-<!--                    v-model="warehouseDefault" :options="warehouseList" disabled></b-form-select>-->
-<!--              </b-col>-->
-<!--            </b-row>-->
             <b-row class="my-1">
               <b-col sm="4"><label :for="'input-enname'" class="label-input">ឈ្មោះទំនិញជាអង់គ្លេស</label></b-col>
               <b-col sm="8">

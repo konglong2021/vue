@@ -9,13 +9,17 @@
                   <div class="input-group input-group-sm search-content">
                     <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>
                     <input
-                      class="form-control input-search-box" type="search" placeholder="ស្វែងរកទំនិញ..."  v-model="searchInput"
-                      @keyup.enter="searchProduct()" v-inputTextUppercase
+                      class="form-control input-search-box" type="search" placeholder="ស្វែងរកទំនិញ..."
+                      v-model="searchInput" @keyup.enter="searchProduct()"
+                      @change="handleClick" v-inputTextUppercase
                     />
                   </div>
                 </b-col>
                 <b-col sm="6" v-can="'warehouse_access'">
-                  <b-form-select class="form-control input-content input-select-warehouse" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
+                  <b-form-select
+                    class="form-control input-content input-select-warehouse"
+                    v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"
+                  ></b-form-select>
                 </b-col>
               </b-row>
             </b-container>
@@ -29,7 +33,7 @@
             @keyup.enter="searchAndSelectedProduct(scanningInput)"
            autofocus ref="scanningInput" placeholder="បញ្ចូលបារកូដទំនិញ..."></b-form-input>
         </div>
-        <div v-if="!productLoading && warehouse" >
+        <div v-if="!productLoading && warehouse">
           <div class="content-product" v-if="products && products.length > 0">
             <div  v-for="p in products" class="pro-item" v-bind:key="p.id" @click="selectProductItem(p)">
               <div class="pro-img" :style="{ backgroundImage: `url('${p.img}')` }">
@@ -83,7 +87,7 @@
         vm.productLoading = true;
         let $cookiesWarehouse = vm.$store.$cookies.get('storeItem');
         if($warehouse){
-          await vm.$axios.post('/api/stockbywarehouse',{'warehouse' : $cookiesWarehouse, pagination: true}).then(function (response) {
+          await vm.$axios.post('/api/stockbywarehouse',{'warehouse' : $warehouse ? $warehouse : $cookiesWarehouse, pagination: false}).then(function (response) {
             if(response && response.hasOwnProperty("data")){
               vm.productLoading = false;
               let dataResponse = (response.data && response.data.hasOwnProperty("data")) ? response.data.data : response.data;
@@ -170,7 +174,6 @@
       selectProductItem(item){
         this.$emit('selectProduct', item);
       },
-
       cloneObject(obj) {
         return JSON.parse(JSON.stringify(obj));
       },
@@ -179,10 +182,9 @@
           return window.location.protocol + "//" + window.location.hostname + ":8000/" + "storage/img/" + img;
         }
       },
-      async searchProduct(){
-          let $warehouse = this.$store.$cookies.get('storeItem');
+      async searchProduct($warehouse){
           let self = this;
-          await self.$axios.post('/api/stockbywarehouse', {'warehouse' : $warehouse, pagination: false, "search": self.searchInputData})
+          await self.$axios.post('/api/stockbywarehouse', {'warehouse' : $warehouse ? $warehouse : self.warehouse, pagination: false, "search": self.searchInputData})
             .then(function (response) {
               if(response && response.hasOwnProperty("data") && response.data.length > 0){
                 let items = [];
@@ -226,7 +228,7 @@
       handleClick(e) {
         if(e.target.value === '' || e.target.value === null || e.target.value === undefined){
           this.searchInput = '';
-          this.getListProduct();
+          this.getListProduct(this.warehouse);
         }
       },
       async searchAndSelectedProduct(scanningInput){
@@ -278,8 +280,8 @@
       this.warehouse = this.$store.$cookies.get('storeItem');
       if(this.$store.$cookies.get('storeItem')){
         this.$refs.scanningInput.focus();
-        console.log(this.$store.$cookies.get('storeItem'));
-        this.getListProduct(this.$store.$cookies.get('storeItem'));
+       // console.log(this.$store.$cookies.get('storeItem'));
+        //this.getListProduct(this.$store.$cookies.get('storeItem'));
       }
       this.getWareHouseList();
     }
