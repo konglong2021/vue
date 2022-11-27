@@ -61,7 +61,7 @@
           </div>
           <div class="form-column-input">
             <b-form-input :id="'input-getting-money-usd'" type="number" class="input-content" min="0"
-              @keyup="deleteInput(event)" v-model="gettingMoneyUsd"></b-form-input>
+              @keyup="deleteInput($event)" v-model="gettingMoneyUsd"></b-form-input>
           </div>
         </div>
         <div class="form-row-content-money pull-left">
@@ -391,8 +391,8 @@ export default {
       }
       return '';
     },
-    deleteInput(event) {
-      console.log('delete input', event);
+    deleteInput($event) {
+      console.log('delete input', $event);
     },
 
     buildPrintItems() {

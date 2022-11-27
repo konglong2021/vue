@@ -104,7 +104,7 @@
         </div>
       </div>
     </div>
-    <add-new-product-modal v-model="newProductModal" @checkingProductAdd="checkingProductAdd($event)" />
+    <add-new-product-modal v-model="newProductModal" @checkingProductAdd="checkingProductAdd($event)" :warehouseList="warehouses" />
     <!--no need to import it will automatically rendering it -->
     <b-modal id="modal-create-supplier" ref="supplier-form-modal" size="lg" @hidden="onResetSupplier"
       :cancel-title="$t('label_cancel_button')" @ok="handleOnSubmitSupplier" :ok-title="$t('label_save_button')"
@@ -416,7 +416,7 @@ export default {
           console.log(error);
           self.$toast.error("getting data error ").goAway(2000);
         });
-      },
+    },
     generateImageUrlDisplay(img) {
       if (typeof window !== "undefined") {
         return window.location.protocol + "//" + window.location.hostname + ":8000/" + "storage/img/" + img;

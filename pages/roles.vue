@@ -18,7 +18,7 @@
                       <input
                         class="form-control input-search-box"
                         type="search"
-                        placeholder="Search..."
+                        placeholder="ស្វែងរក..."
                       />
                     </div>
                   </b-col>
@@ -59,13 +59,13 @@
           <b-form enctype="multipart/form-data">
             <div class="full-content">
               <b-row class="my-1">
-                <b-col sm="4"><label class="label-input">Title Role</label></b-col>
+                <b-col sm="4"><label class="label-input">ប្រភេទអ្នកប្រើប្រាស់</label></b-col>
                 <b-col sm="8">
                   <span>{{ roleView.title }}</span>
                 </b-col>
               </b-row>
               <b-row class="my-1">
-                <b-col sm="4"><label class="label-input">Permission</label></b-col>
+                <b-col sm="4"><label class="label-input">សិទ្ធប្រើប្រាស់</label></b-col>
                 <b-col sm="8">
                   <span>{{ roleView.permission }}</span>
                 </b-col>
@@ -82,17 +82,17 @@
           <b-form enctype="multipart/form-data">
             <div class="full-content" style="min-height: 250px;">
               <b-row class="my-1">
-                <b-col sm="4"><label class="label-input">Title Role</label></b-col>
+                <b-col sm="4"><label class="label-input">ប្រភេទអ្នកប្រើប្រាស់</label></b-col>
                 <b-col sm="8"><b-form-input type="text" v-model="roleEdit.title" class="input-content"></b-form-input></b-col>
               </b-row>
               <b-row class="my-1">
-                <b-col sm="4"><label class="label-input">Permissions</label></b-col>
+                <b-col sm="4"><label class="label-input">សិទ្ធប្រើប្រាស់</label></b-col>
                 <b-col sm="8">
                   <multiselect
                           class="input-content"
                           v-model="roleEdit.permission" :options="permissions"
-                          track-by="name" label="name" :multiple="true"
-                          :show-labels="false" aria-placeholder="Select Permission"
+                          track-by="name" label="name" :show-labels="false"
+                          :multiple="true" aria-placeholder="Select Permission"
                           @select="selectionChange"
                           @remove="removeElement"
                   ></multiselect>
@@ -115,9 +115,9 @@
             isLoading: false,
             items: [],
             fields: [
-              { key: "title", label: "Title" },
-              { key: "permission", label: "Permission", },
-              { key: "actions", label: "Actions" }
+              { key: "title", label: "ប្រភេទអ្នកប្រើប្រាស់" },
+              { key: "permission", label: "សិទ្ធប្រើប្រាស់", },
+              { key: "actions", label: "សកម្មភាព" }
               ],
             roleView: {},
             roleEdit: {},
@@ -125,6 +125,9 @@
           };
         },
         methods: {
+          customLabel ({ title, desc }) {
+            return `${title} – ${desc}`
+          },
             cloneObject(obj) {
                 return JSON.parse(JSON.stringify(obj));
             },
@@ -132,10 +135,10 @@
               let self = this;
               await self.$axios.get('/api/permission').then(function (response) {
                 if(response.hasOwnProperty("data")){
-                      for(let index=0; index < response.data.length; index++){
-                          self.permissions.push({name : response.data[index]["title"], value : response.data[index]["id"]});
-                      }
+                  for(let index=0; index < response.data.length; index++){
+                    self.permissions.push({name : self.$t(response.data[index]["title"]), value : response.data[index]["id"]});
                   }
+                }
               }).catch(function (error) {
                 self.$toast.error("getting data error ").goAway(2000);
                 console.log(error);
@@ -153,16 +156,18 @@
                                 let roleItemResponse = response.data[index];
                                 let itemRole = [];
                                 let permissions = [];
+                                let permissionTextArray = [];
                                 if(roleItemResponse["permissions"] && roleItemResponse["permissions"].length > 0){
                                     for(let i =0; i < roleItemResponse["permissions"].length; i++){
-                                        permissions.push(roleItemResponse["permissions"][i]["title"]);
+                                      permissionTextArray.push(self.$t(roleItemResponse["permissions"][i]["title"]));
+                                      permissions.push(self.$t(roleItemResponse["permissions"][i]["title"]));
                                     }
                                 }
                                 itemRole["permissions"] = self.cloneObject(roleItemResponse["permissions"]);
                                 itemRole["permission"] = permissions.join(", ");
                                 itemRole["title"] = response.data[index]["title"];
                                 itemRole["id"] = response.data[index]["id"];
-                                itemRole['permissionString'] = itemRole["permissions"].join(", ");
+                                itemRole['permissionString'] = permissionTextArray.join(", ");
                                 self.items.push(itemRole);
                             }
                         }
@@ -182,7 +187,7 @@
                 let permissionList = [];
                 if(item.hasOwnProperty("permissions")){
                     for (let index=0; index < item["permissions"].length; index++){
-                        permissionList.push({name: item["permissions"][index]["title"], value: item["permissions"][index]["id"]});
+                        permissionList.push({name: this.$t(item["permissions"][index]["title"]), value: item["permissions"][index]["id"]});
                     }
                     this.roleEdit["permission"] = this.cloneObject(permissionList);
                 }
@@ -295,3 +300,8 @@
         }
     };
 </script>
+<style scoped>
+.multiselect{
+  display: inline-block;
+}
+</style>

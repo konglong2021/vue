@@ -83,14 +83,16 @@
         vm.productLoading = true;
         let $cookiesWarehouse = vm.$store.$cookies.get('storeItem');
         if($warehouse){
-          await vm.$axios.post('/api/stockbywarehouse',{'warehouse' : $cookiesWarehouse, pagination: false}).then(function (response) {
+          await vm.$axios.post('/api/stockbywarehouse',{'warehouse' : $cookiesWarehouse, pagination: true}).then(function (response) {
             if(response && response.hasOwnProperty("data")){
               vm.productLoading = false;
-              let dataResponse = response.data;
+              let dataResponse = (response.data && response.data.hasOwnProperty("data")) ? response.data.data : response.data;
+
+              console.log(dataResponse);
               if(dataResponse && dataResponse.length > 0){
-                vm.totalRows = response.data.length;
+                vm.totalRows = (response.data && response.data.hasOwnProperty("data")) ? response.data.total : response.data.length;
                 for(let i=0; i < dataResponse.length; i++){
-                  let productList = dataResponse[i].product;
+                  let productList = dataResponse[i];
                   if(productList && productList.length > 0){
                     for(let index=0; index < productList.length; index++){
                       let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
@@ -182,33 +184,33 @@
           let self = this;
           await self.$axios.post('/api/stockbywarehouse', {'warehouse' : $warehouse, pagination: false, "search": self.searchInputData})
             .then(function (response) {
-              if(response.data && response.hasOwnProperty("data") && response.data.length > 0){
-                  let items = [];
-                  self.responseProductList = response.data;
-                  let datas =  response.data;
-                  for(let i=0; i < datas.length; i++){
-                      let productList = datas[i].product;
-                      if(productList && productList.length > 0){
-                          for(let index=0; index < productList.length; index++){
-                              let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
-                              productItem.id = productList[index].id;
-                              productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
-                              productItem.price = productList[index].sale_price;
-                              productItem.img = (productList[index].image !== "no image" && productList[index].image !== "no image created" ) ? self.generateImageUrlDisplay(productList[index].image) : "images/no_icon.png";
-                              productItem.code = productList[index].code;
-                              items.unshift(productItem);
-                          }
-                      }
-                      else if(productList && productList.hasOwnProperty("id")){
-                          let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
-                          productItem.id = productList.id;
-                          productItem.name = productList.en_name + " (" + productList.kh_name + ")";
-                          productItem.price = productList.sale_price;
-                          productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? self.generateImageUrlDisplay(productList.image) : "images/no_icon.png";
-                          productItem.code = productList.code;
-                          items.unshift(productItem);
-                      }
+              if(response && response.hasOwnProperty("data") && response.data.length > 0){
+                let items = [];
+                self.responseProductList = response.data;
+                let datas =  response.data;
+                for(let i=0; i < datas.length; i++){
+                  let productList = datas[i];
+                  if(productList && productList.length > 0){
+                    for(let index=0; index < productList.length; index++){
+                      let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                      productItem.id = productList[index].id;
+                      productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
+                      productItem.price = productList[index].sale_price;
+                      productItem.img = (productList[index].image !== "no image" && productList[index].image !== "no image created" ) ? self.generateImageUrlDisplay(productList[index].image) : "images/no_icon.png";
+                      productItem.code = productList[index].code;
+                      items.unshift(productItem);
+                    }
                   }
+                  else if(productList && productList.hasOwnProperty("id")){
+                    let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                    productItem.id = productList.id;
+                    productItem.name = productList.en_name + " (" + productList.kh_name + ")";
+                    productItem.price = productList.sale_price;
+                    productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? self.generateImageUrlDisplay(productList.image) : "images/no_icon.png";
+                    productItem.code = productList.code;
+                    items.unshift(productItem);
+                  }
+                }
                   self.products = self.cloneObject(items);
               }
               else{
@@ -274,6 +276,7 @@
       this.warehouse = this.$store.$cookies.get('storeItem');
       if(this.$store.$cookies.get('storeItem')){
         this.$refs.scanningInput.focus();
+        console.log(this.$store.$cookies.get('storeItem'));
         this.getListProduct(this.$store.$cookies.get('storeItem'));
       }
       this.getWareHouseList();

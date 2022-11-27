@@ -24,6 +24,14 @@
                 </div>
               </b-col>
             </b-row>
+<!--            <b-row class="my-1">-->
+<!--              <b-col sm="4"><label :for="'warehouse'" class="label-input">ឃ្លាំងទំនិញ</label></b-col>-->
+<!--              <b-col sm="8">-->
+<!--                  <b-form-select-->
+<!--                    :id="'warehouse'" class="form-control input-content"-->
+<!--                    v-model="warehouseDefault" :options="warehouseList" disabled></b-form-select>-->
+<!--              </b-col>-->
+<!--            </b-row>-->
             <b-row class="my-1">
               <b-col sm="4"><label :for="'input-enname'" class="label-input">ឈ្មោះទំនិញជាអង់គ្លេស</label></b-col>
               <b-col sm="8">
@@ -90,6 +98,10 @@
         type:Object,
         require:false
       },
+      warehouseList:{
+        type:Array,
+        require:true
+      }
     },
     data() {
       return {
@@ -108,6 +120,7 @@
         uploadFile: null,
         file: null,
         errors: [],
+        warehouseDefault : this.$store.$cookies.get('storeItem'),
       };
     },
     watch:{
