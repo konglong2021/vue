@@ -64,8 +64,11 @@
             </div>
           </div>
           <div class="display-inline-block full-with" v-if="!isShowFormAddProductInPurchase">
-            <transfer-stock v-model="stockTransfer" :warehouseOption="warehouseOption"
-              :products="productListOptionForTransfer" :productList="productListForTransfer" v-can="'inventory_access'"></transfer-stock>
+            <transfer-stock
+              v-model="stockTransfer" :warehouseOption="warehouseOption"
+              :products="productListOptionForTransfer" :productList="productListForTransfer" v-can="'inventory_access'"
+              :warehouseList="warehouseList"
+            ></transfer-stock>
             <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading" v-can="'inventory_access'">
               <h4 class="font-700">{{$t('product_list')}}</h4>
               <b-table :items="items" :fields="fields" stacked="md" show-empty small>
@@ -84,7 +87,7 @@
             </div>
             <div class="full-content" v-if="stockTransfer.show === false">
               <div class="content-table-data">
-                <div class="table-responsive">
+                <div class="table-responsive" v-if="stockItems.length > 0">
                   <b-table id="table-stock" class="table table-striped table-bordered"
                            v-if="!loadingFields.stockLoading && isShowStockTable"
                            :items="stockItems"
@@ -92,8 +95,9 @@
                            head-variant="light">
                   </b-table>
                 </div>
+                <div v-if="stockItems.length === 0"><h3 class="text-center color-info">មិនមានទំនិញក្នុងស្តុកទេ</h3></div>
               </div>
-              <b-pagination align="right" style="margin-top: 10px !important;" size="md" :disabled="loadingFields.stockLoading || !isShowStockTable" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
+              <b-pagination v-if="stockItems.length > 0" align="right" style="margin-top: 10px !important;" size="md" :disabled="loadingFields.stockLoading || !isShowStockTable" :total-rows="totalItems" v-model="currentPage" @change="currentPageClick($event,currentPage)" :per-page="perPage" first-number last-number></b-pagination>
             </div>
           </div>
           <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading" v-can="'inventory_view'">
@@ -358,7 +362,6 @@ export default {
       warehouseOption: [],
       productListForTransfer: [],
       productListOptionForTransfer: [],
-
     };
   },
   watch: {
@@ -371,16 +374,20 @@ export default {
       handler(val) {
       }
     },
-    currentPage: {
-      handler: function(value) {
-        this.currentPage = value ? value : 1;
-        this.showStockTable();
-      }
-    }
+    // currentPage: {
+    //   handler: function(value) {
+    //     this.currentPage = value ? value : 1;
+    //     this.showStockTable();
+    //   }
+    // }
   },
   computed: {
   },
   methods: {
+    currentPageClick($event,currentPage){
+      this.currentPage = $event;
+      this.showStockTable(this.warehouse);
+    },
     async getListProductForTransferStock($warehouse) {
       let self = this;
       self.productListForTransfer = [];
@@ -425,6 +432,8 @@ export default {
     selectedWarehouse(warehouse) {
       if (warehouse) {
         this.warehouse_id = warehouse;
+        this.currentPage = 1;
+        this.totalItems = 0;
         this.showStockTable(warehouse);
       }
     },
@@ -433,7 +442,7 @@ export default {
       let vm = this;
       vm.stockItems = [];
       vm.loadingFields.stockLoading = true;
-      vm.$axios.post('/api/stockbywarehouse'+ (this.currentPage ? "?page=" + this.currentPage : ""),{'warehouse' : vm.$store.$cookies.get('storeItem'), pagination: true})
+      vm.$axios.post('/api/stockbywarehouse'+ (this.currentPage ? "?page=" + this.currentPage : ""),{'warehouse' : ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')), pagination: true})
         .then(function (response) {
           if (response.data && response.data.hasOwnProperty("data")) {
             vm.loadingFields.stockLoading = false;
@@ -955,7 +964,7 @@ export default {
       let self = this;
       self.stockItems = [];
       self.loadingFields.stockLoading = true;
-      await self.$axios.post('/api/stockbywarehouse'+ (this.currentPage ? "?page=" + this.currentPage : ""), { search: self.searchInput, warehouse: self.warehouse, pagination: true }).then(function (response) {
+      await self.$axios.post('/api/stockbywarehouse' + "?page=1", { search: self.searchInput, warehouse: self.warehouse, pagination: true }).then(function (response) {
         if (response.data && response.data.hasOwnProperty("data")) {
           self.loadingFields.stockLoading = false;
           let dataStock = response.data.data;

@@ -41,7 +41,11 @@
                 <div class="spinner-grow text-muted"></div>
               </div>
               <div v-if="!isLoading">
-                <transfer-stock isLoading:="isLoading" :listStockOut="listDataStockOut" v-model="stockTransfer" :warehouseOption="warehouseOption" :products="productListOptionForTransfer" :productList="productListForTransfer"/>
+                <transfer-stock
+                  isLoading:="isLoading" :listStockOut="listDataStockOut" v-model="stockTransfer"
+                  :warehouseOption="warehouseOption" :products="productListOptionForTransfer"
+                  :productList="productListForTransfer" :warehouseList="warehouseList"
+                />
               </div>
             </div>
           </div>
@@ -67,6 +71,7 @@ export default {
       searchInput : null,
       isLoading: false,
       dateFilter : null,
+      warehouseList: [],
     }
   },
   methods: {
@@ -158,8 +163,6 @@ export default {
       else {
         await self.$axios.get('/api/stockout/' + $dateFilter).then(function (response) {
           self.isLoading = false;
-          console.log(response);
-
           if(response && response.hasOwnProperty("data") && response.data){
             let data = response["data"];
             let dataArray = Object.keys(data).map(key => {
@@ -174,10 +177,8 @@ export default {
                 if(item && item.created_at){
                   date = moment(item.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
                 }
-
                 dataItem.warehouse_from = item.from_warehouse.name + " (" + item.from_warehouse.address + ") ";
                 dataItem.warehouse_to = item.to_warehouse.name + " (" + item.to_warehouse.address + ") ";
-                dataItem.product = item.product.en_name + " - " + item.product.kh_name + "( " + item.product.code + ") ";
                 dataItem.ref = item.ref;
                 dataItem.quantity = parseInt(item.quantity);
                 dataItem["date"] = date;

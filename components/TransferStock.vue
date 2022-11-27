@@ -7,13 +7,19 @@
           <div class="full-content">
             <div class="row margin-bottom-20">
               <div class="display-inline-block width-50-percentage float-left">
-                <b-col class="width-35-percentage display-inline-block"><label class="label-input">ឃ្លាំងចាស់</label></b-col>
-                <b-col class="width-63-percentage display-inline-block ">
+                <b-col class="width-35-percentage display-inline-block">
+                  <label class="label-input" :class="{ 'require-color' : checkData('from_warehouse', true) }">ឃ្លាំងចាស់</label>
+                  <label class="require-color" v-if="checkData('from_warehouse', true)"> * </label>
+                </b-col>
+                <b-col class="width-63-percentage display-inline-block">
                   <b-form-select type="text" class="input-content font-size-14" :options="warehouseOption" v-model="transfer.from_warehouse" required></b-form-select>
                 </b-col>
               </div>
               <div class="display-inline-block width-49-percentage float-left">
-                <b-col class="width-35-percentage display-inline-block"><label class="label-input">ឃ្លាំងផ្ទេរទៅកាន់</label></b-col>
+                <b-col class="width-35-percentage display-inline-block">
+                  <label class="label-input" :class="{ 'require-color' : checkData('to_warehouse', true) }">ឃ្លាំងផ្ទេរទៅកាន់</label>
+                  <label class="require-color" v-if="checkData('to_warehouse', true)"> * </label>
+                </b-col>
                 <b-col class="width-63-percentage display-inline-block">
                   <b-form-select type="text" class="input-content font-size-14" :options="warehouseOption" v-model="transfer.to_warehouse" required></b-form-select>
                 </b-col>
@@ -21,7 +27,10 @@
             </div>
             <div class="row margin-bottom-20">
               <div class="display-inline-block width-50-percentage float-left">
-                <b-col class="width-35-percentage display-inline-block"><label class="label-input">ទំនិញ</label></b-col>
+                <b-col class="width-35-percentage display-inline-block">
+                  <label class="label-input" :class="{ 'require-color' : checkData('product_select', true) }">ទំនិញ</label>
+                  <label class="require-color" v-if="checkData('product_select', true)"> * </label>
+                </b-col>
                 <b-col class="width-63-percentage display-inline-block">
                   <multiselect
                     v-model="product_select" :options="products"
@@ -32,9 +41,12 @@
                 </b-col>
               </div>
               <div class="display-inline-block width-49-percentage float-left">
-                <b-col class="width-35-percentage display-inline-block"><label class="label-input">Reference</label></b-col>
+                <b-col class="width-35-percentage display-inline-block">
+                  <label class="label-input" :class="{ 'require-color' : checkData('ref', false) }">Reference</label>
+                  <label class="require-color" v-if="checkData('ref', true)"> * </label>
+                </b-col>
                 <b-col class="width-63-percentage display-inline-block">
-                  <b-form-input type="text" class="input-content" v-model="transfer.ref" required></b-form-input>
+                  <b-form-input type="text" class="input-content" v-model="transfer.ref" @blur="checkData('ref', false)"></b-form-input>
                 </b-col>
               </div>
 
@@ -111,11 +123,11 @@
             <div class="full-content margin-bottom-20">
               <div class="container-row-form width-60-percentage float-left">
                 <div class="form-row-content-detail row-content-view">
-                  <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ថ្ងៃខែផ្ទេរ : </label>
+                  <label :for="'input-exchange-rate'"  class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ថ្ងៃខែផ្ទេរ : </label>
                   <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ transferItemDetail.date }}</strong>
                 </div>
                 <div class="form-row-content-detail row-content-view">
-                  <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">Reference : </label>
+                  <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="width: 105px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ឯកសារយោង : </label>
                   <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ transferItemDetail.ref }}</strong>
                 </div>
               </div>
@@ -141,8 +153,6 @@
         </b-modal>
       </div>
     </div>
-
-
   </div>
 </template>
 
@@ -172,7 +182,11 @@ export default {
     listStockOut:{
       type:Array,
       require:false
-    }
+    },
+    warehouseList:{
+      type:Array,
+      require:false
+    },
   },
   watch: {
     'value.show': {
@@ -205,7 +219,7 @@ export default {
         { key: 'date', label: 'ថ្ងៃខែផ្ទេរ'},
         { key: 'warehouse_from', label: 'ឃ្លាំងចាស់'},
         { key: 'warehouse_to', label: 'ឃ្លាំងផ្ទេរទៅកាន់'},
-        { key: 'ref', label: ' Reference'},
+        { key: 'ref', label: 'ឯកសារយោង'},
         { key: 'actions', label: this.$t('title_action')},
 
       ],
@@ -268,6 +282,18 @@ export default {
         self.$toast.info("Data starting submit").goAway(1500);
         await self.$axios.post('/api/stock', {items: dataSubmit}).then(function (response) {
           if(response && response.hasOwnProperty("data") && response.data && response.data.success === true){
+            for(let itemSubmit of dataSubmit){
+              let dataItem = {warehouse_from: null, warehouse_to: null, ref: null};
+              let fromWarehouseItem = self.warehouseList.find(w => w.id === itemSubmit.from_warehouse);
+              let toWarehouseItem = self.warehouseList.find(w => w.id === itemSubmit.to_warehouse);
+
+              dataItem.warehouse_from = fromWarehouseItem.name + " (" + fromWarehouseItem.address + ") ";
+              dataItem.warehouse_to = toWarehouseItem.name + " (" + toWarehouseItem.address + ") ";
+              dataItem.ref = itemSubmit.ref;
+              dataItem["date"] = self.getFullDate();
+              self.listStockOut.unshift(dataItem);
+            }
+
             self.value.show = false;
             self.showContent = false;
             self.transfer = {
@@ -361,8 +387,33 @@ export default {
         (!this.transfer.hasOwnProperty("to_warehouse")|| (this.transfer.hasOwnProperty("to_warehouse") && this.transfer.to_warehouse === null))
       );
     },
+    checkData($fieldName, isSelectField){
+      if(!isSelectField){
+        return (this.transfer[$fieldName] === null || this.transfer[$fieldName] === "");
+      }
+      else {
+        if(this.transfer[$fieldName] !== undefined){
+          return (this.transfer[$fieldName] === null || (this.transfer[$fieldName]!== null && this.transfer[$fieldName].length === 0));
+        }
+        else {
+         return (this[$fieldName] === null || (this[$fieldName] !== null && this[$fieldName].length === 0));
+        }
+      }
+    },
+    getFullDate(){
+      let today = new Date();
+      let dd = today.getDate();
+      let mm = (today.getMonth() + 1); //January is 0!
+      let day = (dd < 10) ? ("0" + dd) : dd;
+      let month = (mm < 10) ? ("0" + mm) : mm;
+      let yyyy = today.getFullYear();
+
+      return (day + "/" + month + "/" + yyyy);
+    }
   },
   mounted() {
+  },
+  computed:{
   }
 }
 </script>

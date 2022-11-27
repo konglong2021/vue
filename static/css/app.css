@@ -834,7 +834,9 @@ body {
   max-height: calc(100vh - 300px);
 }
 
-
+.require-color{
+ color: #dc3545;
+}
 .menu-text-item:hover {
   background-color: #000000;
   border-radius: 10px;

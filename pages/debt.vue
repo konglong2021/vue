@@ -282,14 +282,25 @@ export default {
                   dataItem.paid = parseFloat(item["paid"]) > 0 ? parseFloat(item["paid"]) : 0;
                   dataItem.grandtotal = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
                   if (item["order"].invoice_id === itemAlreadyAdd.invoice_id) {
-                    if (parseFloat(item["paid"]) > parseFloat(itemAlreadyAdd.paid) && parseFloat(itemAlreadyAdd.paid) === 0) {
-                      let indexToRemove = self.transactions.indexOf(itemAlreadyAdd);
-                      self.transactions.splice(indexToRemove, 1);
-                    }
+                    // if (parseFloat(item["paid"]) > parseFloat(itemAlreadyAdd.paid) && parseFloat(itemAlreadyAdd.paid) === 0) {
+                    //   let indexToRemove = self.transactions.indexOf(itemAlreadyAdd);
+                    //   self.transactions.splice(indexToRemove, 1);
+                    // }
                     if (parseFloat(item["paid"]) > parseFloat(itemAlreadyAdd.paid)) {
                       dataItem.grandTotalByOrderId = parseFloat(item["order"]["grandtotal"]) > 0 ? parseFloat(item["order"]["grandtotal"]) : 0;
                     }
-                    self.transactions.push(dataItem);
+                    if(parseFloat(item["paid"]) > 0 && parseFloat(itemAlreadyAdd.paid) === 0){
+                      let transactions = self.cloneObject(self.transactions);
+                      let indexToRemove = transactions.findIndex((x) => x.order_id === item.order_id);
+                      if(indexToRemove > -1){
+                        self.transactions.splice(indexToRemove, 1);
+                      }
+                      self.transactions.push(dataItem);
+                    }
+                    if(parseFloat(item["paid"]) > 0 && parseFloat(itemAlreadyAdd.paid) > 0){
+                      itemAlreadyAdd.paid = (itemAlreadyAdd.paid + parseFloat(item["paid"]));
+                    }
+                    //self.transactions.push(dataItem);
                   }
                 }
               }
@@ -443,10 +454,13 @@ export default {
                 const totalGrandTotalArray = paidArray.reduce(function (total, num) {
                   return parseFloat(parseFloat(total) + parseFloat(num)).toFixed(2)
                 }, 0);
-
-                console.log(totalGrandTotalArray);
+                for(let debt of response.data.data){
+                  let transaction = self.transactions.find(t => t.order_id === debt.order_id);
+                  if(transaction){
+                    transaction.paid = parseFloat(transaction.paid) + parseFloat(debt.paid);
+                  }
+                }
                 self.totalNotPaid = (self.totalNotPaid - totalGrandTotalArray);
-                //this.transactionFilterByCustomer
               }
               console.log(response.data.data);
               //self.customer_select = null;

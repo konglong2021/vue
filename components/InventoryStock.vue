@@ -1,6 +1,12 @@
 <template>
   <b-container >
     <h2 class="text-center text-success" style="margin-bottom: 50px;">បញ្ចូលទំនិញក្នុងស្តុក</h2>
+    <div class="display-inline-block full-with" style="margin-bottom: 20px;">
+      <b-button
+        href="#" size="sm" variant="info"
+        title="Discard stock" @click="discardPurchase()"
+      >ត្រលប់ទៅបញ្ជី</b-button>
+    </div>
     <div class="display-inline-block full-with" v-if="purchase">
       <div class="display-inline-block content-field-purchase float-left" v-if="suppliers && products">
         <p class="text-danger" v-if="suppliers.length === 0 || products.length === 0">
