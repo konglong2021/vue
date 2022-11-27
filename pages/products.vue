@@ -68,7 +68,7 @@
               </b-table>
             </div>
             <b-pagination align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading"
-              :total-rows="totalItems" v-model="currentPage" :per-page="perPage" @change="changePage(currentPage)" first-number last-number>
+              :total-rows="totalItems" v-model="currentPage" :per-page="perPage" @change="changePage($event)" first-number last-number>
             </b-pagination>
           </div>
           <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="numberPrint > 0"
@@ -92,7 +92,7 @@
           </div>
         </div>
         <add-new-product-modal v-model="newProductModal" :productItemSelected="productItemSelected"
-          @checkingProductAdd="checkingProductAdd($event)" />
+          @checkingProductAdd="checkingProductAdd($event)" :warehouseList="warehouseList" :warehouseOption="warehouseOption" />
         <!--no need to import it will automatically rendering it -->
         <b-modal id="modal-view-product" ref="view-product-form-modal" size="lg" no-close-on-backdrop
           title="Product View" title-class="text-center mx-auto" hide-footer>
@@ -213,6 +213,7 @@
           { key: 'brand', label: this.$t('title_brand') },
           { key: 'loyalty', label: 'Loyalty' },
           { key: 'sale_price', label: this.$t('label_unit_price') },
+          { key: 'warehouse', label: this.$t('content_title_warehouse') },
           { key: 'actions', label: this.$t('title_action') }
         ],
         category: {}, //new item for category
@@ -255,14 +256,6 @@
         },
         deep: true
       },
-      currentPage: {
-        handler: function (newValue, oldValue) {
-          this.currentPage = newValue ? newValue : 1;
-          this.getListProducts().catch(error => {
-            console.error(error)
-          });
-        }
-      }
     },
     methods: {
       async getAllWarehouse() {
@@ -288,13 +281,20 @@
           vm.$toast.error("Getting data error").goAway(3000);
         });
       },
-      changePage(currentPage){
-        console.log(currentPage);
+      changePage($event){
+        console.log($event);
+        this.currentPage = $event;
+        if(this.searchInput !== '' && this.searchInput !== null && this.searchInput !== undefined){
+          this.searchProduct(this.currentPage);
+        }
+        else {
+          this.getListProducts(this.warehouse, this.currentPage);
+        }
       },
-      async getListProducts($warehouse) {
+      async getListProducts($warehouse, $page = null) {
         let self = this;
         self.isLoading = true;
-        await self.$axios.post('/api/product-price/list'+ (this.currentPage ? "?page=" + this.currentPage : ""),{warehouse : ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem')), pagination: true}).then(function (response) {
+        await self.$axios.post('/api/product-price/list'+ ($page ? ("?page=" + $page) : (this.currentPage ? "?page=" + this.currentPage : "")),{warehouse : ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem')), pagination: true}).then(function (response) {
           if (response.hasOwnProperty("data") && response.data.hasOwnProperty("data")) {
             self.isLoading = false;
             let items = [];
@@ -325,6 +325,11 @@
               newItem["kh_name"] = productItem["kh_name"];
               if(productItem.hasOwnProperty("product_price") && productItem["product_price"].length > 0){
                 newItem['sale_price'] = productItem["product_price"][0]["sale_price"];
+                let warehouseItem = self.warehouseList.find(w => w.id === productItem["product_price"][0]["warehouse_id"])
+                if(warehouseItem){
+                  newItem['warehouse'] = warehouseItem["name"] + " (" + warehouseItem["address"] + ")";
+                  newItem['warehouse_id'] = warehouseItem["id"];
+                }
               }
               items.push(newItem);
             }
@@ -393,6 +398,7 @@
         this.productItemSelected.en_name = item["en_name"];
         this.productItemSelected.kh_name = item["kh_name"];
         this.productItemSelected.image = item["image"];
+        this.productItemSelected.warehouse = item["warehouse_id"];
         let brandList = [];
         if (item["brands"] && item["brands"].length > 0) {
           for (let index = 0; index < item["brands"].length; index++) {
@@ -416,9 +422,30 @@
             let findingItem = self.items.find(productFind => productFind.id === itemProduct.id);
             if(findingItem !== undefined){
               foundItem = true;
-              let indexFound = self.items.indexOf(findingItem);
-              self.items[indexFound]["sale_price"] = itemProduct["sale_price"];
-              self.items[indexFound] = itemProduct;
+              let indexFound = self.items.findIndex((x) => x.id === itemProduct.id);
+              if(indexFound > -1){
+                let dataTemp = [];
+                dataTemp["id"] = itemProduct["id"];
+                dataTemp["sale_price"] = itemProduct["sale_price"];
+                dataTemp["name"] = (itemProduct["name"] ? itemProduct["name"] : (itemProduct["en_name"] + " (" + itemProduct["kh_name"] + ")"));
+                dataTemp["en_name"] = itemProduct["en_name"];
+                dataTemp["kh_name"] = itemProduct["kh_name"];
+
+                dataTemp["brands"] = itemProduct["brands"];
+                dataTemp["brand"] = itemProduct["brand"];
+
+                dataTemp["category_id"] = itemProduct["category_id"];
+                dataTemp["category_name"] = itemProduct["category_name"];
+
+                dataTemp["description"] = itemProduct["description"];
+                dataTemp["loyalty"] = (itemProduct["loyalty"] ? itemProduct["loyalty"] : "N/A");
+                dataTemp["code"] = itemProduct["code"];
+                dataTemp["image"] = itemProduct["image"];
+
+                let warehouseItem = self.warehouseList.find(w => w.id === itemProduct["warehouse_id"]);
+                dataTemp["warehouse"] = (itemProduct["warehouse"] ? itemProduct["warehouse"] : (warehouseItem["name"] + " (" + warehouseItem["address"] + ")"));
+                self.$set(self.items, indexFound, dataTemp);
+              }
             }
           }
           if (foundItem === false) {
@@ -437,67 +464,60 @@
       cloneObject(obj) {
         return JSON.parse(JSON.stringify(obj));
       },
-      async searchProduct() {
+      async searchProduct($page = null) {
         this.isLoading = true;
         this.items = [];
         let self = this;
-        if (self.searchInput) {
-          await self.$axios.post('/api/product/search', { search: self.searchInput ,warehouse : self.$store.$cookies.get('storeItem'), pagination : true}).then(function (response) {
-            self.isLoading = false;
-            if (response) {
-              let items = [];
-              let responseData = (response.hasOwnProperty("data") && response.data.hasOwnProperty("data")) ? response.data.data : (response.hasOwnProperty("data") ? response.data : response);
-              self.responseProductList = responseData;
-              if(responseData && responseData.length > 0){
-                for (let index = 0; index < responseData.length; index++) {
-                  let productItem = responseData[index];
-                  let newItem = {};
-                  let brands = [];
-                  if (productItem["brands"] && productItem["brands"].length > 0) {
-                    for (let i = 0; i < productItem["brands"].length; i++) {
-                      brands.push(productItem["brands"][i]["name"]);
-                    }
+        await self.$axios.post('/api/product/search' + ($page ? "?page=" + $page : "?page=1"), { search: self.searchInput ,warehouse : self.warehouse, pagination : true}).then(function (response) {
+          self.isLoading = false;
+          if (response) {
+            let items = [];
+            let responseData = (response.hasOwnProperty("data") && response.data.hasOwnProperty("data")) ? response.data.data : (response.hasOwnProperty("data") ? response.data : response);
+            self.responseProductList = responseData;
+            if(responseData && responseData.length > 0){
+              for (let index = 0; index < responseData.length; index++) {
+                let productItem = responseData[index];
+                let newItem = {};
+                let brands = [];
+                if (productItem["brands"] && productItem["brands"].length > 0) {
+                  for (let i = 0; i < productItem["brands"].length; i++) {
+                    brands.push(productItem["brands"][i]["name"]);
                   }
-                  newItem['id'] = productItem["id"];
-                  newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
-                  newItem['brand'] = brands.join(", ");
-                  newItem['loyalty'] = "N/A";
-                  newItem['image'] = productItem["image"];
-                  newItem['brands'] = productItem["brands"];
-
-                  if (productItem.hasOwnProperty("categories")) {
-                    newItem['category_name'] = productItem["categories"]["name"];
-                    newItem["categories"] = self.cloneObject(productItem["categories"]);
-                  }
-
-                  newItem['description'] = productItem["description"];
-                  if(productItem.hasOwnProperty("product_price")){
-                    newItem['sale_price'] = productItem["product_price"][0]["sale_price"];
-                  }
-                  newItem['code'] = productItem["code"];
-                  newItem["en_name"] = productItem["en_name"];
-                  newItem["kh_name"] = productItem["kh_name"];
-                  items.push(newItem);
                 }
-                self.items = self.cloneObject(items);
-                self.totalItems = items.length;
+                newItem['id'] = productItem["id"];
+                newItem['name'] = productItem["en_name"] + " (" + productItem["kh_name"] + ")";
+                newItem['brand'] = brands.join(", ");
+                newItem['loyalty'] = "N/A";
+                newItem['image'] = productItem["image"];
+                newItem['brands'] = productItem["brands"];
+
+                if (productItem.hasOwnProperty("categories")) {
+                  newItem['category_name'] = productItem["categories"]["name"];
+                  newItem["categories"] = self.cloneObject(productItem["categories"]);
+                }
+
+                newItem['description'] = productItem["description"];
+                if(productItem.hasOwnProperty("product_price")){
+                  newItem['sale_price'] = productItem["product_price"][0]["sale_price"];
+                }
+                newItem['code'] = productItem["code"];
+                newItem["en_name"] = productItem["en_name"];
+                newItem["kh_name"] = productItem["kh_name"];
+                items.push(newItem);
               }
+              self.items = self.cloneObject(items);
+              self.totalItems = items.length;
             }
-          }).catch(function (error) {
-            console.log(error);
-            self.$toast.error("getting data error ").goAway(2000);
-          });
-        }
-        else {
-          self.items = [];
-          self.totalItems = 0;
-          self.perPage = 10;
-        }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
       },
       handleClick(e) {
+        this.currentPage = 1;
         if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
           this.searchInput = '';
-          this.getListProducts();
         }
       },
       barcodePrint() {
@@ -519,12 +539,16 @@
         }
       },
       selectedWarehouse(warehouse) {
-        console.log(warehouse);
         if (warehouse) {
           this.warehouse_id = warehouse;
           this.currentPage = 1;
           this.totalItems = 0;
-          this.getListProducts(warehouse);
+          if(this.searchInput === null || this.searchInput === '' || this.searchInput === undefined){
+            this.getListProducts(warehouse);
+          }
+          else {
+            this.searchProduct(this.currentPage);
+          }
         }
       },
     },

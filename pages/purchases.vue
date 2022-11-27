@@ -239,7 +239,7 @@ export default {
         { key: 'date', label: this.$t('label_date_purchase'), thClass: "header-th", thStyle: "font-size: 17px;" },
         { key: 'purchase_by', label: this.$t('label_purchase_by'), thClass: "header-th", thStyle: "font-size: 17px;" },
         { key: 'supplier', label: this.$t('label_supplier_name'), thClass: "header-th", thStyle: "font-size: 17px; width: 15%;" },
-        // { key: 'subtotal', label: this.$t('label_sub_total'), thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
+        { key: 'warehouse', label: this.$t('title_warehouse'), thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
         { key: 'grand_total', label: this.$t('label_grand_total'), thClass: "header-th", thStyle: "font-size: 17px; width: 15%;" },
         { key: 'actions', label: this.$t('title_action'), thClass: "header-th", thStyle: "font-size: 17px;" },
       ],
@@ -387,6 +387,8 @@ export default {
               itemData["supplier"] = supplier["text"];
               itemData["batch"] = purchaseItem["batch"];
               itemData["vat"] = purchaseItem["vat"] ? purchaseItem["vat"] : 0;
+              let warehouse = self.warehouseList.find(w => w.id === purchaseItem.warehouse_id);
+              itemData["warehouse"] = warehouse["name"];
               let date = "";
               let grand_total = 0;
               let subtotal = 0;

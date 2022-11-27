@@ -70,6 +70,13 @@
               </b-col>
             </b-row>
             <b-row class="my-1">
+              <b-col sm="4"><label :for="'input-brand'" class="label-input">ឃ្លាំងទំនិញ</label></b-col>
+              <b-col sm="8">
+                <b-form-select class="form-control input-content input-select-warehouse" v-model="product.warehouse" :options="warehouseOption"
+                ></b-form-select>
+              </b-col>
+            </b-row>
+            <b-row class="my-1">
               <b-col sm="4"><label :for="'input-sale_price'" class="label-input">តម្លៃលក់ ($)</label></b-col>
               <b-col sm="8">
                 <b-form-input :id="'input-sale_price'" type="number" class="input-content" v-model="product.sale_price" required></b-form-input>
@@ -101,6 +108,10 @@
       warehouseList:{
         type:Array,
         require:true
+      },
+      warehouseOption:{
+        type:Array,
+        require:true
       }
     },
     data() {
@@ -116,10 +127,13 @@
           image: null,
           sale_price: 0,
           code: null,
+          warehouse: null,
         },
         uploadFile: null,
         file: null,
         errors: [],
+        categoriesList: [],
+        brandList: [],
         warehouseDefault : this.$store.$cookies.get('storeItem'),
       };
     },
@@ -179,6 +193,7 @@
           .then(function (response) {
             if(response.data.brands){
               for(let index=0; index < response.data.brands.length; index++){
+                vm.brandList.push(response.data.brands[index]);
                 vm.brands.push({name : response.data.brands[index]["name"], value : response.data.brands[index]["id"]});
               }
             }
@@ -194,6 +209,7 @@
           .then(function (response) {
             if(response.data.data){
               for(let index=0; index < response.data.data.length; index++){
+                vm.categoriesList.push(response.data.data[index]);
                 vm.categories.push({text : response.data.data[index]["name"], value : response.data.data[index]["id"]});
             }
           }
@@ -258,10 +274,11 @@
         if(vm.product.hasOwnProperty("id") && vm.product.id){
           formData.append("_method", "PUT");
           vm.$toast.info("Data starting submit").goAway(1500);
-          let sale_price = 0;
-          const responseUpdateProduct = await vm.$axios.post('/api/product-price/update', { "warehouse": vm.$store.$cookies.get('storeItem'), "product_id": vm.product.id, "sale_price": vm.product.sale_price});
+          let sale_price = 0, warehouseId = null;
+          const responseUpdateProduct = await vm.$axios.post('/api/product-price/update', { "warehouse": vm.product.warehouse, "product_id": vm.product.id, "sale_price": vm.product.sale_price});
           if (responseUpdateProduct && responseUpdateProduct.hasOwnProperty("data") && responseUpdateProduct.data.hasOwnProperty("data")) {
             sale_price = parseFloat(responseUpdateProduct["data"]["data"]["sale_price"]);
+            warehouseId = responseUpdateProduct["data"]["data"]["warehouse_id"];
           }
           await vm.$axios.post('/api/product/' + vm.product.id, formData)
             .then(function (response) {
@@ -270,12 +287,30 @@
                if(response.hasOwnProperty("data") && response.data){
                  let Brands = vm.cloneObject(response.data["Brands"]);
                  let itemProduct = vm.cloneObject(response.data.product);
+
                  itemProduct["sale_price"] = sale_price;
-                 //itemProduct["sale_price"] = vm.updateProductPrice(vm.$store.$cookies.get('storeItem'), vm.product.id, vm.product.sale_price);
-                 vm.$emit("checkingProductAdd", {itemProduct: vm.cloneObject(itemProduct), brands: Brands});
+                 itemProduct["warehouse_id"] = warehouseId;
+
+                 let brandList = [], brandItemNameList = [];
+                 if (brands && brands.length > 0) {
+                   for (let i = 0; i < brands.length; i++) {
+                     let brandItem = vm.brandList.find(b => b.id === brands[i]);
+                     brandList.push(brandItem);
+                     brandItemNameList.push(brandItem["name"]);
+                   }
+                 }
+                 itemProduct["brands"] = brandList;
+                 itemProduct["brand"] = brandItemNameList.join(", ");
+
+                 let categoriesItem = vm.categoriesList.find(cat => cat.id === parseInt(response.data.product["category_id"]));
+                 if(categoriesItem){
+                   itemProduct["category_name"] = categoriesItem["name"];
+                 }
+
+                 vm.$emit("checkingProductAdd", {itemProduct: vm.cloneObject(itemProduct), brands: Brands, sale_price: sale_price});
                }
                 vm.hideModal();
-                vm.product = {en_name: '', kh_name: '', category: null, brand: null, description: '', image: null, sale_price: 0, code: null};
+                //vm.product = {en_name: '', kh_name: '', category: null, brand: null, description: '', image: null, sale_price: 0, code: null};
               }
             })
             .catch(function (error) {
@@ -291,7 +326,6 @@
             if(responseProduct.hasOwnProperty("data")){
               let brandList = responseProduct.data.hasOwnProperty("Brands") ? responseProduct.data.Brands : [];
               let itemProduct = vm.cloneObject(responseProduct.data.product);
-              let newDataBrand = [];
 
               if(responseProduct.data.hasOwnProperty("Brands")){
                 let brandList = vm.cloneObject(responseProduct.data.Brands);
@@ -308,17 +342,27 @@
                   itemProduct["brand"] = responseBrandName.join(", ");
                 }
               }
+
               if(responseProduct.data.product.hasOwnProperty("category_id")){
-                itemProduct["category_name"]= vm.filterCategoriesData(itemProduct["category_id"]);
+                let categoriesItem = vm.categoriesList.find(cat => cat.id === parseInt(responseProduct.data.product["category_id"]));
+                if(categoriesItem){
+                  itemProduct["category_name"] = categoriesItem["name"];
+                }
               }
+
               if(!itemProduct.hasOwnProperty("name")){
                 itemProduct['name'] = itemProduct["en_name"] + " (" + itemProduct["kh_name"] + ")";
               }
               itemProduct['loyalty'] = "N/A";
-              let sale_price = 0;
-              const responseUpdateProduct = await vm.$axios.post('/api/product-price/update', { "warehouse": vm.$store.$cookies.get('storeItem'), "product_id": itemProduct.id, "sale_price": vm.product.sale_price});
+              let sale_price = 0, warehouseId = null;
+              const responseUpdateProduct = await vm.$axios.post('/api/product-price/update', { "warehouse": vm.product.warehouse, "product_id": itemProduct.id, "sale_price": vm.product.sale_price});
               if (responseUpdateProduct && responseUpdateProduct.hasOwnProperty("data") && responseUpdateProduct.data.hasOwnProperty("data")) {
                 sale_price = parseFloat(responseUpdateProduct["data"]["data"]["sale_price"]);
+                warehouseId = responseUpdateProduct["data"]["data"]["warehouse_id"];
+                let warehouseItem = vm.warehouseList.find(w => w.id === responseUpdateProduct["data"]["data"]["warehouse_id"]);
+                itemProduct["warehouse"] = (warehouseItem["name"] + " (" + warehouseItem["address"] + ")");
+
+                itemProduct["warehouse_id"] = warehouseId;
                 itemProduct["sale_price"] = sale_price;
               }
 
@@ -329,45 +373,6 @@
           else {
             vm.$toast.error("Submit data getting error").goAway(3000);
           }
-          /*
-          await vm.$axios.post('/api/product', formData)
-            .then(function (response) {
-              if(response){
-                vm.$toast.success("Submit data successfully").goAway(2000);
-                let brandList = response.data.hasOwnProperty("Brands") ? response.data.Brands : [];
-                let itemProduct = vm.cloneObject(response.data.product);
-                let newDataBrand = [];
-                if(response.data.hasOwnProperty("Brands")){
-                  let brandList = vm.cloneObject(response.data.Brands);
-                  if(brandList.length > 0){
-                    let responseBrandName = [];
-                    let responseBrand = [];
-                    for(let k=0; k < brands.length; k++){
-                      let itemResponseBrand = vm.cloneObject(vm.selectedBrandList(brands[k]));
-                      let itemData = {"name": itemResponseBrand["name"], "id": itemResponseBrand["value"]};
-                      responseBrandName.push(itemResponseBrand["name"]);
-                      responseBrand.push(itemData);
-                    }
-                    itemProduct["brands"] = vm.cloneObject(responseBrand);
-                    itemProduct["brand"] = responseBrandName.join(", ");
-                  }
-                }
-                if(!itemProduct.hasOwnProperty("category_name")){
-                  itemProduct["category_name"]= vm.filterCategoriesData(itemProduct["category_id"]);
-                }
-                if(!itemProduct.hasOwnProperty("name")){
-                  itemProduct['name'] = itemProduct["en_name"] + " (" + itemProduct["kh_name"] + ")";
-                }
-                console.log(itemProduct);
-                vm.$emit("checkingProductAdd", {itemProduct: itemProduct, brands: brandList});
-                vm.hideModal();
-              }
-            })
-            .catch(function (error) {
-              console.log(error);
-              vm.$toast.error("Submit data getting error").goAway(3000);
-            });
-          */
         }
       },
       selectedBrandList(item){

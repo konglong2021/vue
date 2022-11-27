@@ -957,7 +957,6 @@ export default {
     },
     handleClick(e) {
       this.currentPage = 1;
-      console.log(e.target.value);
       if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
         this.searchInput = '';
         //this.currentPage = 1;
