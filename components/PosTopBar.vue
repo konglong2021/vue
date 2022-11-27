@@ -14,6 +14,7 @@
                 <a class="content-link" href="/pos">
                   <span>{{ $t('title_pos') }}</span>
                 </a>
+                
               </li>
               <li class="li-style" v-can="'pos_access'" style="overflow: hidden;">
                 <a class="content-link" href="/transaction">

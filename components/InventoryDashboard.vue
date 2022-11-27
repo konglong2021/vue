@@ -97,7 +97,7 @@
                 </div>
                 <div v-if="stockItems.length === 0"><h3 class="text-center color-info">មិនមានទំនិញក្នុងស្តុកទេ</h3></div>
               </div>
-              <b-pagination v-if="stockItems.length > 0" align="right" style="margin-top: 10px !important;" size="md" :disabled="loadingFields.stockLoading || !isShowStockTable" :total-rows="totalItems" v-model="currentPage" @change="currentPageClick($event,currentPage)" :per-page="perPage" first-number last-number></b-pagination>
+              <b-pagination v-if="stockItems.length > 0" align="right" style="margin-top: 10px !important;" size="md" :disabled="loadingFields.stockLoading || !isShowStockTable" :total-rows="totalItems" v-model="currentPage" @change="currentPageClick($event)" :per-page="perPage" first-number last-number></b-pagination>
             </div>
           </div>
           <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading" v-can="'inventory_view'">
@@ -374,19 +374,18 @@ export default {
       handler(val) {
       }
     },
-    // currentPage: {
-    //   handler: function(value) {
-    //     this.currentPage = value ? value : 1;
-    //     this.showStockTable();
-    //   }
-    // }
   },
   computed: {
   },
   methods: {
-    currentPageClick($event,currentPage){
+    currentPageClick($event){
       this.currentPage = $event;
-      this.showStockTable(this.warehouse);
+      if(this.searchInput !== '' && this.searchInput !== null && this.searchInput !== undefined){
+        this.searchStock(this.currentPage);
+      }
+      else {
+        this.showStockTable(this.warehouse, this.currentPage);
+      }
     },
     async getListProductForTransferStock($warehouse) {
       let self = this;
@@ -434,15 +433,20 @@ export default {
         this.warehouse_id = warehouse;
         this.currentPage = 1;
         this.totalItems = 0;
-        this.showStockTable(warehouse);
+        if(this.searchInput === null || this.searchInput === '' || this.searchInput === undefined){
+          this.showStockTable(warehouse);
+        }
+        else {
+          this.searchStock(this.currentPage);
+        }
       }
     },
-    showStockTable($warehouse) {
+    showStockTable($warehouse, $page = null) {
       this.isShowStockTable = true;
       let vm = this;
       vm.stockItems = [];
       vm.loadingFields.stockLoading = true;
-      vm.$axios.post('/api/stockbywarehouse'+ (this.currentPage ? "?page=" + this.currentPage : ""),{'warehouse' : ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')), pagination: true})
+      vm.$axios.post('/api/stockbywarehouse'+ ($page ? ("?page=" + $page) : (this.currentPage ? "?page=" + this.currentPage : "")),{'warehouse' : ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')), pagination: true})
         .then(function (response) {
           if (response.data && response.data.hasOwnProperty("data")) {
             vm.loadingFields.stockLoading = false;
@@ -478,7 +482,6 @@ export default {
       }
       return a.kh_name > b.kh_name ? 1 : -1;
     },
-
     async onResetExistingProduct() {
       this.product_select = {
         en_name: '',
@@ -704,7 +707,6 @@ export default {
     showTransferStock() {
       this.stockTransfer.show = true;
     },
-
     showSupplierModal() {
       this.$refs['supplier-form-modal'].show();
       this.supplier = {};
@@ -954,24 +956,26 @@ export default {
       }
     },
     handleClick(e) {
+      this.currentPage = 1;
+      console.log(e.target.value);
       if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
         this.searchInput = '';
-        this.showStockTable();
+        //this.currentPage = 1;
+        //this.showStockTable((this.warehouse_id !== null ? this.warehouse_id : this.$store.$cookies.get('storeItem')), this.currentPage);
       }
     },
-    async searchStock() {
+    async searchStock($page = null) {
       this.items = [];
       let self = this;
-      self.stockItems = [];
       self.loadingFields.stockLoading = true;
-      await self.$axios.post('/api/stockbywarehouse' + "?page=1", { search: self.searchInput, warehouse: self.warehouse, pagination: true }).then(function (response) {
+      await self.$axios.post('/api/stockbywarehouse' + ($page ? "?page=" + $page : "?page=1"), { search: self.searchInput, warehouse: self.warehouse, pagination: true }).then(function (response) {
         if (response.data && response.data.hasOwnProperty("data")) {
+          self.stockItems = [];
           self.loadingFields.stockLoading = false;
           let dataStock = response.data.data;
           if (dataStock && dataStock.length > 0) {
             for (let i = 0; i < dataStock.length; i++) {
               self.stock = {};
-              //let product = dataStock[i]["product"];
               self.stock.store = dataStock[i]["warehouse"];
               self.stock.product_qty = dataStock[i]["total"].toString();
               self.stock.en_name = dataStock[i]["en_name"];

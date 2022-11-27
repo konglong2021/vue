@@ -23,7 +23,6 @@
                       <i class="fa fa-plus" aria-hidden="true"></i>
                     </b-button>
                   </div>
-
                 </b-row>
               </b-container>
             </div>
@@ -31,11 +30,18 @@
           </div>
         </div>
         <div class="content-product" v-bind:class="{ 'content-product-full-height': isLoading }">
+          <div style="display: inline-block; width: 100%; margin-bottom: 20px">
+            <div v-can="'warehouse_access'" style="display: inline-block; width: 13%; float: right; margin-right: 10px; margin-bottom: 10px">
+              <b-form-select class="form-control input-content input-select-warehouse" v-model="warehouse"
+                :options="warehouses" @change="selectedWarehouse(warehouse)"
+              ></b-form-select>
+            </div>
+          </div>
           <div class="content-loading" v-if="isLoading">
             <div class="spinner-grow text-muted"></div>
           </div>
           <div v-if="!isLoading">
-            <div v-if="items">
+            <div v-if="items" class="display-inline-block full-with">
               <b-table class="content-table-scroll-product" id="tableau" sticky-header="true" :items="items"
                 :fields="fields" :per-page="0" :current-page="currentPage" head-variant="light">
                 <template #cell(code)="row">
@@ -237,6 +243,10 @@
           ],
           autoClose: true,
         },
+        warehouse: this.$store.$cookies.get('storeItem'),
+        warehouses: [{ text: "ជ្រើសរើស ឃ្លាំងទំនិញ", value: null }],
+        warehouseList: [],
+        warehouseOption: []
       }
     },
     watch: {
@@ -255,13 +265,36 @@
       }
     },
     methods: {
+      async getAllWarehouse() {
+        let vm = this;
+        vm.warehouseList = [];
+        vm.warehouses = [];
+        await vm.$axios.get('/api/warehouse').then(function (response) {
+          if (response && response.hasOwnProperty("data")) {
+            if (response.data.data) {
+              let dataResponse = response.data.data;
+              for (let index = 0; index < dataResponse.length; index++) {
+                let warehouseItem = { text: '', value: null };
+                warehouseItem.text = dataResponse[index]["name"] + "(" + dataResponse[index]["address"] + ")";
+                warehouseItem.value = dataResponse[index]["id"];
+                vm.warehouses.unshift(warehouseItem);
+                vm.warehouseList.unshift(dataResponse[index]);
+                vm.warehouseOption.push({ text: (dataResponse[index]["name"] + " " + dataResponse[index]["address"]), value: dataResponse[index]["id"] });
+              }
+            }
+          }
+        }).catch(function (error) {
+          console.log(error);
+          vm.$toast.error("Getting data error").goAway(3000);
+        });
+      },
       changePage(currentPage){
         console.log(currentPage);
       },
-      async getListProducts() {
+      async getListProducts($warehouse) {
         let self = this;
         self.isLoading = true;
-        await self.$axios.post('/api/product-price/list'+ (this.currentPage ? "?page=" + this.currentPage : ""),{warehouse : self.$store.$cookies.get('storeItem'), pagination: true}).then(function (response) {
+        await self.$axios.post('/api/product-price/list'+ (this.currentPage ? "?page=" + this.currentPage : ""),{warehouse : ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem')), pagination: true}).then(function (response) {
           if (response.hasOwnProperty("data") && response.data.hasOwnProperty("data")) {
             self.isLoading = false;
             let items = [];
@@ -485,8 +518,18 @@
           }
         }
       },
+      selectedWarehouse(warehouse) {
+        console.log(warehouse);
+        if (warehouse) {
+          this.warehouse_id = warehouse;
+          this.currentPage = 1;
+          this.totalItems = 0;
+          this.getListProducts(warehouse);
+        }
+      },
     },
     mounted() {
+      this.getAllWarehouse();
       this.getListProducts();
     },
     computed: {
@@ -502,16 +545,13 @@
   display: inline-block;
   float: left;
 }
-
 .data {
   width: 70%;
   margin: 5px;
 }
-
 .image {
   width: 28%;
 }
-
 .pro-item {
   width: 100%;
   height: 250px;
@@ -519,22 +559,20 @@
   align-items: center;
   overflow: hidden
 }
-
 .pro-item img {
   flex-shrink: 0;
   -webkit-flex-shrink: 0;
   height: 100%;
 }
-
 #tableau .td-code {
   width: 20vw;
 }
-
 #tableau div #barcodecontainer {
   width: 100%;
 }
-
 .content-table-scroll-product {
-  max-height: calc(100vh - 235px);
+  max-height: calc(100vh - 335px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 </style>
