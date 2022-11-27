@@ -87,8 +87,6 @@
             if(response && response.hasOwnProperty("data")){
               vm.productLoading = false;
               let dataResponse = (response.data && response.data.hasOwnProperty("data")) ? response.data.data : response.data;
-
-              console.log(dataResponse);
               if(dataResponse && dataResponse.length > 0){
                 vm.totalRows = (response.data && response.data.hasOwnProperty("data")) ? response.data.total : response.data.length;
                 for(let i=0; i < dataResponse.length; i++){
@@ -97,22 +95,22 @@
                     for(let index=0; index < productList.length; index++){
                       let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
                       productItem.id = productList[index].id;
+                      productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
                       productItem.price = productList[index].sale_price;
                       productItem.img = (productList[index].image !== "no image" && productList[index].image !== "no image created" ) ? vm.generateImageUrlDisplay(productList[index].image) : "images/no_icon.png";
                       productItem.code = productList[index].code;
-                      //vm.products.push(productItem);
                       vm.products.unshift(productItem);
                     }
                   }
                   else if(productList && productList.hasOwnProperty("id")){
                     let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList.id;
+                    productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
                     productItem.price = productList.sale_price;
                     productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? vm.generateImageUrlDisplay(productList.image) : "images/no_icon.png";
                     productItem.code = productList.code;
-                    //vm.products.push(productItem);
                     vm.products.unshift(productItem);
                   }
                 }
@@ -136,6 +134,7 @@
                     for(let index=0; index < productList.length; index++){
                       let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
                       productItem.id = productList[index].id;
+                      productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
                       productItem.price = productList[index].sale_price;
                       productItem.img = productList[index].image !== "no image" ? vm.generateImageUrlDisplay(productList[index].image) : productList[index].image;
@@ -147,6 +146,7 @@
                   else if(productList && productList.hasOwnProperty("id")){
                     let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList.id;
+                    productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
                     productItem.price = productList.sale_price;
                     productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? vm.generateImageUrlDisplay(productList.image) : productList.image;
@@ -194,6 +194,7 @@
                     for(let index=0; index < productList.length; index++){
                       let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
                       productItem.id = productList[index].id;
+                      productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
                       productItem.price = productList[index].sale_price;
                       productItem.img = (productList[index].image !== "no image" && productList[index].image !== "no image created" ) ? self.generateImageUrlDisplay(productList[index].image) : "images/no_icon.png";
@@ -204,6 +205,7 @@
                   else if(productList && productList.hasOwnProperty("id")){
                     let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList.id;
+                    productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
                     productItem.price = productList.sale_price;
                     productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? self.generateImageUrlDisplay(productList.image) : "images/no_icon.png";

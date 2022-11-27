@@ -284,8 +284,6 @@ export default {
     grandTotalKhPrint() {
       return this.roundKhMoney(this.grandTotalUsdPrint * this.exchangeRate);
     },
-
-
   },
   watch: {
     grandTotalKh(newVal, oldVal) {
@@ -315,7 +313,6 @@ export default {
       this.showInputReturn = false;
       this.inputReturnUsd = this.returnMoneyUsd;
     },
-
     roundKhMoney(num) {
       if (num % 100 > 0) {
         let plus = 100 - num % 100;
@@ -323,8 +320,6 @@ export default {
       }
       return num;
     },
-
-
     updateInputReturn() {
 
       this.showInputReturn = false;
@@ -419,7 +414,6 @@ export default {
 
     },
     async submitPayment() {
-
       let self = this;
       let getting = this.gettingMoney();
       if (getting < this.grandTotalUsd) {
@@ -435,7 +429,7 @@ export default {
       dataSubmit.items = [];
       for (let index = 0; index < self.products.length; index++) {
         let item = self.products[index];
-        dataSubmit.items.push({ product_id: item["id"], sellprice: item["price"], quantity: item["qty"] });
+        dataSubmit.items.push({ product_id: item["product_id"], sellprice: item["price"], quantity: item["qty"] });
       }
       dataSubmit.subtotal = self.subTotal;
       dataSubmit.receive = self.gettingMoney();
@@ -466,8 +460,7 @@ export default {
           self.$toast.error("getting data error ").goAway(2000);
           console.log(error);
         });
-    }
-    ,
+    },
     getFullDate() {
       let today = new Date();
       let dd = today.getDate();
@@ -475,10 +468,8 @@ export default {
       let day = (dd < 10) ? ("0" + dd) : dd;
       let month = (mm < 10) ? ("0" + mm) : mm;
       let yyyy = today.getFullYear();
-
       return (day + "/" + month + "/" + yyyy);
     },
-
     async getCustomerList() {
       let self = this;
       await self.$axios.get('/api/customer').then(function (response) {
@@ -505,13 +496,11 @@ export default {
           console.log(error);
         });
     },
-
     selectCustomer(customer) {
       if (this.customerMap[customer]) {
 
       }
     },
-
   },
 
   mounted() {

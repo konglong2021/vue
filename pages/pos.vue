@@ -36,11 +36,11 @@
           <div v-show="!showModalCashBalance">
             <b-row v-if="isAdmin === false">
               <b-col cols="6" class="content-product-select">
-                <PosSelectProduct :products="productSelectList" 
-                @selectedItem="selectedItem" 
-                @selectProduct="selectProduct($event)" 
-                :warehouseSelectedId ="warehouseSelectedId" 
-                @updateListProduct="updateListProduct" 
+                <PosSelectProduct :products="productSelectList"
+                @selectedItem="selectedItem"
+                @selectProduct="selectProduct($event)"
+                :warehouseSelectedId ="warehouseSelectedId"
+                @updateListProduct="updateListProduct"
                 :cashBalance="cashBalanceData.balance" />
               </b-col>
 
@@ -49,7 +49,7 @@
                   <b-tabs>
                         <b-tab title="ពត៌មាននៃការលក់" active>
                           <div>
-                              <pos-sale-info :products="productSelectList" 
+                              <pos-sale-info :products="productSelectList"
                                   @updateListProduct="updateListProduct"
                               ></pos-sale-info>
                               <div style="clear:both"></div>
@@ -57,16 +57,14 @@
                         </b-tab>
                           <b-tab title="ផលិតផល">
                             <div>
-                              <PosProductList 
-                              @selectProduct="selectProduct($event)" 
-                              @selectWarehouse="selectWarehouse($event)" 
+                              <PosProductList
+                              @selectProduct="selectProduct($event)"
+                              @selectWarehouse="selectWarehouse($event)"
                               :cashBalance="cashBalanceData.balance" />
                             </div>
                         </b-tab>
                   </b-tabs>
-                    
                 </div>
-                
               </b-col>
             </b-row>
             <b-row v-if="isAdmin">
@@ -127,7 +125,7 @@ export default {
           else {
             let foundItem = false;
             for(let i=0; i < this.productSelectList.length; i++){
-              if(this.productSelectList[i]["id"] === $data["id"]){
+              if(this.productSelectList[i]["product_id"] === $data["product_id"]){
                 let itemTemp = JSON.parse(JSON.stringify(this.productSelectList[i]));
                 itemTemp["qty"] = parseInt(itemTemp['qty']) + 1;
                 this.$set(this.productSelectList, i, itemTemp);
@@ -144,7 +142,7 @@ export default {
         else {
           let foundItem = false;
           for(let i=0; i < this.productSelectList.length; i++){
-            if(this.productSelectList[i]["id"] === $data["id"]){
+            if(this.productSelectList[i]["product_id"] === $data["product_id"]){
               let itemTemp = JSON.parse(JSON.stringify(this.productSelectList[i]));
               itemTemp["qty"] = Number(itemTemp['qty']) + 1;
               this.$set(this.productSelectList, i, itemTemp);
@@ -168,7 +166,7 @@ export default {
     increaseQty($event){
       this.productSelectItem = $event;
       for(let index=0; index < this.productSelectList.length; index++) {
-        if (this.productSelectList[index]["id"] === $event["id"]) {
+        if (this.productSelectList[index]["product_id"] === $event["product_id"]) {
           let itemTemp = JSON.parse(JSON.stringify(this.productSelectList[index]));
           itemTemp["qty"] = Number($event["qty"]);
           this.$set(this.productSelectList, index, itemTemp);
@@ -320,12 +318,9 @@ export default {
     let self = this;
     let user = self.$store.$cookies.get('user');
     let roles = user["role"];
-      console.log(roles);
     if(roles && roles.length > 0){
         self.isAdmin = (roles[0]["title"] === "Admin");
     }
-    console.log(self.isAdmin);
-
     self.showSelectStoreModal = (self.$store.$cookies.get('storeItem') === null || self.$store.$cookies.get('storeItem') === undefined || self.$store.$cookies.get('storeItem') === 'undefined') ? true : false;
     if(self.showSelectStoreModal === false){
       self.getBalanceData();
