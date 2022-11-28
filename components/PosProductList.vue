@@ -267,7 +267,7 @@
               console.log(error);
               self.$toast.error("getting data error ").goAway(2000);
             });
-          
+
           /*console.log( this.productList);
           for (let index=0; index < this.productList.length; index++){
             let productItem = this.productList[index];
