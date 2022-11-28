@@ -134,14 +134,15 @@
           >
           </b-table>
           <div style="display: inline-block;float: right;margin-top: 25px;">
-            <span style="display: block;">{{$t('title_total_in_usd')}} : {{order.subtotal}} USD</span>
-            <span style="display: block;margin-top: 10px;">{{$t('title_total_after_vat_in_usd')}} : {{ order.grandtotal}} USD</span>
-            <span style="display: block;margin-top: 10px;" v-if="order.subtotal">{{$t('title_total_in_riel')}} : {{ calculateToRiel(order.subtotal, order.exchange_rate) }} Riel</span>
+            <span style="display: block;">{{ $t('title_total_in_usd') }} : {{ order.subtotal }} USD</span>
+            <span style="display: block; margin-top: 10px;">{{ $t('label_vat') }} ($) : {{ vatPrice(order) }} USD</span>
+            <span style="display: block; margin-top: 10px;">{{$t('title_total_after_vat_in_usd')}} : {{ grandTotalWithVat(order) }} USD</span>
+            <span style="display: block; margin-top: 10px;" v-if="order.subtotal">{{$t('title_total_in_riel')}} : {{ calculateToRiel(grandTotalWithVat(order), order.exchange_rate) }} Riel</span>
 
           </div>
         </b-form>
-        <div id="invoice-print-pos-again" style="padding-top : 35px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
-          <h6 class="text-center" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
+        <div id="invoice-print-pos-again" style="padding-top : 50px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
+          <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
           <table style="font-size: 10px; margin-bottom: 20px;">
             <tbody>
             <tr>
@@ -172,20 +173,24 @@
                 <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.total }}</td>
               </tr>
               <tr>
-                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;" colspan="2">សរុបមុនកាត់ពន្ធ ($)</td>
-                <td style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial'; border-top:1px solid black !important;" colspan="2">{{ order.grandtotal }}</td>
+                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;" colspan="2">សរុបបញ្ចូលពន្ធ ($)</td>
+                <td style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial'; border-top:1px solid black !important;" colspan="2">{{ order.subtotal }}</td>
               </tr>
               <tr>
                 <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ ($) (10%)</td>
-                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ order.priceDiscount }}</td>
+                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ vatPrice(order) }}</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">បញ្ចុះតម្លៃ</td>
+                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ discountPrice(order) }}</td>
               </tr>
               <tr>
                 <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបូកបញ្ចូលពន្ធ ($)</th>
-                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ order.subtotal }}</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ (parseFloat(order.grandtotal) + parseFloat(vatPrice(order))) }}</th>
               </tr>
               <tr>
                 <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
-                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ calculateToRiel(order.subtotal, order.exchange_rate) }}</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ calculateToRiel((parseFloat(order.grandtotal) + parseFloat(vatPrice(order))), order.exchange_rate) }}</th>
               </tr>
             </tbody>
           </table>
@@ -376,9 +381,21 @@
     computed: {
       rows() {
         return this.items.length
-      }
+      },
     },
     methods: {
+      discountPrice(order){
+        const discountPrice = (parseFloat(order.subtotal) * (parseFloat(order.discount) / 100));
+        return discountPrice.toFixed(2);
+      },
+      vatPrice(order){
+        const vatPrice = (parseFloat(order.subtotal) * (parseFloat(order.vat) / 100));
+        return vatPrice.toFixed(2);
+      },
+      grandTotalWithVat(order){
+        const grandTotal = (parseFloat(order.grandtotal) + ((parseFloat(order.vat) / 100) * parseFloat(order.subtotal)));
+        return grandTotal.toFixed(2);
+      },
       async getListProduct($warehouse){
         let vm = this;
         vm.products = [];
@@ -514,7 +531,7 @@
               }
               itemData["invoice_id"] = orderItem["invoice_id"];
               itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-              itemData["priceDiscount"] = (orderItem["discount"] > 0 ? (parseFloat(parseFloat(orderItem["discount"])/100) * parseFloat(itemData["grandtotal"])) : 0);
+              //itemData["priceDiscount"] = (orderItem["discount"] > 0 ? (parseFloat(parseFloat(orderItem["discount"])/100) * parseFloat(itemData["grandtotal"])) : 0);
               itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
               itemData["receive"] = orderItem["receive"];
               itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";

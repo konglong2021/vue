@@ -163,75 +163,67 @@
       </div>
     </b-form>
 
-    <div id="pos-invoice"
-      style="display: none; height: 100%; overflow: hidden; padding: 30px 70px !important; font-family: 'Arial', 'Khmer', sans-serif !important; width: 95%; margin: 15px;">
-      <div style="margin-bottom: 30px; font-family: 'Arial', 'Khmer', sans-serif; display:inline-block">
-        <h1 style="font-family: 'Arial', 'Khmer', sans-serif; text-align: center;">{{ $t('title') }}</h1>
-      </div>
-      <div class="full-content">
-        <div class="container-row-form width-60-percentage float-left">
-          <div class="form-row-content-detail row-content-view" v-if="invoiceNumber">
-            <label class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">វិក័យប័ត្រលេខ</label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;">{{invoiceNumber}}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-customer'" class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">ឈ្មោះអតិថិជន : </label>
-            <strong class="input-content"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">{{displayCustomerName(order.customer)}}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">អត្រាប្តូរប្រាក់រៀល : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ exchangeRate +
-            "(៛)"}}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">លក់ដោយ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{
-            $store.$cookies.get('user').name }}</strong>
-          </div>
-        </div>
-        <div class="container-row-form width-29-percentage float-right">
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-vat'" class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">ពន្ធ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ order.vat !== 0 ?
-            (order.vat * 100) + "%": 0 }}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-discount'" class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">បញ្ចុះតម្លៃ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ order.discount + "%"
-            }}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">ថ្ងៃខែឆ្នាំលក់ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ getFullDate()
-            }}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">REFERENCE </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ order.ref }}</strong>
-          </div>
-        </div>
-      </div>
-      <b-table style="font-family: 'Arial', 'Khmer', sans-serif;" table-class="table-payment" :items="printItems"
-        :fields="fieldsPos" :per-page="0" :current-page="1" stacked="md" show-empty small></b-table>
-      <div style="display: inline-block;float: right; margin-top: 25px; margin-right: 75px;">
-        <span style="display: block; font-family: 'Arial', 'Khmer', sans-serif;">{{$t('title_total_in_usd')}} :
-          {{subTotalPrint}} USD</span>
-        <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer', sans-serif;">
-          {{$t('title_total_after_vat_in_usd')}} {{ $util.format(grandTotalUsdPrint)}} : USD</span>
-        <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer', sans-serif;"
-          v-if="exchangeRate">{{$t('title_total_in_riel')}} : {{ $util.format(grandTotalKhPrint)}} Riel</span>
-      </div>
+
+    <div id="pos-invoice" style="padding-top : 50px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
+      <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
+      <table style="font-size: 10px; margin-bottom: 20px;">
+        <tbody>
+        <tr>
+          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">វិក័យប័ត្រលេខ : {{invoiceNumber}}</td>
+        </tr>
+        <tr>
+          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">ថ្ងៃខែឆ្នាំលក់ : {{ getFullDate() }}</td>
+        </tr>
+        <tr>
+          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">លក់ដោយ : {{$store.$cookies.get('user').name }}</td>
+        </tr>
+        </tbody>
+      </table>
+      <table style="text-align: center;">
+        <thead style="">
+        <tr>
+          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle;">ឈ្មោះទំនិញ</th>
+          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 5%;">ចំនួន</th>
+          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 20%;">តម្លៃ($)</th>
+          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 25%;">សរុប($)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="item of printItems">
+          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.name }}</td>
+          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.qty }}</td>
+          <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.price }}</td>
+          <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.total }}</td>
+        </tr>
+        <tr>
+          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;" colspan="2">សរុបមុនបញ្ចូលពន្ធ ($)</td>
+          <td style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial'; border-top:1px solid black !important;" colspan="2">{{ subTotalPrint }}</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ {{ (this.vat * 100) }} (%)</td>
+          <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ vatPrint }} ($)</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">បញ្ចុះតម្លៃ {{ this.discountOder }} (%)</td>
+          <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ discountPrint }} ($)</td>
+        </tr>
+        <tr>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបូកបញ្ចូលពន្ធបញ្ចុះតម្លៃ ($)</th>
+          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalUsdPrint - this.discountPrint) }}</th>
+        </tr>
+        <tr>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
+          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalKhPrint)}}</th>
+        </tr>
+        </tbody>
+      </table>
+      <footer style="font-family: 'Arial', 'Khmer', sans-serif; text-align:center; font-size: 10px; margin-top: 45px;">
+        <p style="text-align:center; margin-bottom: 0; padding-bottom: 0;">ទំនិញទិញហើយ មិនអាចប្តុរជាទឹកប្រាក់វិញបានទេ</p>
+        <p style="text-align:center; margin-bottom: 0; padding-bottom: 0; margin-top: 4px; padding-top: 0">អរគុណសម្រាប់ការគាំទ្រ</p>
+      </footer>
     </div>
   </div>
+
 </template>
 <script>
 export default {
@@ -256,7 +248,7 @@ export default {
     },
     grandTotalUsd() {
       let total = this.subTotalWithDiscount;
-      let taxValue = total * this.vat;
+      let taxValue = this.subTotal * this.vat;
       return total + taxValue;
 
     },
@@ -271,6 +263,16 @@ export default {
       }
       return subTotal;
     },
+    discountPrint() {
+      let discount = parseFloat(this.discountOder);
+      if (isNaN(discount)) discount = 0.0;
+      const discountPrice = (this.subTotalPrint * (discount / 100.0));
+      return discountPrice.toFixed(2);
+    },
+    vatPrint() {
+      const vatPrint = (this.subTotalPrint * this.vat);
+      return vatPrint.toFixed(2);
+    },
     subTotalWithDiscountPrint() {
       let discount = parseFloat(this.discount);
       if (isNaN(discount)) discount = 0.0;
@@ -282,7 +284,7 @@ export default {
       return total + taxValue;
     },
     grandTotalKhPrint() {
-      return this.roundKhMoney(this.grandTotalUsdPrint * this.exchangeRate);
+      return this.roundKhMoney((this.grandTotalUsdPrint - this.discountPrint) * this.exchangeRate);
     },
   },
   watch: {
@@ -306,9 +308,7 @@ export default {
       this.updateReturnMoney();
     }
   },
-  methods:
-  {
-
+  methods: {
     cancelInputReturn() {
       this.showInputReturn = false;
       this.inputReturnUsd = this.returnMoneyUsd;
@@ -448,12 +448,12 @@ export default {
         if (response.data.success === true) {
           self.$toast.success("Submit data successfully").goAway(2000);
           self.invoiceNumber = response.data.order["invoice_id"];
+          self.discountOder = parseFloat(response.data.order["discount"]);
           self.showPrintReceipt = true;
           self.$emit("updateListProduct", []);
           self.order = dataSubmit;
           self.ref = '';
           self.discount = 0.0;
-
         }
       })
         .catch(function (error) {
@@ -512,13 +512,11 @@ export default {
       optionStyleHtmlToPaper: {
         specs: [
           'fullscreen=yes',
-          'titlebar=yes',
-          'scrollbars=yes'
+          'titlebar=no',
+          'scrollbars=no'
         ],
         styles: [
-          'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
-          'https://unpkg.com/kidlat-css/css/kidlat.css',
-          // '~/static/css/app.css',
+          '../static/css/invoice-print.css',
         ],
         autoClose: true,
       },
@@ -531,6 +529,7 @@ export default {
       showPrintReceipt: false,
       is_show_content_print: false,
       invoiceNumber: '',
+      discountOder : 0.0,
       showInputReturn: false,
       inputReturnUsd: 0.0,
       returnMoneyUsd: 0.0,
@@ -555,10 +554,7 @@ export default {
       gettingMoneyUsd: 0,
       gettingMoneyRiel: 0,
       customerMap: {},
-      printItems: [
-
-      ],
-
+      printItems: [],
     }
   }
 }
@@ -611,5 +607,131 @@ export default {
 
 .btn-payment i {
   font-size: 40px !important;
+}
+@media print {
+  @page {
+    size: 57mm 200mm;
+    margin-top: 5mm;
+    margin-left: 5mm;
+    margin-right: 5mm;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Times New Roman', sans-serif;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  tr {
+    width: 100%;
+
+  }
+
+  h1 {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  #logo {
+    width: 60%;
+    text-align: center;
+    -webkit-align-content: center;
+    align-content: center;
+    padding: 5px;
+    /*margin: 2px;*/
+    display: block;
+    margin: 0 auto;
+  }
+
+  header {
+    width: 100%;
+    text-align: center;
+    -webkit-align-content: center;
+    align-content: center;
+    vertical-align: middle;
+  }
+
+  .items thead {
+    text-align: center;
+  }
+
+  .center-align {
+    text-align: center;
+  }
+
+  .bill-details td {
+    font-size: 10px;
+  }
+
+  .receipt {
+    font-size: medium;
+  }
+
+  .items .heading {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    border-top:1px solid black;
+    margin-bottom: 4px;
+    border-bottom: 1px solid black;
+    vertical-align: middle;
+  }
+
+  .items thead tr th:first-child,
+  .items tbody tr td:first-child {
+    width: 47%;
+    min-width: 47%;
+    max-width: 47%;
+    word-break: break-all;
+    text-align: left;
+  }
+
+  .items td {
+    font-size: 11px;
+    text-align: right;
+    vertical-align: bottom;
+  }
+
+  .price::before {
+    content: "\20B9";
+    font-family: "Arial";
+    text-align: right;
+  }
+
+  .sum-up {
+    text-align: right !important;
+  }
+  .total {
+    font-size: 11px;
+    border-top:1px dashed black !important;
+    border-bottom:1px dashed black !important;
+  }
+  .total.text, .total.price {
+    text-align: right;
+  }
+  .total.price::before {
+    content: "\20B9";
+  }
+  .line {
+    border-top:1px solid black !important;
+  }
+  .heading.rate {
+    width: 20%;
+  }
+  .heading.amount {
+    width: 25%;
+  }
+  .heading.qty {
+    width: 5%
+  }
+  p {
+    padding: 1px;
+    margin: 0;
+  }
+  section, footer {
+    font-size: 10px;
+  }
 }
 </style>
