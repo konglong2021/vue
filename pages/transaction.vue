@@ -389,11 +389,13 @@
         return discountPrice.toFixed(2);
       },
       vatPrice(order){
-        const vatPrice = (parseFloat(order.subtotal) * (parseFloat(order.vat) / 100));
+        const totalAfterDiscount = (parseFloat(order.subtotal) - this.discountPrice(order));
+        const vatPrice = (totalAfterDiscount * (parseFloat(order.vat) / 100));
         return vatPrice.toFixed(2);
       },
       grandTotalWithVat(order){
-        const grandTotal = (parseFloat(order.grandtotal) + ((parseFloat(order.vat) / 100) * parseFloat(order.subtotal)));
+        const totalAfterDiscount = (parseFloat(order.subtotal) - this.discountPrice(order));
+        const grandTotal = (parseFloat(order.grandtotal) + ((parseFloat(order.vat) / 100) * totalAfterDiscount));
         return grandTotal.toFixed(2);
       },
       async getListProduct($warehouse){
@@ -531,7 +533,6 @@
               }
               itemData["invoice_id"] = orderItem["invoice_id"];
               itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-              //itemData["priceDiscount"] = (orderItem["discount"] > 0 ? (parseFloat(parseFloat(orderItem["discount"])/100) * parseFloat(itemData["grandtotal"])) : 0);
               itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
               itemData["receive"] = orderItem["receive"];
               itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";

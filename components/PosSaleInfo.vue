@@ -248,7 +248,7 @@ export default {
     },
     grandTotalUsd() {
       let total = this.subTotalWithDiscount;
-      let taxValue = this.subTotal * this.vat;
+      let taxValue = total * this.vat;
       return total + taxValue;
 
     },
@@ -270,7 +270,7 @@ export default {
       return discountPrice.toFixed(2);
     },
     vatPrint() {
-      const vatPrint = (this.subTotalPrint * this.vat);
+      const vatPrint = (this.subTotalWithDiscountPrint * this.vat);
       return vatPrint.toFixed(2);
     },
     subTotalWithDiscountPrint() {
