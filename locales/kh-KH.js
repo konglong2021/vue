@@ -165,5 +165,6 @@ export default {
   "user_edit": "កែប្រែ អ្នកប្រើប្រាស់",
   "warehouse_access": "មើលពត៍មាន ឃ្លាំងទំនិញ",
   "warehouse_create": "បង្កើត ឃ្លាំងទំនិញ",
-  "warehouse_edit": "កែប្រែ ឃ្លាំងទំនិញ"
+  "warehouse_edit": "កែប្រែ ឃ្លាំងទំនិញ",
+  "product_view_history": "មើលពត័មានតម្លៃនាំចូលរបស់ទំនិញ"
 };

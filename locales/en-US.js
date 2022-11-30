@@ -165,6 +165,7 @@ export default {
   "user_edit": "User edit",
   "warehouse_access": "Warehouse access",
   "warehouse_create": "Warehouse create",
-  "warehouse_edit": "Warehouse edit"
+  "warehouse_edit": "Warehouse edit",
+  "product_view_history": "product_view_history"
 
 };
