@@ -437,6 +437,7 @@ export default {
       this.selected = $item.id;
       this.selectedItemData = $item;
       this.showPlusAndMinusIcon = true;
+      console.log($item);
       this.$emit("selectedItem", $item);
     },
     openInputQtyProduct($product) {
@@ -591,14 +592,14 @@ export default {
       let self = this;
       await self.$axios.get('/api/product_by_barcode/' + scanningInput).then(function (response) {
         if (response.data.hasOwnProperty("data")) {
-          //debugger;
           let data = response.data;
           if (data.success) {
             let product = data.data;
             let productItem = {
               id: product.id,
               price: product.sale_price,
-              name: product.en_name + ' (' + product.kh_name + ')',
+              name: product.kh_name,
+              kh_name: product.kh_name,
               img: (product.image !== "no image" && product.image !== "no image created") ? self.generateImageUrlDisplay(product.image) : "images/no_icon.png",
               code: product.code
             };

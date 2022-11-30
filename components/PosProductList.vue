@@ -103,6 +103,7 @@
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
+                      productItem.kh_name = productList[index].kh_name;
                       productItem.price = productList[index].sale_price;
                       productItem.img = (productList[index].image !== "no image" && productList[index].image !== "no image created" ) ? vm.generateImageUrlDisplay(productList[index].image) : "images/no_icon.png";
                       productItem.code = productList[index].code;
@@ -114,6 +115,7 @@
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
+                    productItem.kh_name = productList.kh_name;
                     productItem.price = productList.sale_price;
                     productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? vm.generateImageUrlDisplay(productList.image) : "images/no_icon.png";
                     productItem.code = productList.code;
@@ -143,6 +145,7 @@
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
+                      productItem.kh_name = productList[index].kh_name;
                       productItem.price = productList[index].sale_price;
                       productItem.img = productList[index].image !== "no image" ? vm.generateImageUrlDisplay(productList[index].image) : productList[index].image;
                       productItem.code = productList[index].code;
@@ -155,6 +158,7 @@
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
+                    productItem.kh_name = productList.kh_name;
                     productItem.price = productList.sale_price;
                     productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? vm.generateImageUrlDisplay(productList.image) : productList.image;
                     productItem.code = productList.code;
@@ -202,6 +206,7 @@
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
+                      productItem.kh_name = productList[index].kh_name;
                       productItem.price = productList[index].sale_price;
                       productItem.img = (productList[index].image !== "no image" && productList[index].image !== "no image created" ) ? self.generateImageUrlDisplay(productList[index].image) : "images/no_icon.png";
                       productItem.code = productList[index].code;
@@ -213,6 +218,7 @@
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
+                    productItem.kh_name = productList.kh_name;
                     productItem.price = productList.sale_price;
                     productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? self.generateImageUrlDisplay(productList.image) : "images/no_icon.png";
                     productItem.code = productList.code;
@@ -249,6 +255,7 @@
                     productItem.id = productList["id"];
                     productItem.product_id = productList["product_id"];
                     productItem.name = productList["en_name"] + " (" + productList["kh_name"] + ")";
+                    productItem.kh_name = productList.kh_name;
                     productItem.price = productList['sale_price'];
                     productItem.img = (productList['image'] !== "no image" && productList["image"] !== "no image created" ) ? self.generateImageUrlDisplay(productList["image"]) : "images/no_icon.png";
                     productItem.code = productList['code'];
@@ -327,6 +334,7 @@
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
+                      productItem.kh_name = productList[index].kh_name;
                       productItem.price = productList[index].sale_price;
                       productItem.img = (productList[index].image !== "no image" && productList[index].image !== "no image created" ) ? vm.generateImageUrlDisplay(productList[index].image) : "images/no_icon.png";
                       productItem.code = productList[index].code;
@@ -338,6 +346,7 @@
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
+                    productItem.kh_name = productList.kh_name;
                     productItem.price = productList.sale_price;
                     productItem.img = (productList.image !== "no image" && productList.image !== "no image created") ? vm.generateImageUrlDisplay(productList.image) : "images/no_icon.png";
                     productItem.code = productList.code;

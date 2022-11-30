@@ -167,7 +167,7 @@
             </thead>
             <tbody>
               <tr v-for="item of itemsProductDetail">
-                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.name }}</td>
+                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.kh_name }}</td>
                 <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.qty }}</td>
                 <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.price }}</td>
                 <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.total }}</td>
@@ -191,6 +191,15 @@
               <tr>
                 <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
                 <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ calculateToRiel((parseFloat(order.grandtotal) + parseFloat(vatPrice(order))), order.exchange_rate) }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ ($)</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ order.return_money_usd }}</th>
+              </tr>
+
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ (៛)</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(order.return_money_kh)}}</th>
               </tr>
             </tbody>
           </table>
@@ -528,6 +537,8 @@
               itemData["date"] = date;
               itemData["order_id"] = orderItem.id;
               itemData["sale_by"] = user.name;
+              itemData["return_money_kh"] =  orderItem.return_money_kh;
+              itemData["return_money_usd"] =  orderItem.return_money_usd;
               if(customerItem){
                 itemData["customer"] = customerItem["name"];
               }
@@ -611,6 +622,7 @@
               if(productItem){
                 data["number"] = (indexOrder + 1);
                 data["name"] = productItem["name"];
+                data["kh_name"] = productItem["kh_name"];
                 data["qty"] = parseInt(orderDetailList[indexOrder]["quantity"]);
                 data["price"] = orderDetailList[indexOrder]["sellprice"];
                 let total = (parseFloat(orderDetailList[indexOrder]["sellprice"]) * parseInt(orderDetailList[indexOrder]["quantity"]));

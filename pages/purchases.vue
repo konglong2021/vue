@@ -12,6 +12,10 @@
         </div>
       </div>
       <div class="content-product content-order-list">
+        <div style="display: inline-block; width: 13%; float: right; margin-right: 10px; margin-bottom: 10px">
+<!--          <b-form-select class="form-control input-content input-select-warehouse" v-model="warehouse"-->
+<!--                         :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>-->
+        </div>
         <div class="content-loading" v-if="isLoading">
           <div class="spinner-grow text-muted"></div>
         </div>
@@ -662,6 +666,19 @@ export default {
       let yyyy = today.getFullYear();
 
       return (day + "/" + month + "/" + yyyy);
+    },
+    selectedWarehouse(warehouse) {
+      if (warehouse) {
+        this.warehouse_id = warehouse;
+        this.currentPage = 1;
+        this.totalItems = 0;
+        if(this.searchInput === null || this.searchInput === '' || this.searchInput === undefined){
+          //this.getDataPurchase(warehouse);
+        }
+        else {
+          //this.getDataPurchase(this.currentPage);
+        }
+      }
     },
   },
   mounted() {

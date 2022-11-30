@@ -46,9 +46,7 @@
               <label :for="'input-vat'" class="label-input no-margin-bottom">ពន្ធ</label>
             </div>
             <div class="form-column-input">
-
               <b-form-select class="form-control input-content" v-model="vat" :options="vats"></b-form-select>
-
             </div>
           </div>
 
@@ -116,16 +114,17 @@
           </div>
           <div style="clear:both"> </div>
           <div class="line"></div>
-          <div class="total" style="cursor:pointer" @click="inputReturn()">
+<!--          <div class="total" style="cursor:pointer" @click="inputReturn()">-->
+          <div class="total" style="cursor:pointer">
             <div class="pull-left">
               លុយត្រូវអាប់ ($) :
             </div>
             <div class="pull-right">
-              <div class="pull-left" v-if="showInputReturn">
-                <b-form-input :id="'input-return-usd'" @keyup.enter="updateInputReturn()"
-                  @keyup.esc="cancelInputReturn()" type="number" class="input-content" v-model="inputReturnUsd">
-                </b-form-input>
-              </div>
+<!--              <div class="pull-left" v-if="showInputReturn">-->
+<!--                <b-form-input :id="'input-return-usd'" @keyup.enter="updateInputReturn()"-->
+<!--                  @keyup.esc="cancelInputReturn()" type="number" class="input-content" v-model="inputReturnUsd">-->
+<!--                </b-form-input>-->
+<!--              </div>-->
               <div class="pull-right" v-if="!showInputReturn">
                 {{$util.format( returnMoneyUsd)}}
               </div>
@@ -208,13 +207,23 @@
           <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ discountPrint }} ($)</td>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបូកបញ្ចូលពន្ធបញ្ចុះតម្លៃ ($)</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបញ្ចូលពន្ធបញ្ចុះតម្លៃ ($)</th>
           <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalUsdPrint - this.discountPrint) }}</th>
         </tr>
         <tr>
           <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
           <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalKhPrint)}}</th>
         </tr>
+        <tr>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ ($)</th>
+          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ grandTotalUsdPrint }}</th>
+        </tr>
+
+        <tr>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ (៛)</th>
+          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(returnMoneyKh)}}</th>
+        </tr>
+
         </tbody>
       </table>
       <footer style="font-family: 'Arial', 'Khmer', sans-serif; text-align:center; font-size: 10px; margin-top: 45px;">
@@ -296,8 +305,8 @@ export default {
       console.log(newVal, ' ->', oldVal);
       if (this.products.length == 0) {
         this.gettingMoneyUsd = 0;
+        this.returnMoneyKh = 0.0;
       }
-
 
       this.updateReturnMoney();
     },
@@ -321,7 +330,6 @@ export default {
       return num;
     },
     updateInputReturn() {
-
       this.showInputReturn = false;
       this.returnMoneyUsd = parseFloat(this.inputReturnUsd);
       let getting = this.gettingMoney();
@@ -330,8 +338,6 @@ export default {
         let kh = (remain - this.returnMoneyUsd) * this.exchangeRate;
         this.returnMoneyKh = this.$util.roundKhDown(kh);
       }
-
-
     },
     inputReturn() {
       if (!this.showInputReturn) {
@@ -356,11 +362,10 @@ export default {
         this.exchangeRate = 4100;
       }
 
-      let getting = gettingUsd + gettingKh / exchangeRate;
+      let getting = gettingUsd + (gettingKh / exchangeRate);
       return getting;
     },
     updateReturnMoney() {
-
       this.returnMoneyKh = 0.0;
       this.returnMoneyUsd = 0.0;
       let getting = this.gettingMoney();
@@ -368,13 +373,20 @@ export default {
       if (getting > this.grandTotalUsd) {
         remain = getting - this.grandTotalUsd;
         if (!this.$util.isInt(remain)) {
+          this.returnMoneyKh = this.$util.roundKhDown(remain.toFixed(2) * this.exchangeRate);
+          // this.returnMoneyKh = this.$util.roundKhDown(remain.toFixed(2) * 4000);
+          this.returnMoneyUsd = remain;
+          /*
           let num = parseInt(remain);
           let extra = remain - num;
           this.returnMoneyKh = this.$util.roundKhDown(extra * this.exchangeRate);
           this.returnMoneyUsd = num;
+          */
         }
         else {
           this.returnMoneyUsd = remain;
+          // this.returnMoneyKh = this.$util.roundKhDown(remain.toFixed(2) * 4000);
+          this.returnMoneyKh = this.$util.roundKhDown(remain.toFixed(2) * this.exchangeRate);
         }
       }
 
@@ -387,7 +399,7 @@ export default {
       return '';
     },
     deleteInput($event) {
-      console.log('delete input', $event);
+      //console.log('delete input', $event);
     },
 
     buildPrintItems() {
@@ -397,7 +409,7 @@ export default {
         const total = (parseFloat(p.price) * parseInt(p.qty));
         let item = {
           total: total,
-          name: p.name,
+          name: p.kh_name,
           qty: p.qty,
           price: p.price
         };
@@ -446,7 +458,7 @@ export default {
       this.buildPrintItems();
       await this.$axios.post('/api/sale', dataSubmit).then(function (response) {
         if (response.data.success === true) {
-          self.$toast.success("Submit data successfully").goAway(2000);
+          self.$toast.success("ទិន្នន័យត្រូវបានរក្សាទុក ដោយជោគជ័យ!!").goAway(2000);
           self.invoiceNumber = response.data.order["invoice_id"];
           self.discountOder = parseFloat(response.data.order["discount"]);
           self.showPrintReceipt = true;
