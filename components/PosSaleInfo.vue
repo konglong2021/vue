@@ -215,15 +215,25 @@
           <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalKhPrint)}}</th>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ ($)</th>
-          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ grandTotalUsdPrint }}</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px solid black !important; text-align: right;"></th>
+          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-top:1px solid black !important; text-align: right;"></th>
         </tr>
-
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ (៛)</th>
-          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(returnMoneyKh)}}</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ទទួលប្រាក់ ($)</th>
+          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ gettingMoneyUsd }}</th>
         </tr>
-
+        <tr>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ទទួលប្រាក់ (៛)</th>
+          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ gettingMoneyRiel }}</th>
+        </tr>
+        <tr>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">លុយត្រូវអាប់ ($)</th>
+          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ grandTotalUsdPrint }}</th>
+        </tr>
+        <tr>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">លុយត្រូវអាប់ (៛)</th>
+          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ $util.format(returnMoneyKh) }}</th>
+        </tr>
         </tbody>
       </table>
       <footer style="font-family: 'Arial', 'Khmer', sans-serif; text-align:center; font-size: 10px; margin-top: 45px;">

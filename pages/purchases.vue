@@ -12,7 +12,7 @@
         </div>
       </div>
       <div class="content-product content-order-list">
-        <div style="display: inline-block; width: 13%; float: right; margin-right: 10px; margin-bottom: 10px">
+        <div style="display: inline-block; width: 100%; float: right; margin-right: 10px; margin-bottom: 10px">
 <!--          <b-form-select class="form-control input-content input-select-warehouse" v-model="warehouse"-->
 <!--                         :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>-->
         </div>
@@ -23,70 +23,20 @@
           <div class="card">
             <div class="card-body">
               <div class="table-responsive">
-                <table class="table table-purchase" style="display: none;">
-                  <thead class="table-header">
-                    <tr class="tr-header">
-                      <th class="th-header" style="width: 10%;">{{ $t('label_date_purchase') }}</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_purchase_by') }}</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_supplier_name') }}</th>
-                      <th class="th-header" style="width: 15%;">{{ $t('label_product_name') }}</th>
-                      <th class="th-header" style="width: 7%;">{{ $t('label_quantity') }}</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_import_price') }} ($)</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_sub_total') }} ($)</th>
-                      <th class="th-header" style="width: 15%;">{{ $t('label_grand_total') }} ($)</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('title_action') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody class="table-body" style="max-height: calc(100vh - 300px)">
-                    <tr class="table-body-tr" v-for="item in items" v-bind:key="item.purchase_id">
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.date !== undefined ? item.date : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.purchase_by !== undefined ? item.purchase_by : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.supplier !== undefined ? item.supplier : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 15%;">
-                        <b class="content">{{ (item.name !== undefined ? item.name : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 7%;">
-                        <b class="content">{{ (item.quantity !== undefined ? item.quantity : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.unitprice !== undefined ? item.unitprice : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.subtotal !== undefined ? item.subtotal : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 15%;">
-                        <b class="content">{{ (item.grand_total !== undefined ? item.grand_total : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;" v-show="item.purchase_id" :rowspan="item.lengthDetail">
-                        <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(item)">
-                          <i class="fa fa-eye"></i>
-                        </b-button>
-                        <b-button size="sm" title="Edit order data" class="btn-no-background"
-                          @click="UpdateDetailData(item,  $event.target)">
-                          <i class="fa fa-edit"></i>
-                        </b-button>
-                        <b-button size="sm" title="Remove order data" class="btn-no-background-danger"
-                          @click="openConfirmToRemove(item)">
-                          <i class="fa fa-trash"></i>
-                        </b-button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <b-table id="my-table-purchase" class="table table-striped table-bordered table-purchase" v-if="items"
-                  sticky-header="true" :items="items" :fields="itemsFields" head-variant="light">
+                <b-table
+                  id="my-table-purchase"
+                  class="table table-striped table-bordered table-purchase"
+                  v-if="items" sticky-header="true"
+                  :items="items" :fields="itemsFields"
+                  head-variant="light"
+                  :tbody-tr-class="addClassToRow"
+                >
                   <template #cell(actions)="row">
-                    <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(row.item)">
+                    <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(row.item);">
                       <i class="fa fa-eye"></i>
                     </b-button>
                     <b-button size="sm" title="Edit order data" class="btn-no-background"
-                      @click="UpdateDetailData(row.item,  $event.target)">
+                      @click="UpdateDetailData(row.item, $event.target)">
                       <i class="fa fa-edit"></i>
                     </b-button>
                     <b-button size="sm" title="Remove order data" class="btn-no-background-danger"
@@ -103,53 +53,58 @@
       </div>
     </div>
     <b-modal id="modal-detail-purchase" ref="detail-purchase-form-modal" size="lg" modal-class="payment-form-modal"
-      @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
-      @ok="handleSubmit" ok-title="បិទ" title="ការនាំទំនិញចូល" no-close-on-backdrop>
-      <div class="full-content margin-bottom-20">
-        <div class="container-row-form width-60-percentage float-left">
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-customer'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ផ្គត់ផ្គង់ដោយ : </label>
-            <strong class="input-content"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">{{purchase.supplier}}</strong>
-          </div>
+      ok-only ok-variant="secondary" footer-class="justify-content-center"
+      @ok="hideModal" ok-title="បិទ" title="ការនាំទំនិញចូល" no-close-on-backdrop>
+      <div style="display: inline-block; width: 100%;" v-if="purchase && purchase.id">
+        <div class="full-content margin-bottom-20">
+          <div class="container-row-form width-60-percentage float-left">
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-customer'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ផ្គត់ផ្គង់ដោយ : </label>
+              <strong class="input-content"
+                      style="font-family: 'Arial', 'Khmer', sans-serif;">{{purchase.supplier}}</strong>
+            </div>
 
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">នាំចូលដោយ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{
-            $store.$cookies.get('user').name }}</strong>
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">នាំចូលដោយ : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{
+                  $store.$cookies.get('user').name }}</strong>
+            </div>
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-discount'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">Batch : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.batch
+                }}</strong>
+            </div>
           </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-discount'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">Batch : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.batch
-            }}</strong>
+          <div class="container-row-form width-29-percentage float-right">
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-vat'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ពន្ធ : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.vat !== 0 ?
+                purchase.vat + "%": 0 }}</strong>
+            </div>
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ថ្ងៃខែឆ្នាំចូល : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.date
+                }}</strong>
+            </div>
           </div>
         </div>
-        <div class="container-row-form width-29-percentage float-right">
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-vat'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ពន្ធ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.vat !== 0 ?
-            purchase.vat + "%": 0 }}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ថ្ងៃខែឆ្នាំចូល : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.date
-            }}</strong>
-          </div>
+        <div style="display: inline-block; overflow:hidden; width: 100%;">
+          <b-table
+            style="max-height: 335px; overflow-y: auto; font-family: 'Arial', 'Khmer', sans-serif;"
+            sticky-header="true"
+            :items="itemsProductDetail"
+            :fields="fieldsProductDetail"
+            head-variant="light">
+          </b-table>
         </div>
-      </div>
-      <div style="display: inline-block; overflow:hidden; width: 100%;">
-        <b-table style="height: 500px !important; font-family: 'Arial', 'Khmer', sans-serif;"
-          table-class="table-product-detail" :items="itemsProductDetail" :fields="fieldsProductDetail" :per-page="0"
-          stacked="md" show-empty small>
-        </b-table>
-      </div>
-      <div class="container-row-form width-15-percentage float-right" style="font-size: 20px;">
-        <b>សរុប : {{ grandTotalPrice(itemsProductDetail) }} $</b>
+        <div class="container-row-form width-15-percentage float-right" style="font-size: 20px;">
+          <b>សរុប : {{ grandTotalPrice(itemsProductDetail) }} $</b>
+        </div>
       </div>
     </b-modal>
     <b-modal id="modal-edit-purchase" ref="edit-purchase-form-modal" size="lg" modal-class="payment-form-modal"
@@ -279,7 +234,12 @@ export default {
       tr_id_select: null,
       vats: [{ text: '0%', value: 0 }, { text: '5%', value: 0.05 }, { text: '10%', value: 0.1 }, { text: '15%', value: 0.15 }],
       productItemAdd: null,
-      purchaseSelect: null
+      purchaseSelect: null,
+      viewRowIdSelected: null,
+      editRowIdSelected: null,
+      selectedRows: [],
+      selectMode: 'single',
+      changeColor: false
     }
   },
   watch: {
@@ -292,6 +252,11 @@ export default {
     }
   },
   methods: {
+    addClassToRow(item, type) {
+      if (item && type === 'row') {
+        return item && item.isSelected === true && this.purchaseSelect.id === item.id ? "table-primary" : "";
+      }
+    },
     async getListProduct() {
       let vm = this;
       vm.products = [];
@@ -384,6 +349,7 @@ export default {
               let supplier = self.suppliers.find(item => item.value === purchaseItem["supplier_id"]);
               let user = self.cloneObject(self.$store.$cookies.get('user'));
               let itemData = [];
+              itemData["isSelected"] = false;
 
               itemData["id"] = purchaseItem.id;
               itemData["purchase_id"] = purchaseItem.id;
@@ -422,12 +388,34 @@ export default {
     cloneObject(obj) {
       return JSON.parse(JSON.stringify(obj));
     },
+    hideModal() {
+      // this.purchase = {
+      //   vat: 0,
+      //   id: null,
+      //   import_price: 0,
+      //   supplier: null,
+      //   warehouse: null,
+      //   subtotal: 0,
+      //   grandtotal: 0,
+      //   qty: 0,
+      //   batch: null,
+      // };
+      // this.purchaseSelect = null;
+      this.$refs["detail-purchase-form-modal"].hide();
+    },
     viewDetailData(item) {
       this.purchase = item;
       this.itemsProductDetail = [];
       let purchaseDetailList = [];
       let purchaseDetailArray = [];
-
+      for(let itemData of this.items){
+        if(itemData.id === item.id){
+          itemData["isSelected"] = true;
+        }
+        else {
+          itemData["isSelected"] = false;
+        }
+      }
       if (this.purchaseList.length > 0) {
         for (let index = 0; index < this.purchaseList.length; index++) {
           if (this.purchaseList[index]["id"] === item.purchase_id) {
@@ -445,7 +433,7 @@ export default {
               data["code"] = productItem["code"];
               data["quantity"] = parseInt(purchaseDetailList[indexItem]["quantity"]);
               data["unitprice"] = purchaseDetailList[indexItem]["unitprice"];
-              data["saleprice"] = productItem["sale_price"];
+              data["saleprice"] = purchaseDetailList[indexItem]["sale_price"];
               const subtotal = (parseFloat(purchaseDetailList[indexItem]["unitprice"]) * parseInt(purchaseDetailList[indexItem]["quantity"]));
               data["subtotal"] = subtotal.toFixed(2);
               purchaseDetailArray.push(data);
@@ -459,15 +447,19 @@ export default {
         let index = this.fieldsProductDetail.indexOf(itemActionField);
         this.fieldsProductDetail.splice(index, 1);
       }
-      this.$refs["detail-purchase-form-modal"].show();
+      this.$nextTick(() => {
+        this.$refs["detail-purchase-form-modal"].show();
+      });
     },
-
     UpdateDetailData(item, $target) {
       this.purchaseSelect = item;
-
       let purchaseDetailList = [];
       let purchaseDetailArray = [];
       let listProductAlreadyAdd = [];
+      Object.entries(this.items).forEach(([key, val]) => {
+        val.isSelected = (val.id === item.id ? true : false);
+      });
+
       if (this.purchaseList.length > 0) {
         let purchaseItem = this.purchaseList.find(row => row.id === item.id);
         if (purchaseItem && purchaseItem.hasOwnProperty("id")) {
@@ -479,6 +471,7 @@ export default {
         }
         if (purchaseDetailList && purchaseDetailList.length > 0) {
           for (let indexPurchase = 0; indexPurchase < purchaseDetailList.length; indexPurchase++) {
+            console.log(purchaseDetailList[indexPurchase]);
             let productIdSelected = purchaseDetailList[indexPurchase]["product_id"];
             let data = {};
             let productItem = this.products.find(dataProduct => dataProduct.id === productIdSelected);
@@ -488,7 +481,7 @@ export default {
               data["code"] = productItem["code"];
               data["quantity"] = parseInt(purchaseDetailList[indexPurchase]["quantity"]);
               data["unitprice"] = purchaseDetailList[indexPurchase]["unitprice"];
-              data["saleprice"] = parseFloat(productItem["sale_price"]);
+              data["saleprice"] = parseFloat(purchaseDetailList[indexPurchase]["sale_price"]);
               const subtotal = parseFloat(purchaseDetailList[indexPurchase]["unitprice"]) * parseInt(purchaseDetailList[indexPurchase]["quantity"]);
               data["subtotal"] = subtotal.toFixed(2);
               listProductAlreadyAdd.push(productItem["id"]);
@@ -507,12 +500,15 @@ export default {
         this.fieldsProductDetail.push({ key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle: "font-size: 17px;" });
       }
       this.$refs['edit-purchase-form-modal'].show();
+      console.log(this.itemsProductDetail);
     },
+
     rowClass(item, type) {
       if (item && type === 'row') {
         if (item.isAdd === true) {
           return 'active-color'
-        } else {
+        }
+        else {
           return ''
         }
       } else {
@@ -547,7 +543,8 @@ export default {
           productAdd["code"] = productItemAdd["code"];
           productAdd["name"] = (productItemAdd["en_name"] + " " + productItemAdd["kh_name"]);
 
-          productAdd["saleprice"] = productItemAdd["sale_price"];
+          console.log(productItemAdd);
+          //productAdd["saleprice"] = productItemAdd["sale_price"];
           productAdd["unitprice"] = productItemAdd["unitprice"];
           productAdd["quantity"] = 1;
           productAdd["subtotal"] = (parseInt(productAdd["quantity"]) * (productAdd["unitprice"] > 0 ? parseFloat(productAdd["unitprice"]) : 0));
@@ -588,7 +585,8 @@ export default {
       let subtotal = 0;
       for (let index = 0; index < self.itemsProductDetail.length; index++) {
         let purchaseDetailItem = {};
-        purchaseDetailItem['product_id'] = self.itemsProductDetail[index]['id'];
+        purchaseDetailItem["sale_price"] = self.itemsProductDetail[index]["saleprice"];
+        purchaseDetailItem['product_id'] = self.itemsProductDetail[index]['product_id'];
         purchaseDetailItem['unitprice'] = self.itemsProductDetail[index]['unitprice'];
         purchaseDetailItem['quantity'] = self.itemsProductDetail[index]['quantity'];
         subtotal = subtotal + parseFloat(self.itemsProductDetail[index]['subtotal']);

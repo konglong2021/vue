@@ -683,6 +683,22 @@ body {
   box-shadow: none !important;
 }
 
+.background-color{
+  background-color: red;
+
+}
+.table-primary{
+  border-color: #9fcdff;
+  background-color: #9fcdff;
+}
+.Changes {
+  background-color: red;
+}
+
+.noChange {
+  background-color: red;
+}
+
 .btn-no-background-danger {
   padding: 0;
   background: none;
@@ -703,10 +719,6 @@ body {
   color: #dc3545 !important;
   outline: none !important;
   box-shadow: none !important;
-}
-
-.payment-form-modal .table-product-detail tbody tr td {
-  height: 52px;
 }
 
 .active-color {
@@ -844,4 +856,7 @@ body {
 
 @page{
   size: auto;
+}
+.active{
+  background-color: red !important;
 }

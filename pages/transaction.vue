@@ -152,7 +152,7 @@
               <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">ថ្ងៃខែឆ្នាំលក់ : {{ order.date }}</td>
             </tr>
             <tr>
-              <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">លក់ដោយ : {{ order.customer }}</td>
+              <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">លក់ដោយ : {{ order.sale_by }}</td>
             </tr>
             </tbody>
           </table>
@@ -173,11 +173,11 @@
                 <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.total }}</td>
               </tr>
               <tr>
-                <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;" colspan="2">សរុបបញ្ចូលពន្ធ ($)</td>
-                <td style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial'; border-top:1px solid black !important;" colspan="2">{{ order.subtotal }}</td>
+                <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;">សរុប ($)</td>
+                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial'; border-top:1px solid black !important;">{{ order.subtotal }}</td>
               </tr>
               <tr>
-                <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ ($) (10%)</td>
+                <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ ($) ({{ order.vat * 100 }} %)</td>
                 <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ vatPrice(order) }}</td>
               </tr>
               <tr>
@@ -192,14 +192,28 @@
                 <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
                 <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ calculateToRiel((parseFloat(order.grandtotal) + parseFloat(vatPrice(order))), order.exchange_rate) }}</th>
               </tr>
+
+
               <tr>
-                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ ($)</th>
-                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ order.return_money_usd }}</th>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px solid black !important; text-align: right;"></th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-top:1px solid black !important; text-align: right;"></th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ទទួលប្រាក់ ($)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ order.receive_money_usd }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ទទួលប្រាក់ (៛)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ order.receive_money_kh }}</th>
               </tr>
 
               <tr>
-                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">លុយត្រូវអាប់ (៛)</th>
-                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(order.return_money_kh)}}</th>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">លុយត្រូវអាប់ ($)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ order.return_money_usd }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">លុយត្រូវអាប់ (៛)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ $util.format(order.return_money_kh)}}</th>
               </tr>
             </tbody>
           </table>
@@ -209,9 +223,10 @@
           </footer>
         </div>
       </b-modal>
-      <b-modal id="modal-edit-payment" ref="edit-payment-form-modal" size="lg" modal-class="payment-form-modal"
-              @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
-              @ok="handleSubmit" ok-title="កែប្រែ" title="ការលក់" no-close-on-backdrop>
+      <b-modal
+        id="modal-edit-payment" ref="edit-payment-form-modal" size="lg" modal-class="payment-form-modal"
+        @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
+        @ok="handleSubmit" ok-title="កែប្រែ" title="ការលក់" no-close-on-backdrop>
         <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;" @submit.stop.prevent="onSubmitEditPayment">
           <div class="full-content margin-bottom-20">
             <div class="container-row-form width-30-percentage float-left">
@@ -359,7 +374,9 @@
           discount: 0,
           invoice_id: null,
           exchange_rate: 4100,
-          subtotal : 0
+          subtotal : 0,
+          receive_money_usd: 0,
+          receive_money_kh: 0,
         },
         product_select: null,
         productOptions : [],
@@ -537,11 +554,17 @@
               itemData["date"] = date;
               itemData["order_id"] = orderItem.id;
               itemData["sale_by"] = user.name;
+
+              itemData["receive_money_kh"] =  orderItem["receive_money_kh"];
+              itemData["receive_money_usd"] =  orderItem["receive_money_usd"];
+
               itemData["return_money_kh"] =  orderItem.return_money_kh;
               itemData["return_money_usd"] =  orderItem.return_money_usd;
+
               if(customerItem){
                 itemData["customer"] = customerItem["name"];
               }
+
               itemData["invoice_id"] = orderItem["invoice_id"];
               itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
               itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
@@ -625,6 +648,7 @@
                 data["kh_name"] = productItem["kh_name"];
                 data["qty"] = parseInt(orderDetailList[indexOrder]["quantity"]);
                 data["price"] = orderDetailList[indexOrder]["sellprice"];
+
                 let total = (parseFloat(orderDetailList[indexOrder]["sellprice"]) * parseInt(orderDetailList[indexOrder]["quantity"]));
                 data["total"] = total.toFixed(2);
                 data["discount"] = discount > 0 ? (discount) : 0;
