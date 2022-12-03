@@ -857,6 +857,4 @@ body {
 @page{
   size: auto;
 }
-.active{
-  background-color: red !important;
-}
+
