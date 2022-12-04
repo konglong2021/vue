@@ -89,7 +89,8 @@
           </div>
         </div>
       </div>
-      <b-modal id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
+      <b-modal
+              id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
                @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
                @ok="onSubmitToPrint" ok-title="ព្រីនចេញ" title="ការលក់" no-close-on-backdrop>
         <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;">
@@ -125,24 +126,25 @@
               </div>
             </div>
           </div>
-          <b-table table-class="table-payment"
-                   :items="itemsProductDetail"
-                   :fields="fieldsProductDetail"
-                   stacked="md"
-                   show-empty
-                   small
+          <b-table
+                  table-class="table-payment"
+                  style="max-height: 215px; overflow-y: auto; font-family: 'Arial', 'Khmer', sans-serif;"
+                  :items="itemsProductDetail"
+                  :fields="fieldsProductDetail"
+                  sticky-header="true"
+                  head-variant="light"
           >
           </b-table>
-          <div style="display: inline-block;float: right;margin-top: 25px;">
-            <span style="display: block;">{{ $t('title_total_in_usd') }} : {{ order.subtotal }} USD</span>
-            <span style="display: block; margin-top: 10px;">{{ $t('label_vat') }} ($) : {{ vatPrice(order) }} USD</span>
-            <span style="display: block; margin-top: 10px;">{{$t('title_total_after_vat_in_usd')}} : {{ grandTotalWithVat(order) }} USD</span>
-            <span style="display: block; margin-top: 10px;" v-if="order.subtotal">{{$t('title_total_in_riel')}} : {{ calculateToRiel(grandTotalWithVat(order), order.exchange_rate) }} Riel</span>
+          <div style="display: inline-block;float: right;margin-top: 20px;">
+            <span style="display: block; font-size: 12px;">{{ $t('title_total_in_usd') }} : {{ order.subtotal }} USD</span>
+            <span style="display: block; margin-top: 5px; font-size: 12px;">{{ $t('label_vat') }} ($) : {{ vatPrice(order) }} USD</span>
+            <span style="display: block; margin-top: 5px; font-size: 12px;">{{$t('title_total_after_vat_in_usd')}} : {{ grandTotalWithVat(order) }} USD</span>
+            <span style="display: block; margin-top: 5px; font-size: 12px;" v-if="order.subtotal">{{$t('title_total_in_riel')}} : {{ calculateToRiel(grandTotalWithVat(order), order.exchange_rate) }} Riel</span>
 
           </div>
         </b-form>
         <div id="invoice-print-pos-again" style="padding-top : 50px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
-          <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
+          <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer', sans-serif; font-size: 13px;">{{ $t('title') }}</h6>
           <table style="font-size: 10px; margin-bottom: 20px;">
             <tbody>
             <tr>
@@ -265,14 +267,14 @@
                 </div>
               </div>
             </div>
-            <b-table style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" table-class="table-product-detail"
-                     :items="itemsProductDetail"
-                     :fields="fieldsProductDetail"
-                     :per-page="0"
-                     stacked="md"
-                     show-empty
-                     small
-                      :tbody-tr-class="rowClass"
+            <b-table
+                    style="max-height: 320px; overflow-y: auto; font-family: 'Arial', 'Khmer', sans-serif; width: 100%;"
+                    table-class="table-product-detail"
+                    :items="itemsProductDetail"
+                    :fields="fieldsProductDetail"
+                    :tbody-tr-class="rowClass"
+                    sticky-header="true"
+                    head-variant="light"
             >
               <template #cell(qty)="row">
                 <b-form-input :ref="'inputQty' + row.item.id" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" v-on:change="updatedDataOfCurrentProduct(row.item.qty, row.item, 'qty')"></b-form-input>
@@ -334,20 +336,20 @@
         ],
         itemsProductDetail: [],
         fieldsProductDetail: [
-          { key: 'number', label: 'លេខរៀង', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
-          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
-          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 17px;"},
-          { key: 'discount', label: 'បញ្ចុះតម្លៃ (%)', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'total_after_discount', label: 'តម្លៃសរុប បន្ទាប់ពី បញ្ចុះតម្លៃ ($)', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle : "font-size: 17px;"},
+          { key: 'number', label: 'លេខរៀង', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 13px; width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 13px;width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'discount', label: 'បញ្ចុះតម្លៃ (%)', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'total_after_discount', label: 'សរុប បន្ទាប់ពី បញ្ចុះតម្លៃ ($)', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
         ],
         fieldsProductDetailPrint: [
-          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
-          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
-          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 17px;"},
+          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 13px; width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 13px;width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
         ],
         warehouses : [{text : "ជ្រើសរើស ឃ្លាំងទំនិញ", value : null}],
         warehouse: null,
@@ -1194,6 +1196,7 @@
 <style scoped>
   .content-order-list{
     min-height: calc(100vh - 140px);
+    font-family: Arial, "Khmer OS Bokor", sans-serif;
   }
   .table-transaction{
     display: inline-block;
@@ -1270,6 +1273,7 @@
     overflow-y: auto;
     max-height: calc(100vh - 255px);
   }
+
   @media print {
     @page {
       size: 57mm 200mm;

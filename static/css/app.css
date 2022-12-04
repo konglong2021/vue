@@ -2,7 +2,7 @@
   background: url(/images/home-menu-bg-overlay.svg), linear-gradient(to right bottom, #77717e, #c9a8a9);
   background-size: cover;
   height: 100vh;
-  font-family: Arial, "Khmer", sans-serif;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
 }
 
 .clearboth {
@@ -10,7 +10,7 @@
 }
 
 .main-page-content {
-  font-family: Arial, "Khmer", sans-serif;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
   min-height: calc(100vh - 80px);
   background-color: #f8f9fa;
 }
@@ -21,7 +21,7 @@
 
 body {
   /*font-family: "Khmer", sans-serif;*/
-  font-family: Arial, "Khmer", sans-serif;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
 }
 
 .head-title {
@@ -368,12 +368,26 @@ body {
   justify-content: center;
 }
 
+#modal-detail-payment .table-payment{
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
+}
+
 #modal-submit-payment .table-payment th {
   border-top: none;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
 }
 
 #modal-submit-payment .table-payment td {
   border-top: none;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
+}
+
+#modal-edit-payment .table-product-detail{
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
 }
 
 .input-content {
@@ -563,7 +577,8 @@ body {
 }
 
 .header-th {
-  font-size: 17px;
+  /*font-size: 12px;*/
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
 }
 
 @media print {

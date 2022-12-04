@@ -178,7 +178,6 @@
       cancel-title="បោះបង់" title="ការលក់" no-close-on-backdrop>
       <h4 style="text-align: center;">ទិន្នន័យមួយនេះ និងត្រូវលុបចេញ?</h4>
     </b-modal>
-
   </b-container>
 </template>
 <script>

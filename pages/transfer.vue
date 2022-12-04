@@ -9,14 +9,14 @@
                 <h3 class="head-title"> {{ $t('stock_transfer')}}</h3>
               </div>
               <div class="content-panel-right">
-                <b-container class="col-6 mx-auto menu-wrapper">
+                <b-container style="display: inline-block; margin: 0; float: right; width: 60%;">
                   <b-row>
-                    <b-col>
-                      <div class="input-group input-group-sm search-content" style="display: none">
-                        <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>
-                        <input class="form-control input-search-box" type="search" placeholder="Search..." v-model="searchInput" @keyup.enter="searchProduct()" @change="handleClick" />
-                      </div>
-                    </b-col>
+<!--                    <b-col>-->
+<!--                      <div class="input-group input-group-sm search-content" style="display: none">-->
+<!--                        <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>-->
+<!--                        <input class="form-control input-search-box" type="search" placeholder="Search..." v-model="searchInput" @keyup.enter="searchProduct()" @change="handleClick" />-->
+<!--                      </div>-->
+<!--                    </b-col>-->
                     <div style="display: inline-block; overflow: hidden; margin-right: 10px;">
                       <div class="form-column-label" style="vertical-align: text-bottom; width: 155px;">ស្វែងរកទិន្នន័យតាមថ្ងៃ : </div>
                       <div class="form-column-input width-50-percentage" style="vertical-align: text-bottom;">
