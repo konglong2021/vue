@@ -164,79 +164,79 @@
 
 
     <div id="pos-invoice" style="padding-top : 50px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
-      <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
+      <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
       <table style="font-size: 10px; margin-bottom: 20px;">
         <tbody>
         <tr>
-          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">វិក័យប័ត្រលេខ : {{invoiceNumber}}</td>
+          <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">វិក័យប័ត្រលេខ : {{invoiceNumber}}</td>
         </tr>
         <tr>
-          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">ថ្ងៃខែឆ្នាំលក់ : {{ getFullDate() }}</td>
+          <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">ថ្ងៃខែឆ្នាំលក់ : {{ getFullDate() }}</td>
         </tr>
         <tr>
-          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">លក់ដោយ : {{$store.$cookies.get('user').name }}</td>
+          <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">លក់ដោយ : {{$store.$cookies.get('user').name }}</td>
         </tr>
         </tbody>
       </table>
       <table style="text-align: center;">
-        <thead style="">
+        <thead style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">
         <tr>
-          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle;">ឈ្មោះទំនិញ</th>
-          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 5%;">ចំនួន</th>
-          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 20%;">តម្លៃ($)</th>
-          <th style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 25%;">សរុប($)</th>
+          <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle;">ឈ្មោះទំនិញ</th>
+          <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 5%;">ចំនួន</th>
+          <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 20%;">តម្លៃ($)</th>
+          <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 25%;">សរុប($)</th>
         </tr>
         </thead>
         <tbody>
         <tr v-for="item of printItems">
-          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.name }}</td>
-          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px;">{{ item.qty }}</td>
-          <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.price }}</td>
-          <td style="font-size: 10px; content: '\20B9';font-family: 'Arial';text-align: right;">{{ item.total }}</td>
+          <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px;">{{ item.name }}</td>
+          <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px;">{{ item.qty }}</td>
+          <td style="font-size: 10px; content: '\20B9';font-family: 'Arial', 'Khmer OS Bokor', sans-serif;text-align: right;">{{ item.price }}</td>
+          <td style="font-size: 10px; content: '\20B9';font-family: 'Arial', 'Khmer OS Bokor', sans-serif;text-align: right;">{{ item.total }}</td>
         </tr>
         <tr>
-          <td style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;" colspan="2">សរុបមុនបញ្ចូលពន្ធ ($)</td>
-          <td style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial'; border-top:1px solid black !important;" colspan="2">{{ subTotalPrint }}</td>
+          <td colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; border-top:1px solid black !important;">សរុបមុនបញ្ចូលពន្ធ ($)</td>
+          <td colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right; content: '\20B9'; border-top:1px solid black !important;">{{ subTotalPrint }}</td>
         </tr>
         <tr>
-          <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ {{ (this.vat * 100) }} (%)</td>
-          <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ vatPrint }} ($)</td>
+          <td colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ {{ (this.vat * 100) }} (%)</td>
+          <td colspan="2" style="font-size: 10px; text-align: right; content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{ vatPrint }} ($)</td>
         </tr>
         <tr>
-          <td colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">បញ្ចុះតម្លៃ {{ this.discountOder }} (%)</td>
-          <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ discountPrint }} ($)</td>
+          <td colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important;">បញ្ចុះតម្លៃ {{ this.discountOder }} (%)</td>
+          <td colspan="2" style="font-size: 10px; text-align: right; content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{ discountPrint }} ($)</td>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបញ្ចូលពន្ធបញ្ចុះតម្លៃ ($)</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបញ្ចូលពន្ធបញ្ចុះតម្លៃ ($)</th>
           <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalUsdPrint - this.discountPrint) }}</th>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
-          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalKhPrint)}}</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
+          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ $util.format(grandTotalKhPrint) }}</th>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10.5px; border-top:1px solid black !important; text-align: right;"></th>
-          <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-top:1px solid black !important; text-align: right;"></th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right;"></th>
+          <th colspan="2" style="font-size: 10px; border-top:1px dashed black !important; border-top:1px solid black !important; text-align: right;"></th>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ទទួលប្រាក់ ($)</th>
-          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ gettingMoneyUsd }}</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; font-weight: normal;">ទទួលប្រាក់ ($)</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right; content: '\20B9'; font-weight: normal;">{{ orderPrint.gettingMoneyUsd }}</th>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">ទទួលប្រាក់ (៛)</th>
-          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ gettingMoneyRiel }}</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; font-weight: normal;">ទទួលប្រាក់ (៛)</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right; content: '\20B9'; font-weight: normal;">{{ $util.format(orderPrint.gettingMoneyRiel) }}</th>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">លុយត្រូវអាប់ ($)</th>
-          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ grandTotalUsdPrint }}</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; font-weight: normal;">លុយត្រូវអាប់ ($)</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right; content: '\20B9'; font-weight: normal;">{{ orderPrint.returnMoneyUsd }}</th>
         </tr>
         <tr>
-          <th colspan="2" style="font-family: 'Arial', 'Khmer', sans-serif; font-size: 10px; text-align: right !important;">លុយត្រូវអាប់ (៛)</th>
-          <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial';">{{ $util.format(returnMoneyKh) }}</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; font-weight: normal;">លុយត្រូវអាប់ (៛)</th>
+          <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right; content: '\20B9'; font-weight: normal;">{{ $util.format(orderPrint.returnMoneyKh) }}</th>
         </tr>
         </tbody>
       </table>
-      <footer style="font-family: 'Arial', 'Khmer', sans-serif; text-align:center; font-size: 10px; margin-top: 45px;">
+      <footer style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align:center; font-size: 10px; margin-top: 45px;">
         <p style="text-align:center; margin-bottom: 0; padding-bottom: 0;">ទំនិញទិញហើយ មិនអាចប្តុរជាទឹកប្រាក់វិញបានទេ</p>
         <p style="text-align:center; margin-bottom: 0; padding-bottom: 0; margin-top: 4px; padding-top: 0">អរគុណសម្រាប់ការគាំទ្រ</p>
       </footer>
@@ -249,7 +249,7 @@ export default {
   props: {
     products: [],
     warehouseSelectedId: null,
-    cashBalance: 0
+    cashBalance: 0,
   },
   computed: {
     subTotal() {
@@ -384,14 +384,7 @@ export default {
         remain = getting - this.grandTotalUsd;
         if (!this.$util.isInt(remain)) {
           this.returnMoneyKh = this.$util.roundKhDown(remain.toFixed(2) * this.exchangeRate);
-          // this.returnMoneyKh = this.$util.roundKhDown(remain.toFixed(2) * 4000);
           this.returnMoneyUsd = remain;
-          /*
-          let num = parseInt(remain);
-          let extra = remain - num;
-          this.returnMoneyKh = this.$util.roundKhDown(extra * this.exchangeRate);
-          this.returnMoneyUsd = num;
-          */
         }
         else {
           this.returnMoneyUsd = remain;
@@ -399,7 +392,6 @@ export default {
           this.returnMoneyKh = this.$util.roundKhDown(remain.toFixed(2) * this.exchangeRate);
         }
       }
-
     },
     displayCustomerName(customerId) {
       if (this.customerMap[customerId]) {
@@ -414,7 +406,7 @@ export default {
 
     buildPrintItems() {
       this.printItems = [];
-      for (var i in this.products) {
+      for (let i in this.products) {
         let p = this.products[i];
         const total = (parseFloat(p.price) * parseInt(p.qty));
         let item = {
@@ -425,7 +417,6 @@ export default {
         };
         this.printItems.push(item);
       }
-
     },
     printReceipt() {
       const self = this;
@@ -461,7 +452,7 @@ export default {
       dataSubmit.receive_money_usd = self.gettingMoneyUsd;
       dataSubmit.receive_money_kh = self.gettingMoneyRiel;
       dataSubmit.return_money_kh = self.returnMoneyKh;
-      dataSubmit.return_money_usd = self.returnMoneyUsd;
+      dataSubmit.return_money_usd = Number(self.returnMoneyUsd).toFixed(2);
       dataSubmit.exchange_rate = self.exchangeRate;
       dataSubmit.discount = self.discount;
       dataSubmit.ref = self.ref;
@@ -472,6 +463,7 @@ export default {
           self.invoiceNumber = response.data.order["invoice_id"];
           self.discountOder = parseFloat(response.data.order["discount"]);
           self.showPrintReceipt = true;
+          self.dataDisplayInPrint(response.data.order);
           self.$emit("updateListProduct", []);
           self.order = dataSubmit;
           self.ref = '';
@@ -482,6 +474,12 @@ export default {
           self.$toast.error("getting data error ").goAway(2000);
           console.log(error);
         });
+    },
+    dataDisplayInPrint(data){
+      this.orderPrint.gettingMoneyUsd = data.receive_money_usd;
+      this.orderPrint.gettingMoneyRiel = data.receive_money_kh;
+      this.orderPrint.returnMoneyUsd = data.return_money_usd;
+      this.orderPrint.returnMoneyKh = data.return_money_kh;
     },
     getFullDate() {
       let today = new Date();
@@ -577,6 +575,7 @@ export default {
       gettingMoneyRiel: 0,
       customerMap: {},
       printItems: [],
+      orderPrint: {subTotalPrint: 0, gettingMoneyUsd: 0, gettingMoneyRiel: 0, returnMoneyKh: 0, returnMoneyUsd: 0}
     }
   }
 }
