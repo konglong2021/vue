@@ -35,7 +35,7 @@
         </div>
         <div v-if="!productLoading && warehouse">
           <div class="content-product" v-if="products && products.length > 0">
-            <div  v-for="p in products" class="pro-item" v-bind:key="p.id" @click="selectProductItem(p)">
+            <div  v-for="p in products" class="pro-item" v-bind:key="p.product_id" @click="selectProductItem(p)">
               <div class="pro-img" :style="{ backgroundImage: `url('${p.img}')` }">
                 <div class="pro-price">{{ p.price }} {{ p.currency }}</div>
               </div>
@@ -99,7 +99,7 @@
                   let productList = dataResponse[i];
                   if(productList && productList.length > 0){
                     for(let index=0; index < productList.length; index++){
-                      let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                      let productItem =  { id: '', product_id: null, name: null,kh_name : null, price : 0, currency:'USD', img :'', code : null};
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
@@ -111,7 +111,7 @@
                     }
                   }
                   else if(productList && productList.hasOwnProperty("id")){
-                    let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                    let productItem =  { id: '',product_id: null, name: null,kh_name : null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
@@ -141,7 +141,7 @@
                   let productList = dataResponse[i].product;
                   if(productList && productList.length > 0){
                     for(let index=0; index < productList.length; index++){
-                      let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                      let productItem =  { id: '', product_id: null, name: null, kh_name : null, price : 0, currency:'USD', img :'', code : null};
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
@@ -154,7 +154,7 @@
                     }
                   }
                   else if(productList && productList.hasOwnProperty("id")){
-                    let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                    let productItem =  { id: '', product_id:null, name: null, kh_name : null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
@@ -202,7 +202,7 @@
                   let productList = datas[i];
                   if(productList && productList.length > 0){
                     for(let index=0; index < productList.length; index++){
-                      let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                      let productItem =  { id: '', product_id: null, name: null, kh_name: null, price : 0, currency:'USD', img :'', code : null};
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
@@ -214,7 +214,7 @@
                     }
                   }
                   else if(productList && productList.hasOwnProperty("id")){
-                    let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                    let productItem =  { id: '', product_id: null, name: null, kh_name: null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";
@@ -251,7 +251,7 @@
                 if(response.data && response.data.length > 0){
                   foundItem = true;
                   for(let productList of response.data){
-                    let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                    let productItem =  { id: '', product_id: null, name: null, kh_name: null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList["id"];
                     productItem.product_id = productList["product_id"];
                     productItem.name = productList["en_name"] + " (" + productList["kh_name"] + ")";
@@ -330,7 +330,7 @@
                   let productList = dataResponse[i];
                   if(productList && productList.length > 0){
                     for(let index=0; index < productList.length; index++){
-                      let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                      let productItem =  { id: '',product_id: null, name: null, kh_name: null, price : 0, currency:'USD', img :'', code : null};
                       productItem.id = productList[index].id;
                       productItem.product_id = productList[index].product_id;
                       productItem.name = productList[index].en_name + " (" + productList[index].kh_name + ")";
@@ -342,7 +342,7 @@
                     }
                   }
                   else if(productList && productList.hasOwnProperty("id")){
-                    let productItem =  { id: '', name: null, price : 0, currency:'USD', img :'', code : null};
+                    let productItem =  { id: '', product_id: null, name: null, kh_name: null, price : 0, currency:'USD', img :'', code : null};
                     productItem.id = productList.id;
                     productItem.product_id = productList.product_id;
                     productItem.name = productList.en_name + " (" + productList.kh_name + ")";

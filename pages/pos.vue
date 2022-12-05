@@ -78,6 +78,7 @@
 
 <script>
   import moment from 'moment';
+
 export default {
   middleware: "local-auth",
   layout:'posui',

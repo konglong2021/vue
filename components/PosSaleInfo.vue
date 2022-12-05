@@ -116,21 +116,15 @@
           <div class="line"></div>
 <!--          <div class="total" style="cursor:pointer" @click="inputReturn()">-->
           <div class="total" style="cursor:pointer">
-            <div class="pull-left">
-              លុយត្រូវអាប់ ($) :
-            </div>
+            <div class="pull-left">លុយត្រូវអាប់ ($) :</div>
             <div class="pull-right">
 <!--              <div class="pull-left" v-if="showInputReturn">-->
 <!--                <b-form-input :id="'input-return-usd'" @keyup.enter="updateInputReturn()"-->
 <!--                  @keyup.esc="cancelInputReturn()" type="number" class="input-content" v-model="inputReturnUsd">-->
 <!--                </b-form-input>-->
 <!--              </div>-->
-              <div class="pull-right" v-if="!showInputReturn">
-                {{$util.format( returnMoneyUsd)}}
-              </div>
+              <div class="pull-right" v-if="!showInputReturn">{{ $util.format( returnMoneyUsd) }}</div>
               <div style="clear:both"></div>
-
-
             </div>
             <div style="clear:both"> </div>
           </div>
@@ -161,8 +155,6 @@
         </div>
       </div>
     </b-form>
-
-
     <div id="pos-invoice" style="padding-top : 50px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
       <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 12px;">{{ $t('title') }}</h6>
       <table style="font-size: 10px; margin-bottom: 20px;">
@@ -245,11 +237,84 @@
 
 </template>
 <script>
+import {getTypeOf} from "static/js/amcharts/plugins/export/libs/jszip/jszip";
+
 export default {
   props: {
     products: [],
     warehouseSelectedId: null,
     cashBalance: 0,
+  },
+  data() {
+    return {
+      optionStyleHtmlToPaper: {
+        specs: [
+          'fullscreen=yes',
+          'titlebar=no',
+          'scrollbars=no'
+        ],
+        styles: [
+          '../static/css/invoice-print.css',
+        ],
+        autoClose: true,
+      },
+      fieldsPos: [
+        { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle: "font-size: 17px;" },
+        { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle: "font-size: 17px;" },
+        { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle: "font-size: 17px;" },
+        { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th", thStyle: "font-size: 17px;" },
+      ],
+      showPrintReceipt: false,
+      is_show_content_print: false,
+      invoiceNumber: '',
+      discountOder : 0.0,
+      showInputReturn: false,
+      inputReturnUsd: 0.0,
+      returnMoneyUsd: 0.0,
+      returnMoneyKh: 0.0,
+      exchangeRate: 4100,
+      categories: [],
+      searchInput: null,
+      scanningInput: null,
+      productLoading: false,
+      warehouses: [{ text: "ជ្រើសរើស ឃ្លាំងទំនិញ", value: null }],
+      warehouse: null,
+      searchInputData: null,
+      customers: [],
+      discount: 0.0,
+      vat: 0.0,
+      ref: '',
+      order: {
+        vat: 0,
+        distcount: 0
+      },
+      vats: [{ text: '0%', value: 0 }, { text: '5%', value: 0.05 }, { text: '10%', value: 0.1 }, { text: '15%', value: 0.15 }],
+      gettingMoneyUsd: 0,
+      gettingMoneyRiel: 0,
+      customerMap: {},
+      printItems: [],
+      orderPrint: {subTotalPrint: 0, gettingMoneyUsd: 0, gettingMoneyRiel: 0, returnMoneyKh: 0, returnMoneyUsd: 0}
+    }
+  },
+  watch: {
+    grandTotalKh(newVal, oldVal) {
+      this.gettingMoneyUsd = 0;
+      this.gettingMoneyRiel = 0;
+    },
+    gettingMoneyRiel(newVal, oldVal) {
+      if (this.products.length == 0) {
+        this.gettingMoneyUsd = 0;
+        this.returnMoneyKh = 0.0;
+      }
+
+      this.updateReturnMoney();
+    },
+    gettingMoneyUsd(newVal, oldVal) {
+      if (this.products.length == 0) {
+        this.gettingMoneyUsd = 0;
+      }
+      this.updateReturnMoney();
+    }
   },
   computed: {
     subTotal() {
@@ -275,7 +340,7 @@ export default {
       return this.roundKhMoney(this.grandTotalUsd * this.exchangeRate);
     },
     subTotalPrint() {
-      var subTotal = 0;
+      let subTotal = 0;
       for (let inx in this.printItems) {
         let p = this.printItems[inx];
         subTotal += p.price * p.qty;
@@ -305,27 +370,6 @@ export default {
     grandTotalKhPrint() {
       return this.roundKhMoney((this.grandTotalUsdPrint - this.discountPrint) * this.exchangeRate);
     },
-  },
-  watch: {
-    grandTotalKh(newVal, oldVal) {
-      this.gettingMoneyUsd = 0;
-      this.gettingMoneyRiel = 0;
-    },
-    gettingMoneyRiel(newVal, oldVal) {
-      console.log(newVal, ' ->', oldVal);
-      if (this.products.length == 0) {
-        this.gettingMoneyUsd = 0;
-        this.returnMoneyKh = 0.0;
-      }
-
-      this.updateReturnMoney();
-    },
-    gettingMoneyUsd(newVal, oldVal) {
-      if (this.products.length == 0) {
-        this.gettingMoneyUsd = 0;
-      }
-      this.updateReturnMoney();
-    }
   },
   methods: {
     cancelInputReturn() {
@@ -434,9 +478,13 @@ export default {
         message = message + " ( " + this.$util.format(this.grandTotalUsd - getting) + " USD ) ";
         self.$toast.error(message).goAway(2000);
       }
-
       let dataSubmit = {};
-      dataSubmit.customer_id = self.order.customer;
+      if(self.order && self.order.hasOwnProperty("customer") && self.order.customer !== null && self.order.customer !== undefined){
+        dataSubmit.customer_id = self.order.customer;
+      }
+      else {
+        dataSubmit.customer_id = 1;
+      }
       dataSubmit.vat = self.vat;
       dataSubmit.warehouse_id = this.$store.$cookies.get('storeItem');
       dataSubmit.items = [];
@@ -456,8 +504,8 @@ export default {
       dataSubmit.exchange_rate = self.exchangeRate;
       dataSubmit.discount = self.discount;
       dataSubmit.ref = self.ref;
-      this.buildPrintItems();
-      await this.$axios.post('/api/sale', dataSubmit).then(function (response) {
+      self.buildPrintItems();
+      await self.$axios.post('/api/sale', dataSubmit).then(function(response) {
         if (response.data.success === true) {
           self.$toast.success("ទិន្នន័យត្រូវបានរក្សាទុក ដោយជោគជ័យ!!").goAway(2000);
           self.invoiceNumber = response.data.order["invoice_id"];
@@ -466,14 +514,14 @@ export default {
           self.dataDisplayInPrint(response.data.order);
           self.$emit("updateListProduct", []);
           self.order = dataSubmit;
+          self.order.customer = dataSubmit.customer_id;
           self.ref = '';
           self.discount = 0.0;
         }
-      })
-        .catch(function (error) {
-          self.$toast.error("getting data error ").goAway(2000);
-          console.log(error);
-        });
+      }).catch(function (error) {
+        console.log(error);
+        self.$toast.error("submit data sale error").goAway(2000);
+      });
     },
     dataDisplayInPrint(data){
       this.orderPrint.gettingMoneyUsd = data.receive_money_usd;
@@ -500,7 +548,6 @@ export default {
             self.customers.push({ text: customer["name"], value: customer["id"] });
             self.customerMap[customer["id"]] = customer;
           }
-
           for (let k = 0; k < response.data.customer.length; k++) {
             let customer = response.data.customer[k];
             if (customer["title"] === "Normal Member") {
@@ -522,62 +569,10 @@ export default {
       }
     },
   },
-
   mounted() {
     this.getCustomerList();
     console.log(this.$util.format(2020));
   },
-  data() {
-    return {
-      optionStyleHtmlToPaper: {
-        specs: [
-          'fullscreen=yes',
-          'titlebar=no',
-          'scrollbars=no'
-        ],
-        styles: [
-          '../static/css/invoice-print.css',
-        ],
-        autoClose: true,
-      },
-      fieldsPos: [
-        { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle: "font-size: 17px;" },
-        { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle: "font-size: 17px;" },
-        { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle: "font-size: 17px;" },
-        { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th", thStyle: "font-size: 17px;" },
-      ],
-      showPrintReceipt: false,
-      is_show_content_print: false,
-      invoiceNumber: '',
-      discountOder : 0.0,
-      showInputReturn: false,
-      inputReturnUsd: 0.0,
-      returnMoneyUsd: 0.0,
-      returnMoneyKh: 0.0,
-      exchangeRate: 4100,
-      categories: [],
-      searchInput: null,
-      scanningInput: null,
-      productLoading: false,
-      warehouses: [{ text: "ជ្រើសរើស ឃ្លាំងទំនិញ", value: null }],
-      warehouse: null,
-      searchInputData: null,
-      customers: [],
-      discount: 0.0,
-      vat: 0.0,
-      ref: '',
-      order: {
-        vat: 0,
-        distcount: 0
-      },
-      vats: [{ text: '0%', value: 0 }, { text: '5%', value: 0.05 }, { text: '10%', value: 0.1 }, { text: '15%', value: 0.15 }],
-      gettingMoneyUsd: 0,
-      gettingMoneyRiel: 0,
-      customerMap: {},
-      printItems: [],
-      orderPrint: {subTotalPrint: 0, gettingMoneyUsd: 0, gettingMoneyRiel: 0, returnMoneyKh: 0, returnMoneyUsd: 0}
-    }
-  }
 }
 </script>
 <style scoped>

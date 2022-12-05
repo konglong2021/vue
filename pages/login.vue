@@ -82,13 +82,13 @@ export default {
             self.form.email = null;
             self.form.password = null;
             self.form.isFieldError = true;
-            self.$toast.error("getting data error ").goAway(2000);
+            self.$toast.error("មានបញ្ហាលើការចូលប្រើប្រាស់!!!!").goAway(2000);
         }
       }).catch(function (error) {
         self.form.email = null;
         self.form.password = null;
         self.form.isFieldError = true;
-        self.$toast.error("getting data error ").goAway(2000);
+        self.$toast.error("មានបញ្ហាលើការចូលប្រើប្រាស់!!!!").goAway(2000);
       });
     },
     cloneObject(obj) {
