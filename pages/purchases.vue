@@ -6,21 +6,27 @@
           <div class="content-panel-left" style="width: 20%;">
             <h3 class="head-title">{{$t('content_title_purchase')}}</h3>
           </div>
-          <div class="content-panel-right content-panel-right-full-width"
-            style="vertical-align: text-bottom; width: 80%;">
+          <div class="content-panel-right content-panel-right-full-width" style="vertical-align: text-bottom; width: 80%;">
+            <div class="float-right" style="margin-right: 8px"></div>
+            <div class="float-right" style="margin-right: 8px">
+              <div class="content-search"></div>
+              <div class="float-right" style="margin-right: 8px" v-can="'warehouse_access'" v-if="warehouses && warehouses.length > 0">
+                <b-form-select
+                  class="form-control input-content input-select-warehouse"
+                  v-model="warehouse" :options="warehouses"
+                  @change="selectedWarehouse(warehouse)"
+                ></b-form-select>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div class="content-product content-order-list">
-        <div style="display: inline-block; width: 100%; float: right; margin-right: 10px; margin-bottom: 10px">
-<!--          <b-form-select class="form-control input-content input-select-warehouse" v-model="warehouse"-->
-<!--                         :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>-->
-        </div>
         <div class="content-loading" v-if="isLoading">
           <div class="spinner-grow text-muted"></div>
         </div>
-        <div v-if="!isLoading && items && items.length > 0">
-          <div class="card">
+        <div v-if="!isLoading">
+          <div class="card" v-if="items && items.length > 0">
             <div class="card-body">
               <div class="table-responsive">
                 <b-table
@@ -48,7 +54,11 @@
               </div>
             </div>
           </div>
-
+          <b-pagination
+            align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading"
+            :total-rows="totalItems" v-model="currentPage" :per-page="perPage"
+            @change="changePage($event)" first-number last-number>
+          </b-pagination>
         </div>
       </div>
     </div>
@@ -152,6 +162,12 @@
         <b-table style="font-family: 'Arial', 'Khmer', sans-serif;" table-class="table-product-detail"
           :items="itemsProductDetail" :fields="fieldsProductDetail" :per-page="0" stacked="md" show-empty small
           :tbody-tr-class="rowClass">
+          <template #cell(saleprice)="row">
+            <b-form-input ref="inputSaleprice" type="number" class="input-content"
+                          v-bind:class="'content-input-saleprice-'+row.item.id" v-model="row.item.saleprice"
+                          v-on:change="updatedDataOfCurrentProduct(row.item.saleprice, row.item, 'inputSaleprice');"
+                          :autofocus="true"></b-form-input>
+          </template>
           <template #cell(quantity)="row">
             <b-form-input ref="inputQuantity" type="number" class="input-content"
               v-bind:class="'content-input-quantity-'+row.item.id" v-model="row.item.quantity"
@@ -191,6 +207,7 @@ export default {
   },
   data() {
     return {
+      customerOptions : [],
       isLoading: false,
       items: [],
       itemsFields: [
@@ -238,19 +255,33 @@ export default {
       editRowIdSelected: null,
       selectedRows: [],
       selectMode: 'single',
-      changeColor: false
+      changeColor: false,
+      warehouse: this.$store.$cookies.get('storeItem'),
+      currentPage: 1,
+      perPage: 10,
+      totalItems: 0,
+      filterDate: null
     }
   },
   watch: {
     products: {
       handler: function (products) {
         if (products.length > 0) {
-          this.getDataPurchase();
+          this.getDataPurchase(null,(this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
         }
       }
     }
   },
   methods: {
+    changePage($event){
+      this.currentPage = $event;
+      if(this.searchInput !== '' && this.searchInput !== null && this.searchInput !== undefined){
+        this.getDataPurchase(this.currentPage);
+      }
+      else {
+        this.getDataPurchase(this.warehouse, this.currentPage);
+      }
+    },
     addClassToRow(item, type) {
       if (item && type === 'row') {
         return item && item.isSelected === true && this.purchaseSelect.id === item.id ? "table-primary" : "";
@@ -261,7 +292,10 @@ export default {
       vm.products = [];
       vm.productOptions = [];
 
-      await vm.$axios.get('/api/product').then(function (response) {
+      //await vm.$axios.get('/api/product').then(function (response) {
+      await vm.$axios.post('/api/product-price/list',
+        {warehouse : vm.warehouse, pagination: false}
+      ).then(function (response) {
         if (response && response.hasOwnProperty("data")) {
           if (response.data && response.data.length > 0) {
             vm.totalRows = response.data.length;
@@ -291,7 +325,6 @@ export default {
       let vm = this;
       vm.warehouseList = [];
       vm.warehouses = [];
-
       await vm.$axios.get('/api/warehouse').then(function (response) {
         if (response && response.hasOwnProperty("data")) {
           if (response.data.data) {
@@ -331,20 +364,29 @@ export default {
           vm.$toast.error("Getting data error").goAway(3000);
         });
     },
-    async getDataPurchase() {
+    async getDataPurchase($filterDate = null, $warehouse = null, $page = null) {
       let self = this;
       self.isLoading = true;
       self.items = [];
-      await self.$axios.get('/api/purchase')
+      self.purchaseList = [];
+      await self.$axios.post('/api/purchase-history' + ($page ? ("?page=" + $page) : (this.currentPage ? "?page=" + this.currentPage : "")),{"warehouse": $warehouse, "pagination":true})
         .then(function (response) {
           self.isLoading = false;
-          let data = self.cloneObject(response.data.data);
-          if (data && data.length > 0) {
-            self.purchaseList = self.cloneObject(data);
-            let itemPurchase = [];
+          let responseData = [];
+          if(
+            response && response.hasOwnProperty("data")
+            && response.data && response.data.hasOwnProperty("data")
+            && response.data.data.hasOwnProperty("data")
+          ){
+            responseData = self.cloneObject(response.data.data.data);
+            self.totalItems = response.data.data.total;
+            self.perPage = response.data.data.per_page;
+          }
+          if (responseData && responseData.length > 0) {
+            for (let index = 0; index < responseData.length; index++) {
+              let purchaseItem = self.cloneObject(responseData[index]);
+              let newPurchaseItem = self.cloneObject(responseData[index]);
 
-            for (let index = 0; index < data.length; index++) {
-              let purchaseItem = self.cloneObject(data[index]);
               let supplier = self.suppliers.find(item => item.value === purchaseItem["supplier_id"]);
               let user = self.cloneObject(self.$store.$cookies.get('user'));
               let itemData = [];
@@ -361,9 +403,19 @@ export default {
               let date = "";
               let grand_total = 0;
               let subtotal = 0;
+              newPurchaseItem["purchasedetails"] = [];
 
               for (let indexProduct = 0; indexProduct < purchaseItem["purchasedetails"].length; indexProduct++) {
                 let purchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
+                let newPurchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
+
+                if(purchaseItem.hasOwnProperty("product_price") && purchaseItem["product_price"] && purchaseItem["product_price"].length > 0){
+                  let priceForCurrentProduct = purchaseItem["product_price"].find(price => price.product_id === purchaseItem["purchasedetails"][indexProduct].product_id);
+                  if(priceForCurrentProduct !== undefined){
+                    purchaseDetailItem["saleprice"] = priceForCurrentProduct["sale_price"];
+                    newPurchaseDetailItem["saleprice"] = priceForCurrentProduct["sale_price"];
+                  }
+                }
                 if (purchaseDetailItem && purchaseDetailItem.created_at) {
                   date = moment(purchaseDetailItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
                 }
@@ -371,18 +423,19 @@ export default {
                 let unitprice = parseFloat(purchaseDetailItem["unitprice"]);
                 subtotal = (subtotal + (qty * unitprice));
                 grand_total = grand_total + parseFloat(qty * unitprice);
+                newPurchaseItem["purchasedetails"].push(newPurchaseDetailItem);
               }
               itemData["date"] = date;
               itemData["subtotal"] = subtotal.toFixed(2);
               itemData["grand_total"] = grand_total.toFixed(2);
               self.items.push(itemData);
+              self.purchaseList.push(newPurchaseItem);
             }
           }
-        })
-        .catch(function (error) {
+        }).catch(function (error) {
           console.log(error);
           self.$toast.success("Submit data getting error").goAway(3000);
-        });
+      });
     },
     cloneObject(obj) {
       return JSON.parse(JSON.stringify(obj));
@@ -407,6 +460,7 @@ export default {
       this.itemsProductDetail = [];
       let purchaseDetailList = [];
       let purchaseDetailArray = [];
+      let purchaseItem = {};
       for(let itemData of this.items){
         if(itemData.id === item.id){
           itemData["isSelected"] = true;
@@ -418,6 +472,7 @@ export default {
       if (this.purchaseList.length > 0) {
         for (let index = 0; index < this.purchaseList.length; index++) {
           if (this.purchaseList[index]["id"] === item.purchase_id) {
+            purchaseItem = this.cloneObject(this.purchaseList[index]);
             purchaseDetailList = this.cloneObject(this.purchaseList[index]["purchasedetails"]);
             break;
           }
@@ -432,7 +487,7 @@ export default {
               data["code"] = productItem["code"];
               data["quantity"] = parseInt(purchaseDetailList[indexItem]["quantity"]);
               data["unitprice"] = purchaseDetailList[indexItem]["unitprice"];
-              data["saleprice"] = purchaseDetailList[indexItem]["sale_price"];
+              data["saleprice"] = purchaseDetailList[indexItem]["saleprice"] ? purchaseDetailList[indexItem]["saleprice"] : productItem["sale_price"];
               const subtotal = (parseFloat(purchaseDetailList[indexItem]["unitprice"]) * parseInt(purchaseDetailList[indexItem]["quantity"]));
               data["subtotal"] = subtotal.toFixed(2);
               purchaseDetailArray.push(data);
@@ -458,7 +513,6 @@ export default {
       Object.entries(this.items).forEach(([key, val]) => {
         val.isSelected = (val.id === item.id ? true : false);
       });
-
       if (this.purchaseList.length > 0) {
         let purchaseItem = this.purchaseList.find(row => row.id === item.id);
         if (purchaseItem && purchaseItem.hasOwnProperty("id")) {
@@ -470,17 +524,16 @@ export default {
         }
         if (purchaseDetailList && purchaseDetailList.length > 0) {
           for (let indexPurchase = 0; indexPurchase < purchaseDetailList.length; indexPurchase++) {
-            console.log(purchaseDetailList[indexPurchase]);
             let productIdSelected = purchaseDetailList[indexPurchase]["product_id"];
             let data = {};
             let productItem = this.products.find(dataProduct => dataProduct.id === productIdSelected);
             if (productItem) {
-              data["id"] = productItem["id"];
+              data["product_id"] = productItem["id"];
               data["name"] = (productItem["en_name"] + " " + productItem["kh_name"]);
               data["code"] = productItem["code"];
               data["quantity"] = parseInt(purchaseDetailList[indexPurchase]["quantity"]);
               data["unitprice"] = purchaseDetailList[indexPurchase]["unitprice"];
-              data["saleprice"] = parseFloat(purchaseDetailList[indexPurchase]["sale_price"]);
+              data["saleprice"] = purchaseDetailList[indexPurchase]["saleprice"] ? parseFloat(purchaseDetailList[indexPurchase]["saleprice"]) : productItem["sale_price"];
               const subtotal = parseFloat(purchaseDetailList[indexPurchase]["unitprice"]) * parseInt(purchaseDetailList[indexPurchase]["quantity"]);
               data["subtotal"] = subtotal.toFixed(2);
               listProductAlreadyAdd.push(productItem["id"]);
@@ -493,13 +546,11 @@ export default {
         });
         this.itemsProductDetail = this.cloneObject(purchaseDetailArray);
       }
-
       let itemActionField = this.fieldsProductDetail.find(itemField => itemField.key === 'action');
       if (!itemActionField) {
         this.fieldsProductDetail.push({ key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle: "font-size: 17px;" });
       }
       this.$refs['edit-purchase-form-modal'].show();
-      console.log(this.itemsProductDetail);
     },
 
     rowClass(item, type) {
@@ -531,6 +582,12 @@ export default {
         itemTemp.subtotal = (itemTemp.quantity * itemTemp.unitprice).toFixed(2);
         this.$set(this.itemsProductDetail, index, itemTemp);
       }
+      else if (fieldName === 'inputSaleprice') {
+        let itemTemp = JSON.parse(JSON.stringify(data));
+        let index = this.itemsProductDetail.indexOf(data);
+        itemTemp.saleprice = parseInt(dataItem);
+        this.$set(this.itemsProductDetail, index, itemTemp);
+      }
     },
     addMoreProductSelectedChange(productItemAddId) {
       let productItemAdd = this.products.find(item => item.id === productItemAddId);
@@ -543,7 +600,7 @@ export default {
           productAdd["name"] = (productItemAdd["en_name"] + " " + productItemAdd["kh_name"]);
 
           console.log(productItemAdd);
-          //productAdd["saleprice"] = productItemAdd["sale_price"];
+          productAdd["saleprice"] = productItemAdd["sale_price"];
           productAdd["unitprice"] = productItemAdd["unitprice"];
           productAdd["quantity"] = 1;
           productAdd["subtotal"] = (parseInt(productAdd["quantity"]) * (productAdd["unitprice"] > 0 ? parseFloat(productAdd["unitprice"]) : 0));
@@ -571,15 +628,11 @@ export default {
     onSubmitEditPurchase() {
       let self = this;
       let dataSubmit = {};
-      dataSubmit.warehouse_id = self.$store.$cookies.get('storeItem');
+      dataSubmit.warehouse_id = self.purchase.warehouse;
       dataSubmit.supplier_id = self.purchase.supplier;
       dataSubmit.vat = self.purchase.vat;
       dataSubmit.batch = self.purchase.batch;
       dataSubmit.items = [];
-      let subTotal = 0;
-      let totalVat = 0;
-      let priceAfterDiscount = 0;
-
       let purchaseDetail = [];
       let subtotal = 0;
       for (let index = 0; index < self.itemsProductDetail.length; index++) {
@@ -589,32 +642,33 @@ export default {
         purchaseDetailItem['unitprice'] = self.itemsProductDetail[index]['unitprice'];
         purchaseDetailItem['quantity'] = self.itemsProductDetail[index]['quantity'];
         subtotal = subtotal + parseFloat(self.itemsProductDetail[index]['subtotal']);
+        purchaseDetailItem['product_name'] = self.products.find(p => p.id === self.itemsProductDetail[index]['product_id'])["kh_name"];
         purchaseDetail.unshift(purchaseDetailItem);
       }
-
       let vat = self.purchase.vat !== null ? parseFloat(self.purchase.vat) : 0;
       dataSubmit["purchases"] = purchaseDetail;
       dataSubmit["subtotal"] = subtotal;
       const grandtotal = (subtotal + (subtotal * vat));
       dataSubmit["grandtotal"] = grandtotal.toFixed(2);
-      self.$toast.info("Data starting submit").goAway(1500);
+
+      self.$toast.info("ទិន្នន័យកំពុងបញ្ជូនទៅរក្សាទុក").goAway(1500);
       if (self.purchaseSelect.hasOwnProperty("id") && self.purchaseSelect.id) {
         self.$axios.put('/api/purchase/' + self.purchaseSelect.id, dataSubmit).then(function (response) {
           if (response.data.success === true) {
             self.$nextTick(() => {
+              self.purchaseSelect = null;
+              self.itemsProductDetail = [];
               self.$refs['edit-purchase-form-modal'].hide();
             });
-            self.getDataPurchase();
-            self.$toast.success("Submit data successfully").goAway(2000);
+            self.getDataPurchase(null, self.warehouse);
+            self.$toast.success("ទិន្នន័យត្រូវបានរក្សាទុកបានជោគជ័យ").goAway(2000);
           }
-        })
-          .catch(function (error) {
-            self.$toast.error("getting data error ").goAway(2000);
-            console.log(error);
-          });
+        }).catch(function (error) {
+          self.$toast.error("ការរក្សារទុកទិន្នន័យមិនជោគជ័យ").goAway(2000);
+          console.log(error);
+        });
       }
     },
-
     openConfirmToRemove(row) {
       this.dataSelectToRemove = row;
       this.tr_id_select = row["purchase_id"];
@@ -633,7 +687,6 @@ export default {
         });
       }
     },
-
     removeProductFromList(item, $eventTarget) {
       let productFound = this.itemsProductDetail.find(productItem => productItem.id === item.id);
       let index = this.itemsProductDetail.indexOf(productFound);
@@ -641,7 +694,6 @@ export default {
         this.itemsProductDetail.splice(index, 1);
       }
     },
-
     grandTotalPrice(itemsProductDetail) {
       let total = [];
       Object.entries(itemsProductDetail).forEach(([key, val]) => {
@@ -670,21 +722,21 @@ export default {
         this.currentPage = 1;
         this.totalItems = 0;
         if(this.searchInput === null || this.searchInput === '' || this.searchInput === undefined){
-          //this.getDataPurchase(warehouse);
+          this.getDataPurchase(null, warehouse);
         }
         else {
-          //this.getDataPurchase(this.currentPage);
+          this.getDataPurchase(null, this.currentPage);
         }
       }
     },
+    filterDataByDate(filterDate){
+      this.getDataPurchase(filterDate, this.warehouse);
+    },
   },
   mounted() {
-    this.getListProduct();
     this.getAllWarehouse();
+    this.getListProduct();
     this.getAllSupplier();
-    // if(this.products && this.products.length > 0){
-    //   this.getDataPurchase();
-    // }
   }
 }
 </script>
@@ -735,6 +787,6 @@ export default {
 }
 
 .table-purchase {
-  max-height: calc(100vh - 275px);
+  max-height: calc(100vh - 330px);
 }
 </style>

@@ -9,7 +9,7 @@
             </div>
             <div class="content-panel-right content-panel-right-full-width" style="vertical-align: text-bottom; width: 80%;">
               <div class="float-right" v-can="'warehouse_access'">
-                <b-form-select  class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
+                <b-form-select class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
               </div>
               <div class="float-right product" style="margin-right: 8px; display: none;">
                 <div class="content-search" >
@@ -22,7 +22,11 @@
                 </div>
               </div>
               <div class="float-right" style="margin-right: 8px; display: inline-block;">
-                <b-form-select class="form-control input-content input-select-warehouse min-height-43-px" v-model="status_select" :options="statusList" @change="selectedStatusSale(status_select)"></b-form-select>
+                <b-form-select
+                  class="form-control input-content input-select-warehouse min-height-43-px"
+                  v-model="status_select" :options="statusList"
+                  @change="selectedStatusSale(status_select)"
+                ></b-form-select>
               </div>
               <div class="float-right" style="margin-right: 8px">
                 <div class="content-search" >
@@ -53,12 +57,10 @@
             <div class="content-table-data" v-if="!isLoading">
               <div v-if="items">
                 <div class="table-responsive" v-if="items.length > 0">
-                  <b-table id="my-table-stock" class="table table-striped table-bordered"
-                           v-if="items"
-                           :items="items"
-                           :fields="itemsFields"
-                           responsive
-                           head-variant="light"
+                  <b-table
+                    id="my-table-stock" class="table table-striped table-bordered"
+                    v-if="items" :items="items" :fields="itemsFields" responsive
+                    head-variant="light"
                   >
                     <template #cell(status)="row">
                       <div v-html="row.item.status"></div>
@@ -90,9 +92,9 @@
         </div>
       </div>
       <b-modal
-              id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
-               @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
-               @ok="onSubmitToPrint" ok-title="ព្រីនចេញ" title="ការលក់" no-close-on-backdrop>
+        id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
+        @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
+        @ok="onSubmitToPrint" ok-title="ព្រីនចេញ" title="ការលក់" no-close-on-backdrop>
         <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;">
           <div class="full-content margin-bottom-20">
             <div class="container-row-form width-60-percentage float-left">

@@ -71,23 +71,26 @@
               :total-rows="totalItems" v-model="currentPage" :per-page="perPage" @change="changePage($event)" first-number last-number>
             </b-pagination>
           </div>
-          <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="numberPrint > 0"
-            :id="'barcode-' + barcodeItem.code">
-            <div v-if="barcodeItem.code.length > 12">
-              <div v-for="item in barcodeListToPrint">
+          <div style="display: none;" v-if="barcodeItem && barcodeItem.code" :id="'barcode-' + barcodeItem.code">
+            <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="barcodeItem && barcodeItem.code && barcodeItem.code.length > 12">
                 <span style="text-align: center !important; font-size: 12px;">{{ barcodeItem.kh_name }}</span>
-                <barcode :value="item" height='65' width="2" paddingTop="0" marginTop="0" marginBottom="0" fontSize="12"
-                  paddingBottom="0" marginLeft="0"></barcode>
+                <barcode
+                  :value="barcodeItem.code" height='65' width="2"
+                  paddingTop="0" marginTop="0" marginBottom="0"
+                  fontSize="12" paddingBottom="0" marginLeft="0"
+                ></barcode>
                 <span style="text-align: center !important; font-weight: 600; font-size: 15px;">តម្លៃ USD : {{ barcodeItem.sale_price}}</span>
-              </div>
             </div>
-            <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="barcodeItem.code.length <= 12">
-              <div v-for="item in barcodeListToPrint">
+            <div style="width: 60mm; height: 35mm; display:inline-block;" v-if="barcodeItem && barcodeItem.code && barcodeItem.code.length <= 12">
                 <span style="margin-left:2px; text-align: center !important; display: block; font-size: 12px;">{{ barcodeItem.kh_name }}</span>
-                <barcode :value="item" height='65' width="2" marginTop="0" marginBottom="0" marginLeft="0" fontSize="12"></barcode>
-                <span style="margin-left:8px; text-align: center !important; display: block; font-weight: 600; font-size: 15px;">តម្លៃ
-                  USD : {{ barcodeItem.sale_price }}</span>
-              </div>
+                <barcode
+                  :value="barcodeItem.code" height='65' width="2"
+                  marginTop="0" marginBottom="0" marginLeft="0"
+                  fontSize="12"
+                ></barcode>
+                <span style="margin-left:8px; text-align: center !important; display: block; font-weight: 600; font-size: 15px;">
+                  តម្លៃ USD : {{ barcodeItem.sale_price }}
+                </span>
             </div>
           </div>
         </div>
@@ -158,31 +161,6 @@
             </div>
           </b-form>
         </b-modal>
-        <b-modal id="modal-input-number-barcode" ref="input-number-barcode-modal" size="md" no-close-on-backdrop
-          title="ព្រីនបារកូដ" @ok="barcodePrint" :cancel-title="$t('label_cancel_button')" ok-title="ព្រីនចេញ"
-          title-class="text-center mx-auto" no-close-on-backdrop>
-          <b-form>
-            <div class="display-inline-block full-with">
-              <table class="table ">
-                <thead>
-                  <tr>
-                    <th class="no-border-bottom">ឈ្មោះទំនិញ</th>
-                    <th class="no-border-bottom">ចំនួនព្រីនចេញ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-if="barcodeItem">
-                    <td>{{ barcodeItem.en_name + " - " + barcodeItem.kh_name + " (" + barcodeItem.code + ") " }}</td>
-                    <td>
-                      <b-form-input :id="'input-number-barcode'" type="text" v-model="numberPrint"
-                        @change="updateNumberBarcodePrint(numberPrint)" class="input-content"></b-form-input>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </b-form>
-        </b-modal>
       </div>
     </b-row>
   </b-container>
@@ -222,8 +200,8 @@
         responseProductList: [],
         brandList: [],
         productView: {},
-        numberPrint: 0,
-        barcodeItem: null,
+        numberPrint: 1,
+        barcodeItem: {code : ""},
         barcodeListToPrint: [],
         purchaseDetails: [],
         fieldsPurchaseDetail: [
@@ -247,7 +225,8 @@
         warehouse: this.$store.$cookies.get('storeItem'),
         warehouses: [{ text: "ជ្រើសរើស ឃ្លាំងទំនិញ", value: null }],
         warehouseList: [],
-        warehouseOption: []
+        warehouseOption: [],
+        barcodeItemCode: null,
       }
     },
     watch: {
@@ -282,7 +261,6 @@
         });
       },
       changePage($event){
-        console.log($event);
         this.currentPage = $event;
         if(this.searchInput !== '' && this.searchInput !== null && this.searchInput !== undefined){
           this.searchProduct(this.currentPage);
@@ -294,7 +272,7 @@
       async getListProducts($warehouse, $page = null) {
         let self = this;
         self.isLoading = true;
-        await self.$axios.post('/api/product-price/list'+ ($page ? ("?page=" + $page) : (this.currentPage ? "?page=" + this.currentPage : "")),{warehouse : ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem')), pagination: true}).then(function (response) {
+        await self.$axios.post('/api/product-price/list' + ($page ? ("?page=" + $page) : (this.currentPage ? "?page=" + this.currentPage : "")),{warehouse : ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem')), pagination: true}).then(function (response) {
           if (response.hasOwnProperty("data") && response.data.hasOwnProperty("data")) {
             self.isLoading = false;
             let items = [];
@@ -523,15 +501,16 @@
           this.searchInput = '';
         }
       },
-      barcodePrint() {
-        //this.$htmlToPaper(("barcode-" + this.barcodeItem.code));
-        this.$htmlToPaper(("barcode-" + this.barcodeItem.code), this.optionStyleHtmlToPaper);
-        this.barcodeItem = {};
-        this.numberPrint = 0;
-      },
       barcodeInputNumberPrint(item) {
-        this.barcodeItem = item;
-        this.$refs['input-number-barcode-modal'].show();
+        this.barcodeItemCode = item.code;
+        this.barcodeItem = this.cloneObject(item);
+        if(this.barcodeItem && this.barcodeItem.hasOwnProperty("code") && this.barcodeItem.code!== null && this.barcodeItem.code !== undefined && this.barcodeItem.code !== ""){
+          const self = this;
+          this.$nextTick(function () {
+            self.$htmlToPaper(("barcode-" + self.barcodeItem.code), self.optionStyleHtmlToPaper);
+            self.barcodeItem = {};
+          });
+        }
       },
       updateNumberBarcodePrint(input) {
         this.barcodeListToPrint = [];
