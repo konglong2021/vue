@@ -1,13 +1,64 @@
 <template>
   <b-container fluid class="bv-example-row">
     <div class="main-page-content">
-      <div class="control-panel">
+      <div class="control-panel" style="min-height: 80px;">
         <div class="panel-top">
           <div class="content-panel-left" style="width: 20%;">
             <h3 class="head-title">{{$t('content_title_purchase')}}</h3>
           </div>
-          <div class="content-panel-right content-panel-right-full-width"
-            style="vertical-align: text-bottom; width: 80%;">
+          <div class="content-panel-right content-panel-right-full-width" style="width: 80%; vertical-align: top;">
+            <div class="float-right" style="margin-right: 8px; width: 15%;" v-can="'warehouse_access'" v-if="warehouses && warehouses.length > 0">
+              <b-form-select
+                class="form-control input-content input-select-warehouse min-height-43-px"
+                v-model="warehouse" :options="warehouses"
+                @change="selectedWarehouse(warehouse)"
+              ></b-form-select>
+            </div>
+            <div class="float-right" style="margin-right: 8px; width: 15%;">
+              <div class="content-search">
+                <multiselect
+                  class="input-content content-multiple-select"
+                  v-model="supplier_select" :options="supplierOptions"
+                  track-by="name" label="name" :show-labels="false"
+                  :placeholder="$t('label_search_by_supplier')"
+                  @select="selectionChangeSupplier"
+                  @remove="removeElement"
+                ></multiselect>
+              </div>
+            </div>
+            <div class="float-right" style="margin-right: 8px; width: 48%;">
+              <div class="content-search float-right full-with">
+                <div style="width: 42%; display: inline-block; vertical-align: top;">
+                  <label style="margin-top: 12px; font-weight: normal; width: 20%; vertical-align: top;">ចាប់ពីថ្ងៃ</label>
+                    <div style="width: 78%; display: inline-block;">
+                      <b-form-datepicker class="min-height-43-px" style="vertical-align: middle"
+                        id="datepicker-from-date" formatted="yyyy-MM-dd"
+                        v-model="fromDate"
+                        :date-format-options="{ year: 'numeric', month: 'numeric', day: 'numeric' }"
+                        locale="en"
+                      ></b-form-datepicker>
+                    </div>
+                </div>
+                <div style="width: 42%; display: inline-block; vertical-align: top;">
+                  <label style="margin-top: 12px; font-weight: normal; width: 20%; vertical-align: top;">ដល់ថ្ងៃ</label>
+                  <div style="width: 78%; display: inline-block;">
+                  <b-form-datepicker class="min-height-43-px" style="vertical-align: middle"
+                      id="datepicker-to-date" v-model="toDate"
+                      :date-format-options="{ year: 'numeric', month: 'numeric', day: 'numeric' }"
+                      locale="en"
+                  ></b-form-datepicker>
+                    </div>
+                </div>
+                <div style="width: 14%; display: inline-block; vertical-align: top;">
+                  <b-button class="min-height-43-px button-click btn-date-search" href="#" @click="selectDate()" title="បញ្ចូល" size="sm" variant="info">
+                     <span style="display: inline-block; vertical-align: text-bottom; margin-top: 3px;">
+                       <span style="vertical-align: middle;">បង្ហាញ</span>
+                     <i class="fa fa-search" aria-hidden="true"></i>
+                     </span>
+                  </b-button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -15,74 +66,24 @@
         <div class="content-loading" v-if="isLoading">
           <div class="spinner-grow text-muted"></div>
         </div>
-        <div v-if="!isLoading && items && items.length > 0">
-          <div class="card">
+        <div v-if="!isLoading">
+          <div class="card" v-if="items && items.length > 0">
             <div class="card-body">
               <div class="table-responsive">
-                <table class="table table-purchase" style="display: none;">
-                  <thead class="table-header">
-                    <tr class="tr-header">
-                      <th class="th-header" style="width: 10%;">{{ $t('label_date_purchase') }}</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_purchase_by') }}</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_supplier_name') }}</th>
-                      <th class="th-header" style="width: 15%;">{{ $t('label_product_name') }}</th>
-                      <th class="th-header" style="width: 7%;">{{ $t('label_quantity') }}</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_import_price') }} ($)</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('label_sub_total') }} ($)</th>
-                      <th class="th-header" style="width: 15%;">{{ $t('label_grand_total') }} ($)</th>
-                      <th class="th-header" style="width: 10%;">{{ $t('title_action') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody class="table-body" style="max-height: calc(100vh - 300px)">
-                    <tr class="table-body-tr" v-for="item in items" v-bind:key="item.purchase_id">
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.date !== undefined ? item.date : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.purchase_by !== undefined ? item.purchase_by : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.supplier !== undefined ? item.supplier : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 15%;">
-                        <b class="content">{{ (item.name !== undefined ? item.name : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 7%;">
-                        <b class="content">{{ (item.quantity !== undefined ? item.quantity : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.unitprice !== undefined ? item.unitprice : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;">
-                        <b class="content">{{ (item.subtotal !== undefined ? item.subtotal : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 15%;">
-                        <b class="content">{{ (item.grand_total !== undefined ? item.grand_total : "") }}</b>
-                      </td>
-                      <td class="content-td" style="width: 10%;" v-show="item.purchase_id" :rowspan="item.lengthDetail">
-                        <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(item)">
-                          <i class="fa fa-eye"></i>
-                        </b-button>
-                        <b-button size="sm" title="Edit order data" class="btn-no-background"
-                          @click="UpdateDetailData(item,  $event.target)">
-                          <i class="fa fa-edit"></i>
-                        </b-button>
-                        <b-button size="sm" title="Remove order data" class="btn-no-background-danger"
-                          @click="openConfirmToRemove(item)">
-                          <i class="fa fa-trash"></i>
-                        </b-button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <b-table id="my-table-purchase" class="table table-striped table-bordered table-purchase" v-if="items"
-                  sticky-header="true" :items="items" :fields="itemsFields" head-variant="light">
+                <b-table
+                  id="my-table-purchase"
+                  class="table table-striped table-bordered table-purchase"
+                  v-if="items" sticky-header="true"
+                  :items="items" :fields="itemsFields"
+                  head-variant="light"
+                  :tbody-tr-class="addClassToRow"
+                >
                   <template #cell(actions)="row">
-                    <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(row.item)">
+                    <b-button size="sm" title="View data" class="btn-no-background" @click="viewDetailData(row.item);">
                       <i class="fa fa-eye"></i>
                     </b-button>
                     <b-button size="sm" title="Edit order data" class="btn-no-background"
-                      @click="UpdateDetailData(row.item,  $event.target)">
+                      @click="UpdateDetailData(row.item, $event.target)">
                       <i class="fa fa-edit"></i>
                     </b-button>
                     <b-button size="sm" title="Remove order data" class="btn-no-background-danger"
@@ -94,58 +95,68 @@
               </div>
             </div>
           </div>
-
+          <h3 class="text-center color-info" v-if="items.length === 0">មិនមានទិន្នន័យនៃការនាំទំនិញចូលទេ</h3>
+          <b-pagination v-if="items.length > 0"
+            align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading"
+            :total-rows="totalItems" v-model="currentPage" :per-page="perPage"
+            @change="changePage($event)" first-number last-number>
+          </b-pagination>
         </div>
       </div>
     </div>
     <b-modal id="modal-detail-purchase" ref="detail-purchase-form-modal" size="lg" modal-class="payment-form-modal"
-      @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
-      @ok="handleSubmit" ok-title="បិទ" title="ការនាំទំនិញចូល" no-close-on-backdrop>
-      <div class="full-content margin-bottom-20">
-        <div class="container-row-form width-60-percentage float-left">
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-customer'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ផ្គត់ផ្គង់ដោយ : </label>
-            <strong class="input-content"
-              style="font-family: 'Arial', 'Khmer', sans-serif;">{{purchase.supplier}}</strong>
-          </div>
+      ok-only ok-variant="secondary" footer-class="justify-content-center"
+      @ok="hideModal" ok-title="បិទ" title="ការនាំទំនិញចូល" no-close-on-backdrop>
+      <div style="display: inline-block; width: 100%;" v-if="purchase && purchase.id">
+        <div class="full-content margin-bottom-20">
+          <div class="container-row-form width-60-percentage float-left">
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-customer'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ផ្គត់ផ្គង់ដោយ : </label>
+              <strong class="input-content"
+                      style="font-family: 'Arial', 'Khmer', sans-serif;">{{purchase.supplier}}</strong>
+            </div>
 
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">នាំចូលដោយ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{
-            $store.$cookies.get('user').name }}</strong>
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">នាំចូលដោយ : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{
+                  $store.$cookies.get('user').name }}</strong>
+            </div>
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-discount'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">Batch : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.batch
+                }}</strong>
+            </div>
           </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-discount'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">Batch : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.batch
-            }}</strong>
+          <div class="container-row-form width-29-percentage float-right">
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-vat'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ពន្ធ : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.vat !== 0 ?
+                purchase.vat + "%": 0 }}</strong>
+            </div>
+            <div class="form-row-content-detail row-content-view">
+              <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
+                     style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ថ្ងៃខែឆ្នាំចូល : </label>
+              <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.date
+                }}</strong>
+            </div>
           </div>
         </div>
-        <div class="container-row-form width-29-percentage float-right">
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-vat'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ពន្ធ : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.vat !== 0 ?
-            purchase.vat + "%": 0 }}</strong>
-          </div>
-          <div class="form-row-content-detail row-content-view">
-            <label :for="'input-exchange-rate'" class="label-input no-margin-bottom"
-              style="width: 105px; font-family: 'Arial', 'Khmer', sans-serif;">ថ្ងៃខែឆ្នាំចូល : </label>
-            <strong class="input-content" style="font-family: 'Arial', 'Khmer', sans-serif;"> {{ purchase.date
-            }}</strong>
-          </div>
+        <div style="display: inline-block; overflow:hidden; width: 100%;">
+          <b-table
+            style="max-height: 335px; overflow-y: auto; font-family: 'Arial', 'Khmer', sans-serif;"
+            sticky-header="true"
+            :items="itemsProductDetail"
+            :fields="fieldsProductDetail"
+            head-variant="light">
+          </b-table>
         </div>
-      </div>
-      <div style="display: inline-block; overflow:hidden; width: 100%;">
-        <b-table style="height: 500px !important; font-family: 'Arial', 'Khmer', sans-serif;"
-          table-class="table-product-detail" :items="itemsProductDetail" :fields="fieldsProductDetail" :per-page="0"
-          stacked="md" show-empty small>
-        </b-table>
-      </div>
-      <div class="container-row-form width-15-percentage float-right" style="font-size: 20px;">
-        <b>សរុប : {{ grandTotalPrice(itemsProductDetail) }} $</b>
+        <div class="container-row-form width-15-percentage float-right" style="font-size: 20px;">
+          <b>សរុប : {{ grandTotalPrice(itemsProductDetail) }} $</b>
+        </div>
       </div>
     </b-modal>
     <b-modal id="modal-edit-purchase" ref="edit-purchase-form-modal" size="lg" modal-class="payment-form-modal"
@@ -193,6 +204,12 @@
         <b-table style="font-family: 'Arial', 'Khmer', sans-serif;" table-class="table-product-detail"
           :items="itemsProductDetail" :fields="fieldsProductDetail" :per-page="0" stacked="md" show-empty small
           :tbody-tr-class="rowClass">
+          <template #cell(saleprice)="row">
+            <b-form-input ref="inputSaleprice" type="number" class="input-content"
+                          v-bind:class="'content-input-saleprice-'+row.item.id" v-model="row.item.saleprice"
+                          v-on:change="updatedDataOfCurrentProduct(row.item.saleprice, row.item, 'inputSaleprice');"
+                          :autofocus="true"></b-form-input>
+          </template>
           <template #cell(quantity)="row">
             <b-form-input ref="inputQuantity" type="number" class="input-content"
               v-bind:class="'content-input-quantity-'+row.item.id" v-model="row.item.quantity"
@@ -219,7 +236,6 @@
       cancel-title="បោះបង់" title="ការលក់" no-close-on-backdrop>
       <h4 style="text-align: center;">ទិន្នន័យមួយនេះ និងត្រូវលុបចេញ?</h4>
     </b-modal>
-
   </b-container>
 </template>
 <script>
@@ -233,13 +249,16 @@ export default {
   },
   data() {
     return {
+      productOptions: [],
+      supplier_select: null,
+      customerOptions : [],
       isLoading: false,
       items: [],
       itemsFields: [
         { key: 'date', label: this.$t('label_date_purchase'), thClass: "header-th", thStyle: "font-size: 17px;" },
         { key: 'purchase_by', label: this.$t('label_purchase_by'), thClass: "header-th", thStyle: "font-size: 17px;" },
         { key: 'supplier', label: this.$t('label_supplier_name'), thClass: "header-th", thStyle: "font-size: 17px; width: 15%;" },
-        // { key: 'subtotal', label: this.$t('label_sub_total'), thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
+        { key: 'warehouse', label: this.$t('title_warehouse'), thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
         { key: 'grand_total', label: this.$t('label_grand_total'), thClass: "header-th", thStyle: "font-size: 17px; width: 15%;" },
         { key: 'actions', label: this.$t('title_action'), thClass: "header-th", thStyle: "font-size: 17px;" },
       ],
@@ -275,25 +294,53 @@ export default {
       tr_id_select: null,
       vats: [{ text: '0%', value: 0 }, { text: '5%', value: 0.05 }, { text: '10%', value: 0.1 }, { text: '15%', value: 0.15 }],
       productItemAdd: null,
-      purchaseSelect: null
+      purchaseSelect: null,
+      viewRowIdSelected: null,
+      editRowIdSelected: null,
+      selectedRows: [],
+      selectMode: 'single',
+      changeColor: false,
+      warehouse: this.$store.$cookies.get('storeItem'),
+      currentPage: 1,
+      perPage: 10,
+      totalItems: 0,
+      filterDate: null,
+      supplierOptions: [],
+      fromDate: '',
+      toDate: '',
     }
   },
   watch: {
     products: {
       handler: function (products) {
         if (products.length > 0) {
-          this.getDataPurchase();
+          this.getDataPurchase((this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
         }
       }
     }
   },
   methods: {
+    changePage($event){
+      this.currentPage = $event;
+      if(this.searchInput !== '' && this.searchInput !== null && this.searchInput !== undefined){
+        this.getDataPurchase(this.currentPage);
+      }
+      else {
+        this.getDataPurchase(this.warehouse, this.currentPage);
+      }
+    },
+    addClassToRow(item, type) {
+      if (item && type === 'row') {
+        return item && item.isSelected === true && this.purchaseSelect.id === item.id ? "table-primary" : "";
+      }
+    },
     async getListProduct() {
       let vm = this;
       vm.products = [];
       vm.productOptions = [];
-
-      await vm.$axios.get('/api/product').then(function (response) {
+      await vm.$axios.post('/api/product-price/list',
+        {warehouse : vm.warehouse, pagination: false}
+      ).then(function (response) {
         if (response && response.hasOwnProperty("data")) {
           if (response.data && response.data.length > 0) {
             vm.totalRows = response.data.length;
@@ -323,7 +370,6 @@ export default {
       let vm = this;
       vm.warehouseList = [];
       vm.warehouses = [];
-
       await vm.$axios.get('/api/warehouse').then(function (response) {
         if (response && response.hasOwnProperty("data")) {
           if (response.data.data) {
@@ -354,6 +400,7 @@ export default {
                 let supplierItem = { text: '', value: null };
                 supplierItem.text = data[index]["name"] + "(" + data[index]["address"] + ")";
                 supplierItem.value = data[index]["id"];
+                vm.supplierOptions.push({name: data[index]["name"] + "(" + data[index]["address"] + ")", value: data[index]["id"]});
                 vm.suppliers.unshift(supplierItem);
               }
             }
@@ -363,23 +410,42 @@ export default {
           vm.$toast.error("Getting data error").goAway(3000);
         });
     },
-    async getDataPurchase() {
+    async getDataPurchase($warehouse = null, $page = null) {
       let self = this;
       self.isLoading = true;
       self.items = [];
-      await self.$axios.get('/api/purchase')
-        .then(function (response) {
+      self.purchaseList = [];
+      let dataSubmit =
+        {
+        "warehouse": ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem')),
+        "pagination":true,
+        "from": self.fromDate,
+        "to": self.toDate
+      };
+      if(self.supplier_select){
+        dataSubmit["supplier_id"] = self.supplier_select["value"];
+      }
+      await self.$axios.post('/api/purchase-history' + ($page ? ("?page=" + $page) : (this.currentPage ? "?page=" + this.currentPage : "")), dataSubmit).then(function (response) {
           self.isLoading = false;
-          let data = self.cloneObject(response.data.data);
-          if (data && data.length > 0) {
-            self.purchaseList = self.cloneObject(data);
-            let itemPurchase = [];
+          let responseData = [];
+          if(
+            response && response.hasOwnProperty("data")
+            && response.data && response.data.hasOwnProperty("data")
+            && response.data.data.hasOwnProperty("data")
+          ){
+            responseData = self.cloneObject(response.data.data.data);
+            self.totalItems = response.data.data.total;
+            self.perPage = response.data.data.per_page;
+          }
+          if (responseData && responseData.length > 0) {
+            for (let index = 0; index < responseData.length; index++) {
+              let purchaseItem = self.cloneObject(responseData[index]);
+              let newPurchaseItem = self.cloneObject(responseData[index]);
 
-            for (let index = 0; index < data.length; index++) {
-              let purchaseItem = self.cloneObject(data[index]);
               let supplier = self.suppliers.find(item => item.value === purchaseItem["supplier_id"]);
               let user = self.cloneObject(self.$store.$cookies.get('user'));
               let itemData = [];
+              itemData["isSelected"] = false;
 
               itemData["id"] = purchaseItem.id;
               itemData["purchase_id"] = purchaseItem.id;
@@ -387,12 +453,24 @@ export default {
               itemData["supplier"] = supplier["text"];
               itemData["batch"] = purchaseItem["batch"];
               itemData["vat"] = purchaseItem["vat"] ? purchaseItem["vat"] : 0;
+              let warehouse = self.warehouseList.find(w => w.id === purchaseItem.warehouse_id);
+              itemData["warehouse"] = warehouse["name"];
               let date = "";
               let grand_total = 0;
               let subtotal = 0;
+              newPurchaseItem["purchasedetails"] = [];
 
               for (let indexProduct = 0; indexProduct < purchaseItem["purchasedetails"].length; indexProduct++) {
                 let purchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
+                let newPurchaseDetailItem = self.cloneObject(purchaseItem["purchasedetails"][indexProduct]);
+
+                if(purchaseItem.hasOwnProperty("product_price") && purchaseItem["product_price"] && purchaseItem["product_price"].length > 0){
+                  let priceForCurrentProduct = purchaseItem["product_price"].find(price => price.product_id === purchaseItem["purchasedetails"][indexProduct].product_id);
+                  if(priceForCurrentProduct !== undefined){
+                    purchaseDetailItem["saleprice"] = priceForCurrentProduct["sale_price"];
+                    newPurchaseDetailItem["saleprice"] = priceForCurrentProduct["sale_price"];
+                  }
+                }
                 if (purchaseDetailItem && purchaseDetailItem.created_at) {
                   date = moment(purchaseDetailItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
                 }
@@ -400,31 +478,56 @@ export default {
                 let unitprice = parseFloat(purchaseDetailItem["unitprice"]);
                 subtotal = (subtotal + (qty * unitprice));
                 grand_total = grand_total + parseFloat(qty * unitprice);
+                newPurchaseItem["purchasedetails"].push(newPurchaseDetailItem);
               }
               itemData["date"] = date;
               itemData["subtotal"] = subtotal.toFixed(2);
               itemData["grand_total"] = grand_total.toFixed(2);
               self.items.push(itemData);
+              self.purchaseList.push(newPurchaseItem);
             }
           }
-        })
-        .catch(function (error) {
+        }).catch(function (error) {
           console.log(error);
           self.$toast.success("Submit data getting error").goAway(3000);
-        });
+      });
     },
     cloneObject(obj) {
       return JSON.parse(JSON.stringify(obj));
+    },
+    hideModal() {
+      // this.purchase = {
+      //   vat: 0,
+      //   id: null,
+      //   import_price: 0,
+      //   supplier: null,
+      //   warehouse: null,
+      //   subtotal: 0,
+      //   grandtotal: 0,
+      //   qty: 0,
+      //   batch: null,
+      // };
+      // this.purchaseSelect = null;
+      this.$refs["detail-purchase-form-modal"].hide();
     },
     viewDetailData(item) {
       this.purchase = item;
       this.itemsProductDetail = [];
       let purchaseDetailList = [];
       let purchaseDetailArray = [];
-
+      let purchaseItem = {};
+      for(let itemData of this.items){
+        if(itemData.id === item.id){
+          itemData["isSelected"] = true;
+        }
+        else {
+          itemData["isSelected"] = false;
+        }
+      }
       if (this.purchaseList.length > 0) {
         for (let index = 0; index < this.purchaseList.length; index++) {
           if (this.purchaseList[index]["id"] === item.purchase_id) {
+            purchaseItem = this.cloneObject(this.purchaseList[index]);
             purchaseDetailList = this.cloneObject(this.purchaseList[index]["purchasedetails"]);
             break;
           }
@@ -439,7 +542,7 @@ export default {
               data["code"] = productItem["code"];
               data["quantity"] = parseInt(purchaseDetailList[indexItem]["quantity"]);
               data["unitprice"] = purchaseDetailList[indexItem]["unitprice"];
-              data["saleprice"] = productItem["sale_price"];
+              data["saleprice"] = purchaseDetailList[indexItem]["saleprice"] ? purchaseDetailList[indexItem]["saleprice"] : productItem["sale_price"];
               const subtotal = (parseFloat(purchaseDetailList[indexItem]["unitprice"]) * parseInt(purchaseDetailList[indexItem]["quantity"]));
               data["subtotal"] = subtotal.toFixed(2);
               purchaseDetailArray.push(data);
@@ -453,15 +556,18 @@ export default {
         let index = this.fieldsProductDetail.indexOf(itemActionField);
         this.fieldsProductDetail.splice(index, 1);
       }
-      this.$refs["detail-purchase-form-modal"].show();
+      this.$nextTick(() => {
+        this.$refs["detail-purchase-form-modal"].show();
+      });
     },
-
     UpdateDetailData(item, $target) {
       this.purchaseSelect = item;
-
       let purchaseDetailList = [];
       let purchaseDetailArray = [];
       let listProductAlreadyAdd = [];
+      Object.entries(this.items).forEach(([key, val]) => {
+        val.isSelected = (val.id === item.id ? true : false);
+      });
       if (this.purchaseList.length > 0) {
         let purchaseItem = this.purchaseList.find(row => row.id === item.id);
         if (purchaseItem && purchaseItem.hasOwnProperty("id")) {
@@ -477,12 +583,12 @@ export default {
             let data = {};
             let productItem = this.products.find(dataProduct => dataProduct.id === productIdSelected);
             if (productItem) {
-              data["id"] = productItem["id"];
+              data["product_id"] = productItem["id"];
               data["name"] = (productItem["en_name"] + " " + productItem["kh_name"]);
               data["code"] = productItem["code"];
               data["quantity"] = parseInt(purchaseDetailList[indexPurchase]["quantity"]);
               data["unitprice"] = purchaseDetailList[indexPurchase]["unitprice"];
-              data["saleprice"] = parseFloat(productItem["sale_price"]);
+              data["saleprice"] = purchaseDetailList[indexPurchase]["saleprice"] ? parseFloat(purchaseDetailList[indexPurchase]["saleprice"]) : productItem["sale_price"];
               const subtotal = parseFloat(purchaseDetailList[indexPurchase]["unitprice"]) * parseInt(purchaseDetailList[indexPurchase]["quantity"]);
               data["subtotal"] = subtotal.toFixed(2);
               listProductAlreadyAdd.push(productItem["id"]);
@@ -495,18 +601,19 @@ export default {
         });
         this.itemsProductDetail = this.cloneObject(purchaseDetailArray);
       }
-
       let itemActionField = this.fieldsProductDetail.find(itemField => itemField.key === 'action');
       if (!itemActionField) {
         this.fieldsProductDetail.push({ key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle: "font-size: 17px;" });
       }
       this.$refs['edit-purchase-form-modal'].show();
     },
+
     rowClass(item, type) {
       if (item && type === 'row') {
         if (item.isAdd === true) {
           return 'active-color'
-        } else {
+        }
+        else {
           return ''
         }
       } else {
@@ -530,6 +637,12 @@ export default {
         itemTemp.subtotal = (itemTemp.quantity * itemTemp.unitprice).toFixed(2);
         this.$set(this.itemsProductDetail, index, itemTemp);
       }
+      else if (fieldName === 'inputSaleprice') {
+        let itemTemp = JSON.parse(JSON.stringify(data));
+        let index = this.itemsProductDetail.indexOf(data);
+        itemTemp.saleprice = parseInt(dataItem);
+        this.$set(this.itemsProductDetail, index, itemTemp);
+      }
     },
     addMoreProductSelectedChange(productItemAddId) {
       let productItemAdd = this.products.find(item => item.id === productItemAddId);
@@ -541,6 +654,7 @@ export default {
           productAdd["code"] = productItemAdd["code"];
           productAdd["name"] = (productItemAdd["en_name"] + " " + productItemAdd["kh_name"]);
 
+          console.log(productItemAdd);
           productAdd["saleprice"] = productItemAdd["sale_price"];
           productAdd["unitprice"] = productItemAdd["unitprice"];
           productAdd["quantity"] = 1;
@@ -569,49 +683,47 @@ export default {
     onSubmitEditPurchase() {
       let self = this;
       let dataSubmit = {};
-      dataSubmit.warehouse_id = self.$store.$cookies.get('storeItem');
+      dataSubmit.warehouse_id = self.purchase.warehouse;
       dataSubmit.supplier_id = self.purchase.supplier;
       dataSubmit.vat = self.purchase.vat;
       dataSubmit.batch = self.purchase.batch;
       dataSubmit.items = [];
-      let subTotal = 0;
-      let totalVat = 0;
-      let priceAfterDiscount = 0;
-
       let purchaseDetail = [];
       let subtotal = 0;
       for (let index = 0; index < self.itemsProductDetail.length; index++) {
         let purchaseDetailItem = {};
-        purchaseDetailItem['product_id'] = self.itemsProductDetail[index]['id'];
+        purchaseDetailItem["sale_price"] = self.itemsProductDetail[index]["saleprice"];
+        purchaseDetailItem['product_id'] = self.itemsProductDetail[index]['product_id'];
         purchaseDetailItem['unitprice'] = self.itemsProductDetail[index]['unitprice'];
         purchaseDetailItem['quantity'] = self.itemsProductDetail[index]['quantity'];
         subtotal = subtotal + parseFloat(self.itemsProductDetail[index]['subtotal']);
+        purchaseDetailItem['product_name'] = self.products.find(p => p.id === self.itemsProductDetail[index]['product_id'])["kh_name"];
         purchaseDetail.unshift(purchaseDetailItem);
       }
-
       let vat = self.purchase.vat !== null ? parseFloat(self.purchase.vat) : 0;
       dataSubmit["purchases"] = purchaseDetail;
       dataSubmit["subtotal"] = subtotal;
       const grandtotal = (subtotal + (subtotal * vat));
       dataSubmit["grandtotal"] = grandtotal.toFixed(2);
-      self.$toast.info("Data starting submit").goAway(1500);
+
+      self.$toast.info("ទិន្នន័យកំពុងបញ្ជូនទៅរក្សាទុក").goAway(1500);
       if (self.purchaseSelect.hasOwnProperty("id") && self.purchaseSelect.id) {
         self.$axios.put('/api/purchase/' + self.purchaseSelect.id, dataSubmit).then(function (response) {
           if (response.data.success === true) {
             self.$nextTick(() => {
+              self.purchaseSelect = null;
+              self.itemsProductDetail = [];
               self.$refs['edit-purchase-form-modal'].hide();
             });
-            self.getDataPurchase();
-            self.$toast.success("Submit data successfully").goAway(2000);
+            self.getDataPurchase(self.warehouse);
+            self.$toast.success("ទិន្នន័យត្រូវបានរក្សាទុកបានជោគជ័យ").goAway(2000);
           }
-        })
-          .catch(function (error) {
-            self.$toast.error("getting data error ").goAway(2000);
-            console.log(error);
-          });
+        }).catch(function (error) {
+          self.$toast.error("ការរក្សារទុកទិន្នន័យមិនជោគជ័យ").goAway(2000);
+          console.log(error);
+        });
       }
     },
-
     openConfirmToRemove(row) {
       this.dataSelectToRemove = row;
       this.tr_id_select = row["purchase_id"];
@@ -630,7 +742,6 @@ export default {
         });
       }
     },
-
     removeProductFromList(item, $eventTarget) {
       let productFound = this.itemsProductDetail.find(productItem => productItem.id === item.id);
       let index = this.itemsProductDetail.indexOf(productFound);
@@ -638,7 +749,6 @@ export default {
         this.itemsProductDetail.splice(index, 1);
       }
     },
-
     grandTotalPrice(itemsProductDetail) {
       let total = [];
       Object.entries(itemsProductDetail).forEach(([key, val]) => {
@@ -661,14 +771,52 @@ export default {
 
       return (day + "/" + month + "/" + yyyy);
     },
+    selectedWarehouse(warehouse) {
+      if (warehouse) {
+        this.warehouse_id = warehouse;
+        this.currentPage = 1;
+        this.totalItems = 0;
+        if(this.searchInput === null || this.searchInput === '' || this.searchInput === undefined){
+          this.getDataPurchase(warehouse);
+        }
+        else {
+          this.getDataPurchase(warehouse, this.currentPage);
+        }
+      }
+    },
+    filterDataByDate(filterDate){
+      this.getDataPurchase(filterDate, this.warehouse);
+    },
+    removeElement(){
+      this.supplier_select = null;
+      this.getDataPurchase(this.warehouse);
+      this.$forceUpdate();
+    },
+    selectionChangeSupplier($obj){
+      if($obj){
+        this.supplier_select = $obj;
+      }
+      else {
+        this.supplier_select = null;
+      }
+      this.currentPage = 1;
+      this.getDataPurchase(this.warehouse, this.currentPage);
+    },
+    async selectDate() {
+      await this.getDataPurchase((this.warehouse ? this.warehouse : this.$store.$cookies.get('storeItem')));
+    },
   },
   mounted() {
     this.getListProduct();
     this.getAllWarehouse();
     this.getAllSupplier();
-    // if(this.products && this.products.length > 0){
-    //   this.getDataPurchase();
-    // }
+
+    const today = new Date();
+    const day = 1;
+    const month = today.getMonth();
+    const year = today.getFullYear();
+    this.toDate = this.$moment(new Date()).format("YYYY-MM-DD");
+    this.fromDate = this.$moment({ year: year, month: month, day: day }).format("YYYY-MM-DD");
   }
 }
 </script>
@@ -719,6 +867,6 @@ export default {
 }
 
 .table-purchase {
-  max-height: calc(100vh - 275px);
+  max-height: calc(100vh - 330px);
 }
 </style>

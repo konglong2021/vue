@@ -701,6 +701,21 @@ body {
   outline: none !important;
   box-shadow: none !important;
 }
+.button-click:hover,
+.button-click:focus,
+.button-click:active{
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  outline-offset: 0;
+}
+.btn-date-search,
+.btn-date-search:focus{
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none !important;
+  border-radius: 6px;
+}
 
 .payment-form-modal .table-product-detail tbody tr td {
   height: 52px;
