@@ -87,10 +87,10 @@
               }}</span>
               <barcode :value="barcodeItem.code" height='65' width="2" marginTop="0" marginBottom="0" marginLeft="0"
                 fontSize="12"></barcode>
-              <span
+              <!-- <span
                 style="margin-left:8px; text-align: center !important; display: block; font-weight: 600; font-size: 15px;">
                 តម្លៃ USD : {{ barcodeItem.sale_price }}
-              </span>
+              </span> -->
             </div>
           </div>
         </div>
