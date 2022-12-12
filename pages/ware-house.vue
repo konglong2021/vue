@@ -12,11 +12,10 @@
                 <b-container class="col-6 mx-auto menu-wrapper">
                   <b-row>
                     <b-col>
-
-                      <div class="input-group input-group-sm search-content">
-                        <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>
-                        <input class="form-control input-search-box" type="search" placeholder="Search..."/>
-                      </div>
+<!--                      <div class="input-group input-group-sm search-content">-->
+<!--                        <span class="input-group-addon button-search-box"><i class="fa fa-search"></i></span>-->
+<!--                        <input class="form-control input-search-box" type="search" placeholder="Search..."/>-->
+<!--                      </div>-->
                     </b-col>
                     <div class="btn-wrapper" v-can="'warehouse_create'">
                       <b-button href="#"  title="Add new WareHouse" size="sm" variant="primary"
@@ -60,9 +59,13 @@
           <div>
           </div>
         </div>
-        <b-modal id="modal-create-warehouse" ref="warehouse-form-modal" size="lg"
-                 @hidden="onResetWareHouse" :cancel-title="$t('label_cancel_button')" no-close-on-backdrop
-                 @ok="handleOnSubmitWareHouse" :ok-title="$t('label_save_button')" :title="$t('title_new_warehouse')">
+        <b-modal
+          id="modal-create-warehouse" ref="warehouse-form-modal" size="lg"
+          @hidden="onResetWareHouse" :cancel-title="$t('label_cancel_button')" no-close-on-backdrop
+          @ok="handleOnSubmitWareHouse" :ok-only="isViewData"
+          :ok-title="isViewData ? $t('label_close_button') : $t('label_save_button')"
+          :title="isViewData ? $t('title_view_warehouse') : (warehouse.id ? $t('title_edit_warehouse') : $t('title_new_warehouse'))"
+        >
           <b-form enctype="multipart/form-data" @submit.stop.prevent="onSubmitWareHouse">
             <div class="full-content">
             </div>
@@ -70,13 +73,13 @@
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-name'" class="label-input">{{$t('label_name')}}</label></b-col>
                 <b-col sm="8">
-                  <b-form-input :id="'input-name'" type="text" v-model="warehouse.name" class="input-content"></b-form-input>
+                  <b-form-input :id="'input-name'" type="text" v-model="warehouse.name" class="input-content" :disabled="isViewData"></b-form-input>
                 </b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-address'" class="label-input">{{$t('label_address')}}</label></b-col>
                 <b-col sm="8">
-                  <b-form-input :id="'input-address'" type="text" v-model="warehouse.address" class="input-content"></b-form-input>
+                  <b-form-input :id="'input-address'" type="text" v-model="warehouse.address" class="input-content" :disabled="isViewData"></b-form-input>
                 </b-col>
               </b-row>
             </div>
@@ -104,6 +107,7 @@
         currentPage: 1,
         totalRows: 0,
         dataView: {},
+        isViewData: false,
       }
     },
     watch : {
@@ -132,14 +136,17 @@
         });
       },
       showModal(){
+        this.isViewData = false;
         this.$refs['warehouse-form-modal'].show();
       },
       onResetWareHouse(){
 
       },
       handleOnSubmitWareHouse(bvModalEvent){
-        bvModalEvent.preventDefault();
-        this.onSubmitWareHouse();
+        if(!this.isViewData) {
+          bvModalEvent.preventDefault();
+          this.onSubmitWareHouse();
+        }
       },
       async onSubmitWareHouse(){
         let vm = this;
@@ -154,6 +161,7 @@
               }
             }
             vm.$nextTick(() => {
+              vm.isViewData = false;
               vm.$refs['warehouse-form-modal'].hide();
             });
           }).catch(function (error) {
@@ -176,6 +184,7 @@
               }
             }
             vm.$nextTick(() => {
+              vm.isViewData = false;
               vm.$refs['warehouse-form-modal'].hide();
             });
           }).catch(function (error) {
@@ -189,12 +198,13 @@
         return JSON.parse(JSON.stringify(obj));
       },
       viewDetail(item, index, target){
-        this.categoryView = item;
-        this.$refs['brand-form-modal'].show();
+        this.isViewData = true;
+        this.warehouse = item;
+        this.$refs['warehouse-form-modal'].show();
       },
       editWareHouse(item, index, target){
+        this.isViewData = false;
         this.warehouse = item;
-        console.log(this.warehouse);
         this.showModal();
       },
     },

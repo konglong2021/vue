@@ -85,7 +85,7 @@ export default {
 }
 
 .content-product {
-  width: 99%;
+  width: 100%;
   padding-top: 10px;
   padding-left: 16px;
   padding-right: 16px;
@@ -93,7 +93,7 @@ export default {
   display: inline-block;
   background-color: #fff;
   min-height: calc(100vh - 170px);
-  margin: 10px;
+  /*margin: 10px;*/
 }
 
 .content-product .content-product-input {

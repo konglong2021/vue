@@ -14,6 +14,7 @@
                 <a class="content-link" href="/pos">
                   <span>{{ $t('title_pos') }}</span>
                 </a>
+
               </li>
               <li class="li-style" v-can="'pos_access'" style="overflow: hidden;">
                 <a class="content-link" href="/transaction">
@@ -25,11 +26,11 @@
                   <span> ការទូរទាត់ទឹកប្រាក់ </span>
                 </a>
               </li>
-              <li class="li-style" style="overflow: hidden;">
-                <a class="content-link" href="/product-return">
-                  <span> ទំនិញត្រលប់ </span>
-                </a>
-              </li>
+<!--              <li class="li-style" style="overflow: hidden;">-->
+<!--                <a class="content-link" href="/product-return">-->
+<!--                  <span> ទំនិញត្រលប់ </span>-->
+<!--                </a>-->
+<!--              </li>-->
               <li class="li-style" style="overflow: hidden;">
                 <a class="cursor-default no-cursor content-user-profile">
                   <span class="content-user-img">
@@ -71,7 +72,14 @@
     methods: {
       async logOut(){
         let response = await this.$axios.post('/api/logout');
-        if(response && response.data.hasOwnProperty("message") && (response.data.message.toLocaleLowerCase() === "logged out" || response.data.message.toLocaleLowerCase() === "logout")){
+        if(response &&
+          response.data.hasOwnProperty("message")
+          &&
+          (response.data.message.toLocaleLowerCase() === "logged out"
+            ||
+            response.data.message.toLocaleLowerCase() === "logout"
+          )
+        ){
           await this.$router.push('/login');
         }
       },

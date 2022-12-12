@@ -1,8 +1,6 @@
 <template>
   <b-container fluid class="bv-example-row main-page-content">
-    <b-row>
-      <InventoryDashboard/>
-    </b-row>
+    <InventoryDashboard/>
   </b-container>
 </template>
 <script>
@@ -14,6 +12,7 @@
 
 <style scoped>
 .main-page-content{
-  min-height: calc(100vh - 95px);
+  /*min-height: calc(100vh - 95px);*/
+  min-height: calc(100% - 75px);
 }
 </style>

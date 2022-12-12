@@ -15,8 +15,8 @@
         </div>
       </div>
       <div v-if="products && products.length > 0" class="content-product-item">
-        <div v-for="p in products" v-bind:key="p.id" class="item-product" @click="selectedItem(p)"
-          :class="{'active-item-product' : selected == p.id}">
+        <div v-for="p in products" v-bind:key="p.product_id" class="item-product" @click="selectedItem(p)"
+          :class="{'active-item-product' : selected == p.product_id}">
           <div class="content-product-name">
             <div class="p-name">{{ p.name }} </div>
             <div class="p-qty"> {{ (p.qty) }} / {{ $t('label_product_sale_item') }}</div>
@@ -434,9 +434,10 @@ export default {
       return ($total - ($total * (this.order.discount / 100)));
     },
     selectedItem($item, $event) {
-      this.selected = $item.id;
+      this.selected = $item.product_id;
       this.selectedItemData = $item;
       this.showPlusAndMinusIcon = true;
+      console.log($item);
       this.$emit("selectedItem", $item);
     },
     openInputQtyProduct($product) {
@@ -457,7 +458,7 @@ export default {
     submitNumberIncreaseQtyProduct(productItem, QtyProduct) {
       let itemTemp = null;
       for (let index = 0; index < this.products.length; index++) {
-        if (this.products[index]["id"] === productItem["id"]) {
+        if (this.products[index]["product_id"] === productItem["product_id"]) {
           itemTemp = JSON.parse(JSON.stringify(this.products[index]));
           itemTemp["qty"] = parseInt(QtyProduct);
           this.$set(this.products, index, itemTemp);
@@ -591,14 +592,14 @@ export default {
       let self = this;
       await self.$axios.get('/api/product_by_barcode/' + scanningInput).then(function (response) {
         if (response.data.hasOwnProperty("data")) {
-          //debugger;
           let data = response.data;
           if (data.success) {
             let product = data.data;
             let productItem = {
-              id: product.id,
+              id: product.product_id,
               price: product.sale_price,
-              name: product.en_name + ' (' + product.kh_name + ')',
+              name: product.kh_name,
+              kh_name: product.kh_name,
               img: (product.image !== "no image" && product.image !== "no image created") ? self.generateImageUrlDisplay(product.image) : "images/no_icon.png",
               code: product.code
             };

@@ -140,6 +140,7 @@
            {key:'state',label:'កំណត់សំគាល់'} ,
            {key:'last_login',label:'ថ្ងៃចូលក្នុងប្រពន្ធ័ចុងក្រោយ'},
            {key:'roles',label:'ទួនាទី'},
+           {key:'warehouse',label:'ឃ្លាំង'},
            { key: 'actions', label: 'សកម្មភាព' },
         ],
         user:{isView: false}, //new item for user
@@ -149,6 +150,7 @@
         file: null,
         errors: [],
         warehouses: [],
+        warehouseList: [],
     }
     },
     methods:{
@@ -160,6 +162,7 @@
           if(response && response.hasOwnProperty("data")){
             if(response.data.data){
               let data = response.data.data;
+              vm.warehouseList = vm.cloneObject(data);
               for(let index=0; index < data.length; index++){
                 vm.warehouses.push({text: (data[index]["name"] + " " + data[index]["address"]), value: data[index]["id"]});
               }
@@ -221,6 +224,10 @@
                 item["birthdate"] = data[index]["profile"]["birthdate"];
                 item["profile_id"] = data[index]["profile"]["id"];
                 item["warehouse_id"] = data[index]["profile"]["warehouse_id"];
+                if(data[index]["profile"]["warehouse_id"]){
+                  let warehouseItem = self.warehouseList.find(item => item.id === data[index]["profile"]["warehouse_id"]);
+                  item["warehouse"] = warehouseItem["name"] + "( " + warehouseItem["address"] + " )";
+                }
                 item["gender"] = data[index]["profile"]["gender"];
               }
               self.items.push(item);
@@ -404,8 +411,8 @@
     },
     mounted() {
       this.getAllRoles();
-      this.getUsers();
       this.getAllWarehouse();
+      this.getUsers();
     }
   }
 </script>

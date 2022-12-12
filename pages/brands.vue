@@ -52,16 +52,21 @@
             </div>
           </div>
       </div>
-      <b-modal id="modal-create-brand" ref="brand-form-modal" size="lg"
-               @hidden="onReset" :cancel-title="$t('label_cancel_button')"
-               @ok="handleOnSubmit" :ok-title="$t('label_save_button')" :title="$t('title_new_brand')" no-close-on-backdrop>
+      <b-modal
+        id="modal-create-brand" ref="brand-form-modal" size="lg"
+        @hidden="onReset" :cancel-title="$t('label_cancel_button')"
+        @ok="handleOnSubmit"
+        :ok-only="isViewData"
+        :ok-title="isViewData ? $t('label_close_button') : $t('label_save_button')"
+        :title="isViewData ? $t('title_view_brand') : ((brand && brand.id) ? $t('title_edit_brand') : $t('title_new_brand'))" no-close-on-backdrop
+      >
         <b-form enctype="multipart/form-data" @submit.stop.prevent="onSubmit">
           <div class="full-content">
           </div>
           <div class="full-content">
             <b-row class="my-1">
               <b-col sm="4"><label :for="'input-enname'" class="label-input">{{ $t('label_name_english') }}</label></b-col>
-              <b-col sm="8"><b-form-input :id="'input-enname'" type="text" v-model="brand.en_name" class="input-content"></b-form-input></b-col>
+              <b-col sm="8"><b-form-input :id="'input-enname'" type="text" v-model="brand.en_name" class="input-content" :disabled="isViewData"></b-form-input></b-col>
             </b-row>
             <b-row class="my-1" >
               <b-col sm="4"><label :for="'input-category'" class="label-input">{{ $t('title_category') }}</label></b-col>
@@ -71,13 +76,14 @@
                              :options="categories" track-by="name" label="name"
                              :multiple="true" :show-labels="false" aria-placeholder="Select categories"
                              @select="selectionChange"
+                             :disabled="isViewData"
                              @remove="removeElement"></multiselect>
               </b-col>
             </b-row>
 
             <b-row class="my-1">
               <b-col sm="4"><label :for="'input-description'" class="label-input">{{ $t('label_description') }}</label></b-col>
-              <b-col sm="8"><b-form-textarea :id="'input-description'" class="input-content" v-model="brand.description"></b-form-textarea></b-col>
+              <b-col sm="8"><b-form-textarea :id="'input-description'" class="input-content" v-model="brand.description" :disabled="isViewData"></b-form-textarea></b-col>
             </b-row>
           </div>
         </b-form>
@@ -106,6 +112,7 @@
         isLoading: false,
         totalRows: 0,
         searchInput: null,
+        isViewData : false,
       }
     },
     watch : {
@@ -166,8 +173,10 @@
       },
       onReset(){},
       handleOnSubmit(bvModalEvent){
-        bvModalEvent.preventDefault();
-        this.onSubmit();
+        if(!this.isViewData){
+          bvModalEvent.preventDefault();
+          this.onSubmit();
+        }
       },
       onSubmit(){
         let dataSubmit = {};
@@ -243,12 +252,15 @@
         }
       },
       showModal(){
+        this.isViewData = false;
         this.$refs['brand-form-modal'].show();
       },
       hideBrandModal(){
+        this.isViewData = false;
         this.$refs['brand-form-modal'].hide();
       },
       viewDetail(item, index, target){
+        this.isViewData = true;
         this.brand = this.cloneObject(item);
         if(item.hasOwnProperty("categoryList")){
           let categoryList = [];
@@ -257,9 +269,10 @@
           }
           this.brand["category"] = this.cloneObject(categoryList);
         }
-        this.showModal();
+        this.$refs['brand-form-modal'].show();
       },
       editBrand(item, index, target){
+        this.isViewData = false;
         this.brand = item;
         if(item.hasOwnProperty("categoryList")){
           let categoryList = [];
@@ -268,7 +281,8 @@
           }
           this.brand["category"] = this.cloneObject(categoryList);
         }
-        this.showModal();
+        this.$refs['brand-form-modal'].show();
+        //this.showModal();
       },
       async searchBrand() {
         let self = this;

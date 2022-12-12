@@ -54,20 +54,25 @@
             </div>
           </div>
       </div>
-      <b-modal id="modal-create-category" ref="category-form-modal" size="lg"
-                 @hidden="onReset" :cancel-title="$t('label_cancel_button')" no-close-on-backdrop
-                 @ok="handleOnSubmit" :ok-title="$t('label_save_button')" :title="$t('title_new_category')">
+      <b-modal
+        id="modal-create-category" ref="category-form-modal" size="lg"
+        @hidden="onReset" :cancel-title="$t('label_cancel_button')"
+        no-close-on-backdrop
+        @ok="handleOnSubmit"
+        :ok-only="isViewData"
+        :ok-title="isViewData ? $t('label_close_button') : $t('label_save_button')"
+        :title="isViewData ? $t('title_view_category') : (category && category.id) ? $t('title_edit_category') : $t('title_new_category')">
           <b-form enctype="multipart/form-data" @submit.stop.prevent="onSubmit">
             <div class="full-content">
             </div>
             <div class="full-content">
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-enname'" class="label-input">{{ $t('label_name_english') }}</label></b-col>
-                <b-col sm="8"><b-form-input :id="'input-enname'" type="text" v-model="category.name" class="input-content"></b-form-input></b-col>
+                <b-col sm="8"><b-form-input :id="'input-enname'" type="text" v-model="category.name" class="input-content" :disabled="isViewData"></b-form-input></b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-khname'" class="label-input">{{ $t('label_name_khmer') }}</label></b-col>
-                <b-col sm="8"><b-form-input :id="'input-khname'" type="text" v-model="category.kh_name" class="input-content"></b-form-input></b-col>
+                <b-col sm="8"><b-form-input :id="'input-khname'" type="text" v-model="category.kh_name" class="input-content" :disabled="isViewData"></b-form-input></b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-category-brand'" class="label-input">{{ $t('title_brands') }}</label></b-col>
@@ -79,42 +84,17 @@
                     :show-labels="false" aria-placeholder="Select brands"
                     @select="selectionChange"
                     @remove="removeElement"
+                    :disabled="isViewData"
                   ></multiselect>
                 </b-col>
               </b-row>
               <b-row class="my-1">
                 <b-col sm="4"><label :for="'input-description'" class="label-input">{{ $t('label_description') }}</label></b-col>
-                <b-col sm="8"><b-form-textarea :id="'input-description'" class="input-content" v-model="category.description"></b-form-textarea></b-col>
+                <b-col sm="8"><b-form-textarea :id="'input-description'" class="input-content" v-model="category.description" :disabled="isViewData"></b-form-textarea></b-col>
               </b-row>
             </div>
           </b-form>
         </b-modal>
-      <b-modal id="modal-view-category-form" ref="view-category-form-modal" size="lg"
-        no-close-on-backdrop title="Product View" title-class="text-center mx-auto" hide-footer
-      >
-        <b-form enctype="multipart/form-data" v-if="categoryView !== null && categoryView !== undefined">
-          <div class="full-content">
-            <b-row class="my-1">
-              <b-col sm="4"><label :for="'input-enname'" class="label-input">Name</label></b-col>
-              <b-col sm="8"><b-form-input :id="'input-enname'" type="text" v-model="categoryItemSelected.name" class="input-content"></b-form-input></b-col>
-            </b-row>
-            <b-row class="my-1">
-              <b-col sm="4"><label :for="'input-khname'" class="label-input">Name(KH)</label></b-col>
-              <b-col sm="8"><b-form-input :id="'input-khname'" type="text" v-model="categoryItemSelected.kh_name" class="input-content"></b-form-input></b-col>
-            </b-row>
-            <b-row class="my-1">
-              <b-col sm="4"><label :for="'input-category'" class="label-input">Brands</label></b-col>
-              <b-col sm="8">
-<!--                <multiselect class="input-content" v-model="category.brand" :options="brands" track-by="name" label="name" :multiple="true" :show-labels="false" aria-placeholder="Select brands"></multiselect>-->
-              </b-col>
-            </b-row>
-            <b-row class="my-1">
-              <b-col sm="4"><label :for="'input-description'" class="label-input">Description</label></b-col>
-              <b-col sm="8"><b-form-textarea :id="'input-description'" class="input-content" v-model="categoryItemSelected.description"></b-form-textarea></b-col>
-            </b-row>
-          </div>
-        </b-form>
-      </b-modal>
     </b-row>
   </b-container>
 </template>
@@ -136,13 +116,15 @@
           { key: 'total_product', label: this.$t('label_total_product') },
           { key: 'actions', label: this.$t('label_action_title') }
         ],
-        category: {}, //new item for category
+        category: {description: null,id: null, kh_name: null, name: null}, //new item for category
         brands: [],
+        brandList: [],
         isLoading: false,
         categoryItemSelected: {},
         categoryView : {},
         totalRows: 0,
         searchInput: null,
+        isViewData: false
       }
     },
     watch : {
@@ -161,6 +143,7 @@
           .then(function (response) {
             if(response.hasOwnProperty("data")){
               for(let index=0; index < response.data.brands.length; index++){
+                self.brandList.push(response.data.brands[index]);
                 self.brands.push({name : response.data.brands[index]["name"], value : response.data.brands[index]["id"]});
               }
             }
@@ -195,7 +178,7 @@
               item['id'] = categoryItem["id"];
               item['kh_name'] = categoryItem["kh_name"];
               item['name'] = categoryItem["name"];
-              item['name'] = categoryItem["name"];
+              item['description'] = categoryItem["description"];
               item['parent'] = "--ROOT--";
               item['products_count'] = categoryItem["products_count"];
               items.push(item);
@@ -209,8 +192,10 @@
       },
       onReset(){},
       handleOnSubmit(bvModalEvent){
-        bvModalEvent.preventDefault();
-        this.onSubmit();
+        if(!this.isViewData){
+          bvModalEvent.preventDefault();
+          this.onSubmit();
+        }
       },
       async onSubmit(){
         let self = this;
@@ -234,9 +219,29 @@
             .then(function (response) {
               if(response){
                 let brands = self.cloneObject(response.data.brands);
-                self.updatedCategoryData(self.items, response.data.data.id, brands);
+                let responseBrandName = [];
+                let responseBrand = [];
+                for(let i=0; i < brands.length; i++){
+                  let itemBrand = self.brandList.find(b => b.id === brands[i]);
+                  responseBrand.push(itemBrand);
+                  responseBrandName.push(itemBrand["name"]);
+                }
+                for(let dataItem of self.items){
+                  let itemFind = self.items.find(d => d.id === response.data.data.id);
+                  if(itemFind){
+                    itemFind["name"] = response.data.data["name"];
+                    itemFind["kh_name"] = response.data.data["kh_name"];
+                    itemFind["description"] = response.data.data["description"];
+                    itemFind["brand"] = responseBrandName.join(", ");
+                    itemFind['parent'] = "--ROOT--";
+                    itemFind['products_count'] = response.data.data["products_count"];
+                  }
+                }
                 self.$toast.success("Submit data successfully").goAway(2000);
                 self.category = {};
+                self.$nextTick(() => {
+                  self.$refs['category-form-modal'].hide();
+                });
               }
             })
             .catch(function (error) {
@@ -256,19 +261,22 @@
                 let responseBrandName = [];
                 let responseBrand = [];
                 for(let i=0; i < brands.length; i++){
-                  let itemResponseBrand = self.cloneObject(self.selectedBrandList(brands[i]));
-                  responseBrandName.push(itemResponseBrand["name"]);
+                  let itemBrand = self.brandList.find(b => b.id === brands[i]);
+                  responseBrand.push(itemBrand);
+                  responseBrandName.push(itemBrand["name"]);
                 }
                 item["brands"] = self.cloneObject(responseBrand);
                 item["brand"] = responseBrandName.join(", ");
                 item['name'] = categoryItem["name"];
+                item['kh_name'] = categoryItem["kh_name"];
+                item['description'] = categoryItem["description"];
                 item['parent'] = "--ROOT--";
                 item['products_count'] = categoryItem["products_count"];
-                //self.items.push(item);
                 self.items.unshift(item);
                 self.$toast.success("submit data is successfully").goAway(1500);
-                self.hideModal();
-                self.category = {};
+                self.$nextTick(() => {
+                  self.$refs['category-form-modal'].hide();
+                });
               }
             })
             .catch(function (error) {
@@ -305,24 +313,19 @@
         return itemData;
       },
       showModal(){
+        this.isViewData = false;
         this.$refs['category-form-modal'].show();
+        this.category = {};
       },
       hideModal(){
+        this.isViewData = false;
+        this.category = {};
         this.$refs['category-form-modal'].hide();
       },
       viewDetail(item, index, target){
-        this.categoryView = item;
-        this.$refs['view-category-form-modal'].show();
-      },
-      adjustCategory(item, index, target){
-        this.$refs['category-form-modal'].show();
-        this.category = {};
+        this.isViewData = true;
         if(!empty(item)){
-          this.category["id"] = item.hasOwnProperty("id") ? JSON.parse(item["id"]) : null;
-          this.category["name"] = item.hasOwnProperty("name") ? JSON.parse(JSON.stringify(item["name"])) : null;
-          this.category["kh_name"] = item.hasOwnProperty("kh_name") ? JSON.parse(JSON.stringify(item["kh_name"])) : null;
-          this.category["description"] = item.hasOwnProperty("description") ? JSON.parse(item["description"]) : null;
-
+          this.category = this.cloneObject(item);
           let brandList = [];
           if(item.hasOwnProperty("brands")){
             for (let index=0; index < item["brands"].length; index++){
@@ -331,6 +334,21 @@
             this.category["brand"] = this.cloneObject(brandList);
           }
         }
+        this.$refs['category-form-modal'].show();
+      },
+      adjustCategory(item, index, target){
+        this.isViewData = false;
+        if(!empty(item)){
+          this.category = this.cloneObject(item);
+          let brandList = [];
+          if(item.hasOwnProperty("brands")){
+            for (let index=0; index < item["brands"].length; index++){
+              brandList.push({name: item["brands"][index]['name'], value: item["brands"][index]['id']});
+            }
+            this.category["brand"] = this.cloneObject(brandList);
+          }
+        }
+        this.$refs['category-form-modal'].show();
       },
       cloneObject(obj) {
         return JSON.parse(JSON.stringify(obj));
@@ -381,7 +399,7 @@
       handleClick(e) {
         if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
           this.searchInput = null;
-          this.getBrands();
+          this.onGetBrand();
         }
       },
     },

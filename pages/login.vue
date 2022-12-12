@@ -70,13 +70,8 @@ export default {
 
           self.$store.commit('auth/setToken', token);
           self.$store.commit('auth/setUser', user);
-          if(response.data && response.data.hasOwnProperty('permission') && response.data.permission){
-              let permission = response.data.permission;
-              let permissions = [];
-              for (let index=0; index< permission.permissions.length;index++){
-                  permissions.push(permission.permissions[index]["title"]);
-              }
-              self.$store.commit('auth/setPermissions', permissions);
+          if(response && response.data && response.data.hasOwnProperty('permissions') && response.data.permissions.length > 0){
+            self.$store.commit('auth/setPermissions', response.data.permissions);
           }
           if(user && user.hasOwnProperty("profile") && user.profile && user.profile.warehouse_id){
             self.$store.commit('auth/setStoreItem', user.profile.warehouse_id);
@@ -87,13 +82,13 @@ export default {
             self.form.email = null;
             self.form.password = null;
             self.form.isFieldError = true;
-            self.$toast.error("getting data error ").goAway(2000);
+            self.$toast.error("មានបញ្ហាលើការចូលប្រើប្រាស់!!!!").goAway(2000);
         }
       }).catch(function (error) {
         self.form.email = null;
         self.form.password = null;
         self.form.isFieldError = true;
-        self.$toast.error("getting data error ").goAway(2000);
+        self.$toast.error("មានបញ្ហាលើការចូលប្រើប្រាស់!!!!").goAway(2000);
       });
     },
     cloneObject(obj) {

@@ -9,7 +9,7 @@
             </div>
             <div class="content-panel-right content-panel-right-full-width" style="vertical-align: text-bottom; width: 80%;">
               <div class="float-right" v-can="'warehouse_access'">
-                <b-form-select  class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
+                <b-form-select class="form-control input-content input-select-warehouse min-height-43-px" v-model="warehouse" :options="warehouses" @change="selectedWarehouse(warehouse)"></b-form-select>
               </div>
               <div class="float-right product" style="margin-right: 8px; display: none;">
                 <div class="content-search" >
@@ -22,7 +22,11 @@
                 </div>
               </div>
               <div class="float-right" style="margin-right: 8px; display: inline-block;">
-                <b-form-select class="form-control input-content input-select-warehouse min-height-43-px" v-model="status_select" :options="statusList" @change="selectedStatusSale(status_select)"></b-form-select>
+                <b-form-select
+                  class="form-control input-content input-select-warehouse min-height-43-px"
+                  v-model="status_select" :options="statusList"
+                  @change="selectedStatusSale(status_select)"
+                ></b-form-select>
               </div>
               <div class="float-right" style="margin-right: 8px">
                 <div class="content-search" >
@@ -53,12 +57,10 @@
             <div class="content-table-data" v-if="!isLoading">
               <div v-if="items">
                 <div class="table-responsive" v-if="items.length > 0">
-                  <b-table id="my-table-stock" class="table table-striped table-bordered"
-                           v-if="items"
-                           :items="items"
-                           :fields="itemsFields"
-                           responsive
-                           head-variant="light"
+                  <b-table
+                    id="my-table-stock" class="table table-striped table-bordered"
+                    v-if="items" :items="items" :fields="itemsFields" responsive
+                    head-variant="light"
                   >
                     <template #cell(status)="row">
                       <div v-html="row.item.status"></div>
@@ -84,42 +86,15 @@
               </div>
             </div>
           </div>
-          <b-pagination align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
+          <div v-if="!filterDate && (!customer_select || (customer_select && !customer_select.value))" class="display-inline-block full-with">
+            <b-pagination align="right" style="margin-top: 5px !important;" size="md" :disabled="isLoading" :total-rows="totalItems" v-model="currentPage" :per-page="perPage" first-number last-number></b-pagination>
+          </div>
         </div>
       </div>
-      <div id="invoice-print-pos-again" style="padding-left: 15px!important; display: none; width: 95%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
-<!--        <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center; font-size: 25px;">{{ $t('title') }}</h1>-->
-        <span style="margin-bottom: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center; font-size: 23px;">{{ $t('title') }}</span><br/><br/>
-<!--        <span v-for="item in itemsProductDetail">-->
-<!--          <span style="font-size: 13px;!important;">{{ item.name }}</span>-->
-<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.qty }}</span>-->
-<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.price }}</span>-->
-<!--          <span style="padding-left: 10px; font-size: 13px;!important;">{{ item.total }}</span>-->
-<!--          <br/>-->
-<!--        </span>-->
-        <table>
-          <thead>
-          <tr>
-            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 70% !important;">ឈ្មោះទំនិញ</th>
-            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">ចំនួន</th>
-            <th style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">តម្លៃ</th>
-          </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in itemsProductDetail" style="font-size: 16px !important; width: 99% !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">
-              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 70% !important;">{{ item.name }}</td>
-              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">{{ item.qty }}</td>
-              <td style="padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important; width: 13% !important;">{{ item.price }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <hr>
-        <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span><br/>
-        <span style="width: 99% !important; float: right; padding-bottom: 10px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 16px !important;">សរុប: 5555</span>
-      </div>
-      <b-modal id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
-               @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
-               @ok="onSubmitToPrint" ok-title="ព្រីនចេញ" title="ការលក់" no-close-on-backdrop>
+      <b-modal
+        id="modal-detail-payment" ref="detail-payment-form-modal" size="lg" modal-class="payment-form-modal"
+        @hidden="onResetPrint" ok-only ok-variant="secondary" footer-class="justify-content-center"
+        @ok="onSubmitToPrint" ok-title="ព្រីនចេញ" title="ការលក់" no-close-on-backdrop>
         <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;">
           <div class="full-content margin-bottom-20">
             <div class="container-row-form width-60-percentage float-left">
@@ -153,73 +128,107 @@
               </div>
             </div>
           </div>
-          <b-table table-class="table-payment"
-                   :items="itemsProductDetail"
-                   :fields="fieldsProductDetail"
-                   stacked="md"
-                   show-empty
-                   small
+          <b-table
+                  table-class="table-payment"
+                  style="max-height: 215px; overflow-y: auto; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"
+                  :items="itemsProductDetail"
+                  :fields="fieldsProductDetail"
+                  sticky-header="true"
+                  head-variant="light"
           >
           </b-table>
-          <div style="display: inline-block;float: right;margin-top: 25px;">
-            <span style="display: block;">{{$t('title_total_in_usd')}} : {{order.subtotal}} USD</span>
-            <span style="display: block;margin-top: 10px;">{{$t('title_total_after_vat_in_usd')}} : {{ order.grandtotal}} USD</span>
-            <span style="display: block;margin-top: 10px;" v-if="order.subtotal">{{$t('title_total_in_riel')}} : {{ calculateToRiel(order.subtotal, order.exchange_rate) }} Riel</span>
+          <div style="display: inline-block;float: right;margin-top: 20px;">
+            <span style="display: block; font-size: 12px;">{{ $t('title_total_in_usd') }} : {{ order.subtotal }} USD</span>
+            <span style="display: block; margin-top: 5px; font-size: 12px;">{{ $t('label_vat') }} ($) : {{ vatPrice(order) }} USD</span>
+            <span style="display: block; margin-top: 5px; font-size: 12px;">{{$t('title_total_after_vat_in_usd')}} : {{ grandTotalWithVat(order) }} USD</span>
+            <span style="display: block; margin-top: 5px; font-size: 12px;" v-if="order.subtotal">{{$t('title_total_in_riel')}} : {{ calculateToRiel(grandTotalWithVat(order), order.exchange_rate) }} Riel</span>
 
           </div>
         </b-form>
+        <div id="invoice-print-pos-again" style="padding-top : 50px; margin: 5px; display: none; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
+          <h6 class="text-center" style="margin-top: 35px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 13px;">{{ $t('title') }}</h6>
+          <table style="font-size: 10px; margin-bottom: 20px;">
+            <tbody>
+            <tr>
+              <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">វិក័យប័ត្រលេខ : {{ order.invoice_id }}</td>
+            </tr>
+            <tr>
+              <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">ថ្ងៃខែឆ្នាំលក់ : {{ order.date }}</td>
+            </tr>
+            <tr>
+              <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; font-weight: 700; padding: 0;">លក់ដោយ : {{ order.sale_by }}</td>
+            </tr>
+            </tbody>
+          </table>
+          <table style="text-align: center;">
+            <thead style="">
+              <tr>
+                <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle;">ឈ្មោះទំនិញ</th>
+                <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 5%;">ចំនួន</th>
+                <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 20%;">តម្លៃ($)</th>
+                <th style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; text-transform: uppercase; border-top:1px solid black; margin-bottom: 4px; border-bottom: 1px solid black; vertical-align: middle; width: 25%;">សរុប($)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item of itemsProductDetail">
+                <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px;">{{ item.kh_name }}</td>
+                <td style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px;">{{ item.qty }}</td>
+                <td style="font-size: 10px; content: '\20B9';font-family: 'Arial', 'Khmer OS Bokor', sans-serif;text-align: right;">{{ item.price }}</td>
+                <td style="font-size: 10px; content: '\20B9';font-family: 'Arial', 'Khmer OS Bokor', sans-serif;text-align: right;">{{ item.total }}</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right !important;">សរុប ($)</td>
+                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; border-top:1px solid black !important;">{{ order.subtotal }}</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important;">ពន្ធ ($) ({{ order.vat * 100 }} %)</td>
+                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{ vatPrice(order) }}</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important;">បញ្ចុះតម្លៃ</td>
+                <td colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{ discountPrice(order) }}</td>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">សរុបបូកបញ្ចូលពន្ធ ($)</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ (parseFloat(order.grandtotal) + parseFloat(vatPrice(order))) }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10.5px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">តម្លៃសរុប (៛)</th>
+                <th colspan="2" style="font-size: 13px; border-top:1px dashed black !important; border-bottom:1px dashed black !important; text-align: right;">{{ calculateToRiel((parseFloat(order.grandtotal) + parseFloat(vatPrice(order))), order.exchange_rate) }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; border-top:1px solid black !important; text-align: right;"></th>
+                <th colspan="2" style="font-size: 10px; border-top:1px dashed black !important; border-top:1px solid black !important; text-align: right;"></th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important;  font-weight: normal;">ទទួលប្រាក់ ($)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;  font-weight: normal;">{{ order.receive_money_usd }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; font-weight: normal;">ទទួលប្រាក់ (៛)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;  font-weight: normal;">{{ order.receive_money_kh }}</th>
+              </tr>
 
-        <div id="invoice-print-again" style="margin: 15px; display: none; width: 95%; height: 100%; overflow: hidden; padding: 30px 30px !important; font-family: 'Arial', 'Khmer OS Bokor', sans-serif !important;">
-          <div style="margin-bottom: 30px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; display:inline-block; width: 100%;">
-            <h1 style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align: center;">{{ $t('title') }}</h1>
-          </div>
-          <div class="full-content margin-bottom-20">
-            <div class="container-row-form width-60-percentage float-left">
-              <div class="form-row-content-detail row-content-view">
-                <label class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">វិក័យប័ត្រលេខ</label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{order.invoice_id}}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-customer'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ឈ្មោះអតិថិជន : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{order.customer}}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">លក់ដោយ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ $store.$cookies.get('user').name }}</strong>
-              </div>
-            </div>
-            <div class="container-row-form width-29-percentage float-right">
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-vat'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ពន្ធ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ order.vat !== 0 ? order.vat + "%": 0 }}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-discount'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">បញ្ចុះតម្លៃ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ order.discount + "%" }}</strong>
-              </div>
-              <div class="form-row-content-detail row-content-view">
-                <label :for="'input-exchange-rate'" class="label-input no-margin-bottom" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">ថ្ងៃខែឆ្នាំលក់ : </label>
-                <strong class="input-content" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"> {{ getFullDate() }}</strong>
-              </div>
-            </div>
-          </div>
-          <b-table style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" table-class="table-payment"
-                   :items="itemsProductDetail"
-                   :fields="fieldsProductDetailPrint"
-                   stacked="md"
-                   show-empty
-                   small
-          ></b-table>
-          <div style="display: inline-block;float: right; margin-top: 25px; margin-right: 75px;">
-            <span style="display: block; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{$t('title_total_in_usd')}} : {{ order.subtotal }} USD</span>
-            <span style="display: block;margin-top: 10px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;">{{$t('title_total_after_vat_in_usd')}} : {{ order.grandtotal }} USD</span>
-          </div>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; font-weight: normal;">លុយត្រូវអាប់ ($)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-weight: normal;">{{ order.return_money_usd }}</th>
+              </tr>
+              <tr>
+                <th colspan="2" style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-size: 10px; text-align: right !important; font-weight: normal;">លុយត្រូវអាប់ (៛)</th>
+                <th colspan="2" style="font-size: 10px; text-align: right;content: '\20B9'; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; font-weight: normal;">{{ $util.format(order.return_money_kh)}}</th>
+              </tr>
+            </tbody>
+          </table>
+          <footer style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif; text-align:center; font-size: 10px; margin-top: 45px;">
+            <p style="text-align:center; margin-bottom: 0; padding-bottom: 0;">ទំនិញទិញហើយ មិនអាចប្តុរជាទឹកប្រាក់វិញបានទេ</p>
+            <p style="text-align:center; margin-bottom: 0; padding-bottom: 0; margin-top: 4px; padding-top: 0">អរគុណសម្រាប់ការគាំទ្រ</p>
+          </footer>
         </div>
       </b-modal>
       <b-modal
-              id="modal-edit-payment" ref="edit-payment-form-modal" size="lg" modal-class="payment-form-modal"
-              @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
-              @ok="handleSubmit" ok-title="កែប្រែ" title="ការលក់" no-close-on-backdrop>
+        id="modal-edit-payment" ref="edit-payment-form-modal" size="lg" modal-class="payment-form-modal"
+        @hidden="onResetEditPayment" ok-only ok-variant="secondary" footer-class="justify-content-center"
+        @ok="handleSubmit" ok-title="កែប្រែ" title="ការលក់" no-close-on-backdrop>
         <b-form enctype="multipart/form-data" style="display: inline-block; width: 100%; height: 100%; overflow: hidden;" @submit.stop.prevent="onSubmitEditPayment">
           <div class="full-content margin-bottom-20">
             <div class="container-row-form width-30-percentage float-left">
@@ -258,14 +267,14 @@
                 </div>
               </div>
             </div>
-            <b-table style="font-family: 'Arial', 'Khmer OS Bokor', sans-serif;" table-class="table-product-detail"
-                     :items="itemsProductDetail"
-                     :fields="fieldsProductDetail"
-                     :per-page="0"
-                     stacked="md"
-                     show-empty
-                     small
-                      :tbody-tr-class="rowClass"
+            <b-table
+                    style="max-height: 320px; overflow-y: auto; font-family: 'Arial', 'Khmer OS Bokor', sans-serif; width: 100%;"
+                    table-class="table-product-detail"
+                    :items="itemsProductDetail"
+                    :fields="fieldsProductDetail"
+                    :tbody-tr-class="rowClass"
+                    sticky-header="true"
+                    head-variant="light"
             >
               <template #cell(qty)="row">
                 <b-form-input :ref="'inputQty' + row.item.id" type="number" class="input-content" v-bind:class="'content-input-qty-'+row.item.id" v-model="row.item.qty" v-on:change="updatedDataOfCurrentProduct(row.item.qty, row.item, 'qty')"></b-form-input>
@@ -327,20 +336,20 @@
         ],
         itemsProductDetail: [],
         fieldsProductDetail: [
-          { key: 'number', label: 'លេខរៀង', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
-          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
-          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 17px;"},
-          { key: 'discount', label: 'បញ្ចុះតម្លៃ (%)', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'total_after_discount', label: 'តម្លៃសរុប បន្ទាប់ពី បញ្ចុះតម្លៃ ($)', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle : "font-size: 17px;"},
+          { key: 'number', label: 'លេខរៀង', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 13px; width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 13px;width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'discount', label: 'បញ្ចុះតម្លៃ (%)', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'total_after_discount', label: 'សរុប បន្ទាប់ពី បញ្ចុះតម្លៃ ($)', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'action', label: this.$t('title_action'), thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
         ],
         fieldsProductDetailPrint: [
-          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 17px;"},
-          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 17px; width: 15%;"},
-          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 17px;width: 15%;"},
-          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 17px;"},
+          { key: 'name', label: 'ឈ្មោះទំនិញ', thClass: "header-th", thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'qty', label: 'ចំនួន', thClass: "header-th", thStyle : "font-size: 13px; width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'price', label: 'តម្លៃឯកតា ($)', thClass: "header-th", thStyle : "font-size: 13px;width: 15%; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
+          { key: 'total', label: 'តម្លៃសរុប ($)', thClass: "header-th" , thStyle : "font-size: 13px; font-family: 'Arial', 'Khmer OS Bokor', sans-serif;"},
         ],
         warehouses : [{text : "ជ្រើសរើស ឃ្លាំងទំនិញ", value : null}],
         warehouse: null,
@@ -355,9 +364,7 @@
             'scrollbars=no'
           ],
           styles: [
-            'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
-            'https://unpkg.com/kidlat-css/css/kidlat.css',
-            // '~/static/css/app.css',
+            '../static/css/invoice-print.css',
           ],
           autoClose: true,
         },
@@ -369,7 +376,9 @@
           discount: 0,
           invoice_id: null,
           exchange_rate: 4100,
-          subtotal : 0
+          subtotal : 0,
+          receive_money_usd: 0,
+          receive_money_kh: 0,
         },
         product_select: null,
         productOptions : [],
@@ -400,9 +409,23 @@
     computed: {
       rows() {
         return this.items.length
-      }
+      },
     },
     methods: {
+      discountPrice(order){
+        const discountPrice = (parseFloat(order.subtotal) * (parseFloat(order.discount) / 100));
+        return discountPrice.toFixed(2);
+      },
+      vatPrice(order){
+        const totalAfterDiscount = (parseFloat(order.subtotal) - this.discountPrice(order));
+        const vatPrice = (totalAfterDiscount * (parseFloat(order.vat) / 100));
+        return vatPrice.toFixed(2);
+      },
+      grandTotalWithVat(order){
+        const totalAfterDiscount = (parseFloat(order.subtotal) - this.discountPrice(order));
+        const grandTotal = (parseFloat(order.grandtotal) + ((parseFloat(order.vat) / 100) * totalAfterDiscount));
+        return grandTotal.toFixed(2);
+      },
       async getListProduct($warehouse){
         let vm = this;
         vm.products = [];
@@ -486,63 +509,78 @@
         self.isLoading = true;
         self.items = [];
         let api = ($filterDate ? ("/saletoday/" + $filterDate) : ("/salebywarehouse"));
-        let fullApi = (api + ("/" + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))) + "?page=" + self.currentPage);
+        let fullApi = (api + ("/" + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))) + ($filterDate== null ? ("?page=" + self.currentPage) : ""));
         await self.$axios.get('/api' + fullApi).then(function (response) {
           self.isLoading = false;
-          if(response && response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")){
-            self.orders = response.data.data;
-            self.orderList = self.cloneObject(response.data.data);
-            if(self.orders.length > 0){
-              for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
-                let orderItem = self.orders[indexOrder];
-                let date = "";
-                if(orderItem && orderItem.created_at){
-                  date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
-                }
+          if($filterDate){
+            self.orders = response.data;
+            self.orderList = self.cloneObject(response.data);
+          }
+          else {
+            if(response && response.hasOwnProperty("data") && response.data && response.data.hasOwnProperty("data")){
+              self.orders = response.data.data;
+              self.orderList = self.cloneObject(response.data.data);
 
-                let customerItem = self.filterDataCustomerList(orderItem.customer_id);
-                let user = self.cloneObject(self.$store.$cookies.get('user'));
-                let itemData = [];
-                let grandtotal = 0;
-                let subtotal = 0;
-                let status_code = 'pending';
-
-                for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
-                  let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
-
-                  subtotal = subtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                  if(orderItem["discount"] > 0){
-                    let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                    grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
-                  }
-                  else {
-                    grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
-                  }
-                }
-
-                itemData["subtotal"] = subtotal.toFixed(2);
-                itemData["grandtotal"] = grandtotal.toFixed(2);
-                itemData["date"] = date;
-                itemData["order_id"] = orderItem.id;
-                itemData["sale_by"] = user.name;
-                if(customerItem){
-                  itemData["customer"] = customerItem["name"];
-                }
-                itemData["invoice_id"] = orderItem["invoice_id"];
-                itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-                itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
-                itemData["receive"] = orderItem["receive"];
-                itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
-                if(parseFloat(itemData["receive"]) === grandtotal){
-                  status_code = 'complete';
-                }
-                itemData["status_code"] = status_code;
-                self.items.push(itemData);
-                self.orderItemList.push(itemData);
-              }
-              self.totalItems = response.data.total;
-              self.perPage = response.data.per_page;
             }
+          }
+          if(self.orders.length > 0){
+            for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
+              let orderItem = self.orders[indexOrder];
+              let date = "";
+              if(orderItem && orderItem.created_at){
+                date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+              }
+
+              let customerItem = self.filterDataCustomerList(orderItem.customer_id);
+              let user = self.cloneObject(self.$store.$cookies.get('user'));
+              let itemData = [];
+              let grandtotal = 0;
+              let subtotal = 0;
+              let status_code = 'pending';
+
+              for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
+                let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
+
+                subtotal = subtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                if(orderItem["discount"] > 0){
+                  let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                  grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
+                }
+                else {
+                  grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
+                }
+              }
+
+              itemData["subtotal"] = subtotal.toFixed(2);
+              itemData["grandtotal"] = grandtotal.toFixed(2);
+              itemData["date"] = date;
+              itemData["order_id"] = orderItem.id;
+              itemData["sale_by"] = user.name;
+
+              itemData["receive_money_kh"] =  orderItem["receive_money_kh"];
+              itemData["receive_money_usd"] =  orderItem["receive_money_usd"];
+
+              itemData["return_money_kh"] =  orderItem.return_money_kh;
+              itemData["return_money_usd"] =  orderItem.return_money_usd;
+
+              if(customerItem){
+                itemData["customer"] = customerItem["name"];
+              }
+
+              itemData["invoice_id"] = orderItem["invoice_id"];
+              itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
+              itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
+              itemData["receive"] = orderItem["receive"];
+              itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
+              if(parseFloat(itemData["receive"]) === grandtotal){
+                status_code = 'complete';
+              }
+              itemData["status_code"] = status_code;
+              self.items.push(itemData);
+              self.orderItemList.push(itemData);
+            }
+            self.totalItems = response.data.total;
+            self.perPage = response.data.per_page;
           }
         }).catch(function (error) {
           console.log(error);
@@ -576,6 +614,7 @@
         return JSON.parse(JSON.stringify(obj));
       },
       viewOrderData(item){
+        console.log(item);
         this.order = item;
         this.itemsProductDetail = [];
         let discount = 0;
@@ -608,8 +647,10 @@
               if(productItem){
                 data["number"] = (indexOrder + 1);
                 data["name"] = productItem["name"];
+                data["kh_name"] = productItem["kh_name"];
                 data["qty"] = parseInt(orderDetailList[indexOrder]["quantity"]);
                 data["price"] = orderDetailList[indexOrder]["sellprice"];
+
                 let total = (parseFloat(orderDetailList[indexOrder]["sellprice"]) * parseInt(orderDetailList[indexOrder]["quantity"]));
                 data["total"] = total.toFixed(2);
                 data["discount"] = discount > 0 ? (discount) : 0;
@@ -887,7 +928,7 @@
       },
       onResetPrint(){},
       onSubmitToPrint(){
-        //this.$htmlToPaper("invoice-print-again", this.optionStyleHtmlToPaper);
+        // this.$htmlToPaper("invoice-print-again", this.optionStyleHtmlToPaper);
         this.$htmlToPaper("invoice-print-pos-again", this.optionStyleHtmlToPaper);
       },
 
@@ -1019,29 +1060,41 @@
       },
       selectionChangeCustomer($obj){
         if($obj){
-          this.items = [];
-          let orderItems = [];
-          this.isLoading = true;
-          if(this.orders && this.orders.length > 0) {
-            this.isLoading = false;
-            for (let index = 0; index < this.orders.length; index++) {
-              let itemOrder = {};
+          this.filterOrderDataByCustomer($obj["value"]);
+        }
+        else {
+          this.getAllOrderData();
+        }
+        this.$forceUpdate();
+      },
+      async filterOrderDataByCustomer($customerId){
+        let self = this;
+        self.isLoading = true;
+        self.items = [];
+        await self.$axios.get('/api/saleByWarehouseAndUser/' + $customerId + "/" + self.$store.$cookies.get('storeItem')).then(function (response) {
+          self.isLoading = false;
+            if(response && response.hasOwnProperty('data') && response.data.hasOwnProperty("data")){
+              self.orders = response.data.data;
+              self.orderList = self.cloneObject(response.data.data);
+              if(self.orders.length > 0){
+                for(let indexOrder =0; indexOrder < self.orders.length; indexOrder++){
+                  let orderItem = self.orders[indexOrder];
+                  let date = "";
+                  if(orderItem && orderItem.created_at){
+                    date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
+                  }
 
-              let orderItem = this.orders[index];
-              let customer = this.customersList.find(customer => customer.id === orderItem.customer_id);
-              if (customer && customer["id"] === $obj["value"]) {
-                let date = "";
-                if(orderItem && orderItem.created_at){
-                  date = moment(orderItem.created_at, "YYYY-MM-DD").format("DD/MM/YYYY").toString();
-                }
+                  let customerItem = self.filterDataCustomerList(orderItem.customer_id);
+                  let user = self.cloneObject(self.$store.$cookies.get('user'));
+                  let itemData = [];
+                  let grandtotal = 0;
+                  let subtotal = 0;
+                  let status_code = 'pending';
 
-                let customerItem = this.filterDataCustomerList(orderItem.customer_id);
-                let user = this.cloneObject(this.$store.$cookies.get('user'));
-                let grandtotal = 0;
-                if (orderItem.hasOwnProperty("orderdetails") && orderItem.orderdetails.length > 0) {
-                  for (let indexOrderDetail = 0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++) {
+                  for(let indexOrderDetail =0; indexOrderDetail < orderItem.orderdetails.length; indexOrderDetail++){
                     let orderDetailItem = orderItem.orderdetails[indexOrderDetail];
 
+                    subtotal = subtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                     if(orderItem["discount"] > 0){
                       let totalItem = (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                       grandtotal = grandtotal + (totalItem - ((parseFloat(orderItem["discount"]) / 100) * totalItem));
@@ -1050,29 +1103,33 @@
                       grandtotal = grandtotal + (parseInt(orderDetailItem.quantity) * parseFloat(orderDetailItem["sellprice"]));
                     }
                   }
+
+                  itemData["subtotal"] = subtotal.toFixed(2);
+                  itemData["grandtotal"] = grandtotal.toFixed(2);
+                  itemData["date"] = date;
+                  itemData["order_id"] = orderItem.id;
+                  itemData["sale_by"] = user.name;
+                  if(customerItem){
+                    itemData["customer"] = customerItem["name"];
+                  }
+                  itemData["invoice_id"] = orderItem["invoice_id"];
+                  itemData["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
+                  itemData["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
+                  itemData["receive"] = orderItem["receive"];
+                  itemData["status"] = (parseFloat(orderItem["receive"]) === parseFloat(itemData["grandtotal"])) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
+                  if(parseFloat(itemData["receive"]) === grandtotal){
+                    status_code = 'complete';
+                  }
+                  itemData["status_code"] = status_code;
+                  self.items.push(itemData);
+                  self.orderItemList.push(itemData);
                 }
-                itemOrder["order_id"] = orderItem.id;
-                itemOrder["sale_by"] = user.name;
-                if (customerItem) {
-                  itemOrder["customer"] = customerItem["name"];
-                }
-                itemOrder["invoice_id"] = orderItem["invoice_id"];
-                itemOrder["discount"] = (orderItem["discount"] > 0 ? orderItem["discount"] : 0);
-                itemOrder["vat"] = ((orderItem.hasOwnProperty("vat") && orderItem["vat"] > 0) ? (orderItem["vat"] * 100) : 0);
-                itemOrder["grandtotal"] = grandtotal.toFixed(2);
-                itemOrder["receive"] = orderItem["receive"];
-                itemOrder["status"] = parseFloat(orderItem["receive"]) === parseFloat(orderItem["grandtotal"]) ? "<div class=' badge badge-success badge-radius'>Completed</div>" : "<div class='badge badge-danger badge-radius'>Pending</div>";
-                itemOrder["status_code"] = parseFloat(orderItem["receive"]) === parseFloat(orderItem["grandtotal"]) ? "complete" : "pending";
-                orderItems.push(itemOrder);
               }
             }
-          }
-          this.items = this.cloneObject(orderItems);
-        }
-        else {
-          this.getAllOrderData();
-        }
-        this.$forceUpdate();
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
       },
       selectedStatusSale(status_select){
         this.items = this.orderItemList.filter(data=> data.status_code === status_select);
@@ -1116,7 +1173,12 @@
       },
       calculateToRiel($totalPriceAsUSD, $exchangeRate){
         let total = (parseFloat($totalPriceAsUSD) * parseFloat($exchangeRate));
-        return total.toFixed(2);
+        let fixedTotal = total.toFixed(2);
+        let parts = fixedTotal.toString().split(".");
+        const numberPart = parts[0];
+        const decimalPart = parts[1];
+        const thousands = /\B(?=(\d{3})+(?!\d))/g;
+        return numberPart.replace(thousands, ",") + (decimalPart ? "." + decimalPart : "");
       },
   },
     mounted() {
@@ -1134,6 +1196,7 @@
 <style scoped>
   .content-order-list{
     min-height: calc(100vh - 140px);
+    font-family: Arial, "Khmer OS Bokor", sans-serif;
   }
   .table-transaction{
     display: inline-block;
@@ -1210,5 +1273,133 @@
     overflow-y: auto;
     max-height: calc(100vh - 255px);
   }
+
+  @media print {
+    @page {
+      size: 57mm 200mm;
+      margin-top: 5mm;
+      margin-left: 5mm;
+      margin-right: 5mm;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Times New Roman', sans-serif;
+    }
+
+    table {
+      width: 100%;
+    }
+
+    tr {
+      width: 100%;
+
+    }
+
+    h1 {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    #logo {
+      width: 60%;
+      text-align: center;
+      -webkit-align-content: center;
+      align-content: center;
+      padding: 5px;
+      /*margin: 2px;*/
+      display: block;
+      margin: 0 auto;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      -webkit-align-content: center;
+      align-content: center;
+      vertical-align: middle;
+    }
+
+    .items thead {
+      text-align: center;
+    }
+
+    .center-align {
+      text-align: center;
+    }
+
+    .bill-details td {
+      font-size: 10px;
+    }
+
+    .receipt {
+      font-size: medium;
+    }
+
+    .items .heading {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      border-top:1px solid black;
+      margin-bottom: 4px;
+      border-bottom: 1px solid black;
+      vertical-align: middle;
+    }
+
+    .items thead tr th:first-child,
+    .items tbody tr td:first-child {
+      width: 47%;
+      min-width: 47%;
+      max-width: 47%;
+      word-break: break-all;
+      text-align: left;
+    }
+
+    .items td {
+      font-size: 11px;
+      text-align: right;
+      vertical-align: bottom;
+    }
+
+    .price::before {
+      content: "\20B9";
+      font-family: "Arial";
+      text-align: right;
+    }
+
+    .sum-up {
+      text-align: right !important;
+    }
+    .total {
+      font-size: 11px;
+      border-top:1px dashed black !important;
+      border-bottom:1px dashed black !important;
+    }
+    .total.text, .total.price {
+      text-align: right;
+    }
+    .total.price::before {
+      content: "\20B9";
+    }
+    .line {
+      border-top:1px solid black !important;
+    }
+    .heading.rate {
+      width: 20%;
+    }
+    .heading.amount {
+      width: 25%;
+    }
+    .heading.qty {
+      width: 5%
+    }
+    p {
+      padding: 1px;
+      margin: 0;
+    }
+    section, footer {
+      font-size: 10px;
+    }
+  }
+
 
 </style>

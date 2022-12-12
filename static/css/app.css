@@ -2,7 +2,7 @@
   background: url(/images/home-menu-bg-overlay.svg), linear-gradient(to right bottom, #77717e, #c9a8a9);
   background-size: cover;
   height: 100vh;
-  font-family: Arial, "Khmer", sans-serif;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
 }
 
 .clearboth {
@@ -10,7 +10,7 @@
 }
 
 .main-page-content {
-  font-family: Arial, "Khmer", sans-serif;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
   min-height: calc(100vh - 80px);
   background-color: #f8f9fa;
 }
@@ -21,7 +21,7 @@
 
 body {
   /*font-family: "Khmer", sans-serif;*/
-  font-family: Arial, "Khmer", sans-serif;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
 }
 
 .head-title {
@@ -368,12 +368,26 @@ body {
   justify-content: center;
 }
 
+#modal-detail-payment .table-payment{
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
+}
+
 #modal-submit-payment .table-payment th {
   border-top: none;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
 }
 
 #modal-submit-payment .table-payment td {
   border-top: none;
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
+}
+
+#modal-edit-payment .table-product-detail{
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
+  font-size: 13px;
 }
 
 .input-content {
@@ -563,7 +577,8 @@ body {
 }
 
 .header-th {
-  font-size: 17px;
+  /*font-size: 12px;*/
+  font-family: Arial, "Khmer OS Bokor", sans-serif;
 }
 
 @media print {
@@ -653,6 +668,9 @@ body {
 .font-size-22 {
   font-size: 22px;
 }
+.font-size-14{
+  font-size: 14px;
+}
 
 .content-multiple-select .multiselect__placeholder {
   color: #000000;
@@ -678,6 +696,22 @@ body {
   color: #28a745 !important;
   outline: none !important;
   box-shadow: none !important;
+}
+
+.background-color{
+  background-color: red;
+
+}
+.table-primary{
+  border-color: #9fcdff;
+  background-color: #9fcdff;
+}
+.Changes {
+  background-color: red;
+}
+
+.noChange {
+  background-color: red;
 }
 
 .btn-no-background-danger {
@@ -715,10 +749,6 @@ body {
   font-size: 14px;
   border: none !important;
   border-radius: 6px;
-}
-
-.payment-form-modal .table-product-detail tbody tr td {
-  height: 52px;
 }
 
 .active-color {
@@ -842,12 +872,19 @@ body {
 }
 
 #modal-detail-transfer .scroll-table-content {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: calc(100vh - 300px);
 }
 
-
+.require-color{
+ color: #dc3545;
+}
 .menu-text-item:hover {
   background-color: #000000;
   border-radius: 10px;
 }
+
+@page{
+  size: auto;
+}
+

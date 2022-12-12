@@ -1,14 +1,11 @@
 export default function ({ store, redirect }){
   if(!store.$cookies.get("token")){
-    //return redirect('/login');
-
-    const inBrowser = typeof window !== 'undefined';
-    if( inBrowser){
+    if(typeof window !== 'undefined'){
       window.location.replace('/login');
     }
     else {
       return redirect('/login');
     }
-    
+
   }
 }

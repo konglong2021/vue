@@ -1,5 +1,5 @@
 <template>
-  <div class="inventory-dashboard-content main-page-content" v-can="'inventory_access'">
+  <div class="inventory-dashboard-content main-page-content">
     <div class="full-content">
       <div class="control-panel">
         <div class="panel-top">
@@ -16,19 +16,19 @@
                       v-model="searchInput" @keyup.enter="searchStock()" @change="handleClick" />
                   </div>
                 </b-col>
-                <div class="btn-wrapper margin-right-20-percentage">
+                <div class="btn-wrapper margin-right-20-percentage" v-can="'inventory_access'">
                   <b-button href="#" title="Add new Product" size="sm" variant="primary" @click="showModal()">
                     <span class="margin-span-btn">{{$t('title_new_product')}}</span>
                     <i class="fa fa-plus" aria-hidden="true"></i>
                   </b-button>
                 </div>
-                <div class="btn-wrapper margin-right-20-percentage">
+                <div class="btn-wrapper margin-right-20-percentage" v-can="'inventory_access'">
                   <b-button href="#" title="Add new Supplier" size="sm" variant="primary" @click="showSupplierModal()">
                     <span class="margin-span-btn">{{$t('title_new_supplier')}}</span>
                     <i class="fa fa-plus" aria-hidden="true"></i>
                   </b-button>
                 </div>
-                <div class="btn-wrapper">
+                <div class="btn-wrapper" v-can="'inventory_access'">
                   <b-button href="#" title="Add new WareHouse" size="sm" variant="primary"
                     @click="showWareHouseModal()">
                     <span class="margin-span-btn">{{$t('title_new_warehouse')}}</span>
@@ -46,7 +46,7 @@
           <div class="spinner-grow text-muted"></div>
         </div>
         <div class="content-data" v-if="!loadingFields.stockLoading && !loadingFields.productListLoading">
-          <div class="btn-wrapper margin-btn" v-if="!isShowFormAddProductInPurchase">
+          <div class="btn-wrapper margin-btn" v-if="!isShowFormAddProductInPurchase" v-can="'inventory_access'">
             <b-button v-if="stockTransfer.show === false" href="#" size="sm" variant="primary"
               title="Add new purchase record" @click="showPurchaseModal()">
               <span class="margin-span-btn">{{$t('stock_in')}}</span>
@@ -64,9 +64,12 @@
             </div>
           </div>
           <div class="display-inline-block full-with" v-if="!isShowFormAddProductInPurchase">
-            <transfer-stock v-model="stockTransfer" :warehouseOption="warehouseOption"
-              :products="productListOptionForTransfer" :productList="productListForTransfer"></transfer-stock>
-            <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
+            <transfer-stock
+              v-model="stockTransfer" :warehouseOption="warehouseOption"
+              :products="productListOptionForTransfer" :productList="productListForTransfer" v-can="'inventory_access'"
+              :warehouseList="warehouseList"
+            ></transfer-stock>
+            <div class="margin-5" v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading" v-can="'inventory_access'">
               <h4 class="font-700">{{$t('product_list')}}</h4>
               <b-table :items="items" :fields="fields" stacked="md" show-empty small>
                 <template #cell(actions)="row">
@@ -83,19 +86,21 @@
               </b-table>
             </div>
             <div class="full-content" v-if="stockTransfer.show === false">
-              <div class="card">
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <b-table id="my-table-stock" class="table table-striped table-bordered content-table-scroll-stock"
-                      v-if="!loadingFields.stockLoading && isShowStockTable" sticky-header="true" :items="stockItems"
-                      :fields="stockFields" head-variant="light">
-                    </b-table>
-                  </div>
+              <div class="content-table-data">
+                <div class="table-responsive" v-if="stockItems.length > 0">
+                  <b-table id="table-stock" class="table table-striped table-bordered"
+                           v-if="!loadingFields.stockLoading && isShowStockTable"
+                           :items="stockItems"
+                           :fields="stockFields"
+                           head-variant="light">
+                  </b-table>
                 </div>
+                <div v-if="stockItems.length === 0"><h3 class="text-center color-info">មិនមានទំនិញក្នុងស្តុកទេ</h3></div>
               </div>
+              <b-pagination v-if="stockItems.length > 0" align="right" style="margin-top: 10px !important;" size="md" :disabled="loadingFields.stockLoading || !isShowStockTable" :total-rows="totalItems" v-model="currentPage" @change="currentPageClick($event)" :per-page="perPage" first-number last-number></b-pagination>
             </div>
           </div>
-          <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading">
+          <div v-if="isShowFormAddProductInPurchase && !loadingFields.productListLoading" v-can="'inventory_view'">
             <inventory-stock :productList="productList" :warehouses="warehouses" :suppliers="suppliers"
               :products="products" :purchase="purchase" @submitPurchase="submitPurchase($event)"
               @discardPurchase="discardPurchase($event)" :vats="vats" />
@@ -103,7 +108,7 @@
         </div>
       </div>
     </div>
-    <add-new-product-modal v-model="newProductModal" @checkingProductAdd="checkingProductAdd($event)" />
+    <add-new-product-modal v-model="newProductModal" @checkingProductAdd="checkingProductAdd($event)" :warehouseList="warehouses" />
     <!--no need to import it will automatically rendering it -->
     <b-modal id="modal-create-supplier" ref="supplier-form-modal" size="lg" @hidden="onResetSupplier"
       :cancel-title="$t('label_cancel_button')" @ok="handleOnSubmitSupplier" :ok-title="$t('label_save_button')"
@@ -252,7 +257,7 @@ export default {
   data() {
     return {
       warehouse_id: null,
-      currentPage: 0,
+      currentPage: 1,
       perPage: 10,
       totalItems: 0,
       stockTransfer: { show: false },
@@ -357,7 +362,6 @@ export default {
       warehouseOption: [],
       productListForTransfer: [],
       productListOptionForTransfer: [],
-
     };
   },
   watch: {
@@ -370,53 +374,54 @@ export default {
       handler(val) {
       }
     },
-    currentPage: {
-      handler: function(value) {
-        // this.fetchData().catch(error => {
-        //   console.error(error)
-        // })
-      }
-    }
   },
   computed: {
   },
   methods: {
+    currentPageClick($event){
+      this.currentPage = $event;
+      if(this.searchInput !== '' && this.searchInput !== null && this.searchInput !== undefined){
+        this.searchStock(this.currentPage);
+      }
+      else {
+        this.showStockTable(this.warehouse, this.currentPage);
+      }
+    },
     async getListProductForTransferStock($warehouse) {
       let self = this;
       self.productListForTransfer = [];
       self.productListOptionForTransfer = [];
 
-      await self.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : self.$store.$cookies.get('storeItem'))).then(function (response) {
-        if (response && response.hasOwnProperty("data")) {
-          let dataResponse = response.data;
-          if (dataResponse && dataResponse.length > 0) {
-            for (let i = 0; i < dataResponse.length; i++) {
-              let productList = dataResponse[i].product;
-              if (productList && productList.length > 0) {
-                for (let index = 0; index < productList.length; index++) {
+      await self.$axios.post('/api/stockbywarehouse',{'warehouse' : self.$store.$cookies.get('storeItem'), pagination: false})
+        .then(function (response) {
+          if (response && response.hasOwnProperty("data")) {
+            let dataResponse = response.data;
+            if (dataResponse && dataResponse.length > 0) {
+              for (let i = 0; i < dataResponse.length; i++) {
+                let productList = dataResponse[i];
+                if (productList && productList.length > 0) {
+                  for (let index = 0; index < productList.length; index++) {
+                    let productOptionItem = { name: '', value: null };
+                    productOptionItem.name = (productList[index].en_name + " - " + productList[index].kh_name + " (" + productList[index].code + ")");
+                    productOptionItem.value = productList[index].product_id;
+                    self.productListForTransfer.unshift(productList[index]);
+                    self.productListOptionForTransfer.unshift(productOptionItem);
+                  }
+                }
+                else if (productList && productList.hasOwnProperty("id")) {
                   let productOptionItem = { name: '', value: null };
-                  productOptionItem.name = (productList[index].en_name + " - " + productList[index].kh_name + " (" + productList[index].code + ")");
-                  productOptionItem.value = productList[index].id;
-
-                  self.productListForTransfer.unshift(productList[index]);
+                  productOptionItem.name = (productList.en_name + " - " + productList.kh_name + " (" + productList.code + ")");
+                  productOptionItem.value = productList.product_id;
+                  self.productListForTransfer.unshift(productList);
                   self.productListOptionForTransfer.unshift(productOptionItem);
                 }
               }
-              else if (productList && productList.hasOwnProperty("id")) {
-                let productOptionItem = { name: '', value: null };
-                productOptionItem.name = (productList.en_name + " - " + productList.kh_name + " (" + productList.code + ")");
-                productOptionItem.value = productList.id;
-
-                self.productListForTransfer.unshift(productList);
-                self.productListOptionForTransfer.unshift(productOptionItem);
-              }
             }
           }
-        }
-      }).catch(function (error) {
-        console.log(error);
-        self.$toast.error("getting data error ").goAway(2000);
-      });
+        }).catch(function (error) {
+          console.log(error);
+          self.$toast.error("getting data error ").goAway(2000);
+        });
     },
     generateImageUrlDisplay(img) {
       if (typeof window !== "undefined") {
@@ -426,36 +431,44 @@ export default {
     selectedWarehouse(warehouse) {
       if (warehouse) {
         this.warehouse_id = warehouse;
-        this.showStockTable(warehouse);
+        this.currentPage = 1;
+        this.totalItems = 0;
+        if(this.searchInput === null || this.searchInput === '' || this.searchInput === undefined){
+          this.showStockTable(warehouse);
+        }
+        else {
+          this.searchStock(this.currentPage);
+        }
       }
     },
-    showStockTable($warehouse) {
+    showStockTable($warehouse, $page = null) {
       this.isShowStockTable = true;
       let vm = this;
       vm.stockItems = [];
       vm.loadingFields.stockLoading = true;
-      vm.$axios.get('/api/stockbywarehouse/' + ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')))
+      vm.$axios.post('/api/stockbywarehouse'+ ($page ? ("?page=" + $page) : (this.currentPage ? "?page=" + this.currentPage : "")),{'warehouse' : ($warehouse ? $warehouse : vm.$store.$cookies.get('storeItem')), pagination: true})
         .then(function (response) {
-          if (response.data) {
+          if (response.data && response.data.hasOwnProperty("data")) {
             vm.loadingFields.stockLoading = false;
-            let dataStock = response.data;
+            let dataStock = response.data.data;
             if (dataStock && dataStock.length > 0) {
               for (let i = 0; i < dataStock.length; i++) {
                 vm.stock = {};
-                let product = dataStock[i]["product"];
                 vm.stock.id = dataStock[i]["id"];
-                vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
+                vm.stock.store = dataStock[i]["warehouse"];
                 vm.stock.product_qty = dataStock[i]["total"].toString();
-                vm.stock.en_name = product["en_name"];
-                vm.stock.kh_name = product["kh_name"];
-                vm.stock.code = product["code"];
-                vm.stock.image = product["image"];
-                vm.stock.sale_price = product["sale_price"].toString();
+                vm.stock.en_name = dataStock[i]["en_name"];
+                vm.stock.kh_name = dataStock[i]["kh_name"];
+                vm.stock.code = dataStock[i]["code"];
+                vm.stock.image = dataStock[i]["image"];
+                vm.stock.sale_price = dataStock[i]["sale_price"].toString();
                 vm.stockItems.push(vm.stock);
               }
               let dataForSort = vm.cloneObject(vm.stockItems);
               vm.stockItems.sort(vm.sortByName);
             }
+            vm.totalItems = response.data.total;
+            vm.perPage = response.data.per_page;
           }
         })
         .catch(function (error) {
@@ -469,7 +482,6 @@ export default {
       }
       return a.kh_name > b.kh_name ? 1 : -1;
     },
-
     async onResetExistingProduct() {
       this.product_select = {
         en_name: '',
@@ -614,7 +626,7 @@ export default {
       vm.productList = [];
       vm.loadingFields.productListLoading = true;
 
-      const response = await this.$axios.get('/api/product');
+      const response = await this.$axios.get('/api/product/0');
       if (response) {
         if (response && response.hasOwnProperty("data")) {
           let dataResponse = response.data;
@@ -695,7 +707,6 @@ export default {
     showTransferStock() {
       this.stockTransfer.show = true;
     },
-
     showSupplierModal() {
       this.$refs['supplier-form-modal'].show();
       this.supplier = {};
@@ -815,7 +826,7 @@ export default {
         for (let index = 0; index < productItems.length; index++) {
           let purchaseDetailItem = {};
           let productTotalPrice = 0;
-
+          purchaseDetailItem["sale_price"] = productItems[index]["sale_price"];
           purchaseDetailItem['product_id'] = productItems[index]['id'];
           purchaseDetailItem['unitprice'] = productItems[index]['import_price'];
           purchaseDetailItem['quantity'] = productItems[index]['qty'];
@@ -832,60 +843,31 @@ export default {
         vm.isShowFormAddProductInPurchase = false;
 
         vm.$toast.info("Data starting submit").goAway(1500);
-
-        for (let indexProduct = 0; indexProduct < productItems.length; indexProduct++) {
-          let productData = vm.productList.find(item => item.id = productItems[indexProduct].id);
-          if (
-            productData && productData.sale_price
-            && productItems[indexProduct].sale_price
-            && parseFloat(productItems[indexProduct].sale_price) !== parseFloat(productData.sale_price)
-          ) {
-            await this.$axios.put('/api/updatesaleprice/' + productItems[indexProduct].id, { sale_price: productItems[indexProduct].sale_price })
-              .then(function (response) {
-                if (response && response.hasOwnProperty("data")) {
-                }
-              })
-              .catch(function (error) {
-                console.log(error);
-                vm.$toast.success("Submit data getting error").goAway(3000);
-              });
-          }
-        }
         await this.$axios.post('/api/purchase', dataSubmit)
           .then(function (response) {
             if (response && response.hasOwnProperty("data")) {
               vm.isShowStockTable = true;
               vm.loadingFields.stockLoading = false;
               vm.purchase = {};
-              vm.$toast.success("Submit data successfully").goAway(2000);
-              if (response && response.data && response.data.message) {
-                vm.$axios.get('/api/stock')
-                  .then(function (response) {
-                    if (response.data) {
-                      vm.stockItems = [];
-                      let dataStock = response.data;
-                      if (dataStock && dataStock.length > 0) {
-                        for (let i = 0; i < dataStock.length; i++) {
-                          vm.stock = {};
-                          let product = dataStock[i]["product"];
-                          vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
-                          vm.stock.product_qty = dataStock[i]["total"].toString();
-                          vm.stock.en_name = product["en_name"];
-                          vm.stock.kh_name = product["kh_name"];
-                          vm.stock.code = product["code"];
-                          vm.stock.image = product["image"];
-                          vm.stock.sale_price = product["sale_price"].toString();
-                          // vm.stockItems.push(vm.stock);
-                          vm.stockItems.unshift(vm.stock);
-                        }
-                      }
-                    }
-                  })
-                  .catch(function (error) {
-                    vm.$toast.error("getting data error ").goAway(2000);
-                    console.log(error);
-                  });
+              let items = response.data["items"];
+              let purchase = response.data["purchase"];
+              for(let item of items){
+                let productItem = vm.productList.find(product => product.id === item.product_id);
+                let warehouse = vm.warehouseList.find(warehouse => warehouse.id === purchase.warehouse_id);
+                if(productItem){
+                  let stockItem = {};
+                  stockItem.id = purchase["id"];
+                  stockItem.store = (warehouse["name"] + " (" + warehouse["address"] + ")");
+                  stockItem.product_qty = item["quantity"].toString();
+                  stockItem.en_name = productItem["en_name"];
+                  stockItem.kh_name = productItem["kh_name"];
+                  stockItem.code = productItem["code"];
+                  stockItem.image = productItem["image"];
+                  stockItem.sale_price = item["sale_price"].toString();
+                  vm.stockItems.push(stockItem);
+                }
               }
+              vm.$toast.success("Submit data successfully").goAway(2000);
             }
           })
           .catch(function (error) {
@@ -908,6 +890,7 @@ export default {
           purchaseDetailItem['product_id'] = vm.items[index]['id'];
           purchaseDetailItem['unitprice'] = vm.items[index]['import_price'];
           purchaseDetailItem['quantity'] = vm.items[index]['qty'];
+          purchaseDetailItem["sale_price"] = vm.items[index]["sale_price"];
           productTotalPrice = parseInt(vm.items[index]['qty']) * parseFloat(this.items[index]['import_price']);
           subtotal += productTotalPrice;
           purchaseDetail.unshift(purchaseDetailItem);
@@ -921,58 +904,32 @@ export default {
         vm.isShowFormAddProductInPurchase = false;
 
         vm.$toast.info("Data starting submit").goAway(1500);
-        // for(let indexProduct =0; indexProduct < vm.items.length; indexProduct++){
-        //   let productData = vm.productList.find(item => item.id = vm.items[indexProduct].id);
-        //   if(
-        //           productData && productData.sale_price
-        //           && vm.items[indexProduct].sale_price
-        //           && parseFloat(vm.items[indexProduct].sale_price) !== parseFloat(productData.sale_price)
-        //   ){
-        //     await this.$axios.put('/api/updatesaleprice/' + vm.items[indexProduct].id, {sale_price : vm.items[indexProduct].sale_price})
-        //             .then(function (response) {
-        //               if(response && response.hasOwnProperty("data")){
-        //               }
-        //             })
-        //             .catch(function (error) {
-        //               console.log(error);
-        //               vm.$toast.success("Submit data getting error").goAway(3000);
-        //             });
-        //   }
-        // }
-
         await this.$axios.post('/api/purchase', dataSubmit)
           .then(function (response) {
             if (response && response.hasOwnProperty("data")) {
               vm.isShowStockTable = true;
               vm.loadingFields.stockLoading = false;
               vm.purchase = {};
+              let items = response.data["items"];
+              let purchase = response.data["purchase"];
+              for(let item of items){
+                let productItem = vm.productList.find(product => product.id === item.product_id);
+                let warehouse = vm.warehouseList.find(warehouse => warehouse.id === purchase.warehouse_id);
+                if(productItem){
+                  let stockItem = {};
+                  stockItem.id = purchase["id"];
+                  stockItem.store = (warehouse["name"] + " (" + warehouse["address"] + ")");
+                  stockItem.product_qty = item["quantity"].toString();
+                  stockItem.en_name = productItem["en_name"];
+                  stockItem.kh_name = productItem["kh_name"];
+                  stockItem.code = productItem["code"];
+                  stockItem.image = productItem["image"];
+                  stockItem.sale_price = item["sale_price"].toString();
+                  vm.stockItems.push(stockItem);
+                }
+              }
               vm.$toast.success("Submit data successfully").goAway(2000);
               if (response && response.data && response.data.message) {
-                vm.$axios.get('/api/stock')
-                  .then(function (response) {
-                    if (response.data) {
-                      vm.stockItems = [];
-                      let dataStock = response.data;
-                      if (dataStock && dataStock.length > 0) {
-                        for (let i = 0; i < dataStock.length; i++) {
-                          vm.stock = {};
-                          let product = dataStock[i]["product"];
-                          vm.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
-                          vm.stock.product_qty = dataStock[i]["total"].toString();
-                          vm.stock.en_name = product["en_name"];
-                          vm.stock.kh_name = product["kh_name"];
-                          vm.stock.code = product["code"];
-                          vm.stock.image = product["image"];
-                          vm.stock.sale_price = product["sale_price"].toString();
-                          vm.stockItems.unshift(vm.stock);
-                        }
-                      }
-                    }
-                  })
-                  .catch(function (error) {
-                    vm.$toast.error("getting data error ").goAway(2000);
-                    console.log(error);
-                  });
               }
             }
           })
@@ -999,36 +956,36 @@ export default {
       }
     },
     handleClick(e) {
+      this.currentPage = 1;
       if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
         this.searchInput = '';
-        this.showStockTable();
+        //this.currentPage = 1;
+        //this.showStockTable((this.warehouse_id !== null ? this.warehouse_id : this.$store.$cookies.get('storeItem')), this.currentPage);
       }
     },
-    async searchStock() {
-      this.isLoading = true;
+    async searchStock($page = null) {
       this.items = [];
       let self = this;
-      self.stockItems = [];
       self.loadingFields.stockLoading = true;
-      console.log(self.warehouse, 'warehouse_id');
-      await self.$axios.post('/api/stock/search', { search: self.searchInput, warehouse_id: self.warehouse }).then(function (response) {
-        if (response.data) {
+      await self.$axios.post('/api/stockbywarehouse' + ($page ? "?page=" + $page : "?page=1"), { search: self.searchInput, warehouse: self.warehouse, pagination: true }).then(function (response) {
+        if (response.data && response.data.hasOwnProperty("data")) {
+          self.stockItems = [];
           self.loadingFields.stockLoading = false;
-          let dataStock = response.data;
+          let dataStock = response.data.data;
           if (dataStock && dataStock.length > 0) {
             for (let i = 0; i < dataStock.length; i++) {
               self.stock = {};
-              let product = dataStock[i]["product"];
-              self.stock.store = dataStock[i]["warehouse"]["name"] + " (" + dataStock[i]["warehouse"]["address"] + ")";
+              self.stock.store = dataStock[i]["warehouse"];
               self.stock.product_qty = dataStock[i]["total"].toString();
-              self.stock.en_name = product["en_name"];
-              self.stock.kh_name = product["kh_name"];
-              self.stock.code = product["code"];
-              self.stock.image = product["image"];
-              self.stock.sale_price = product["sale_price"].toString();
-              //self.stockItems.push(self.stock);
+              self.stock.en_name = dataStock[i]["en_name"];
+              self.stock.kh_name = dataStock[i]["kh_name"];
+              self.stock.code = dataStock[i]["code"];
+              self.stock.image = dataStock[i]["image"];
+              self.stock.sale_price = dataStock[i]["sale_price"].toString();
               self.stockItems.unshift(self.stock);
             }
+            self.totalItems = response.data.total;
+            self.perPage = response.data.per_page;
           }
         }
       }).catch(function (error) {
@@ -1069,7 +1026,6 @@ export default {
     }
   },
   mounted() {
-
     this.getListProductForTransferStock();
     this.getProductList();
     this.getAllWarehouse();
@@ -1105,5 +1061,11 @@ export default {
 
 .content-table-scroll-stock {
   max-height: calc(100vh - 300px);
+}
+.content-table-data{
+  display: inline-block;
+  width: 100%;
+  overflow-y: auto;
+  max-height: calc(100vh - 295px);
 }
 </style>

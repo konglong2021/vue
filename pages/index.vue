@@ -87,7 +87,6 @@ export default {
   },
   mounted() {
     let self = this;
-    console.log(self.$store.$cookies.get('user'));
   }
 };
 </script>

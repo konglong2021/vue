@@ -1,6 +1,12 @@
 <template>
   <b-container >
     <h2 class="text-center text-success" style="margin-bottom: 50px;">បញ្ចូលទំនិញក្នុងស្តុក</h2>
+    <div class="display-inline-block full-with" style="margin-bottom: 20px;">
+      <b-button
+        href="#" size="sm" variant="info"
+        title="Discard stock" @click="discardPurchase()"
+      >ត្រលប់ទៅបញ្ជី</b-button>
+    </div>
     <div class="display-inline-block full-with" v-if="purchase">
       <div class="display-inline-block content-field-purchase float-left" v-if="suppliers && products">
         <p class="text-danger" v-if="suppliers.length === 0 || products.length === 0">
@@ -157,6 +163,9 @@ export default {
           let dataItem = this.productItems.find(item => item.id === $obj.value);
           let index = this.productItems.indexOf(dataItem);
           if(dataItem && dataItem.hasOwnProperty("id")){
+            if(itemsData[index].hasOwnProperty("sale_price")){
+              itemsData[index]["sale_price"] = 0;
+            }
             if(itemsData[index].hasOwnProperty("qty") && parseInt(itemsData[index]["qty"]) > 0 && parseInt(itemsData[index]["qty"]) > 1){
               itemsData[index]["qty"] = (parseInt(itemsData[index]["qty"]) + parseInt(productItem.qty));
             }
@@ -166,11 +175,17 @@ export default {
           }
           else {
             productItem["number"] = (this.productItems.length + 1);
+            if(productItem.hasOwnProperty("sale_price")){
+              productItem["sale_price"] = 0;
+            }
             itemsData.unshift(productItem);
           }
         }
         else {
           productItem["number"] = 1;
+          if(productItem.hasOwnProperty("sale_price")){
+            productItem["sale_price"] = 0;
+          }
           itemsData.unshift(productItem);
         }
         this.productItems = this.cloneObject(itemsData);
@@ -183,6 +198,7 @@ export default {
     checkingToDisable(){
       let countInputQty = 0;
       let countInputPrice = 0;
+      let countInputSalePrice = 0;
       let shouldBeDisable = false;
       if(this.productItems && this.productItems.length > 0){
         for (let i=0; i< this.productItems.length; i++){
@@ -192,8 +208,11 @@ export default {
           if(this.productItems[i] && this.productItems[i].hasOwnProperty("import_price") && this.productItems[i]["import_price"] > 0){
             countInputPrice = (countInputPrice + 1);
           }
+          if(this.productItems[i] && this.productItems[i].hasOwnProperty("sale_price") && this.productItems[i]["sale_price"] > 0){
+            countInputSalePrice = (countInputSalePrice + 1);
+          }
         }
-        shouldBeDisable = (countInputQty < this.productItems.length || countInputPrice < this.productItems.length);
+        shouldBeDisable = (countInputQty < this.productItems.length || countInputPrice < this.productItems.length || countInputSalePrice < this.productItems.length);
       }
       return shouldBeDisable;
     },
