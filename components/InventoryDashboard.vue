@@ -65,6 +65,7 @@
           </div>
           <div class="display-inline-block full-with" v-if="!isShowFormAddProductInPurchase">
             <transfer-stock
+              :listStockOut="listDataStockOut"
               v-model="stockTransfer" :warehouseOption="warehouseOption"
               :products="productListOptionForTransfer" :productList="productListForTransfer" v-can="'inventory_access'"
               :warehouseList="warehouseList"
@@ -362,6 +363,7 @@ export default {
       warehouseOption: [],
       productListForTransfer: [],
       productListOptionForTransfer: [],
+      listDataStockOut: [],
     };
   },
   watch: {
