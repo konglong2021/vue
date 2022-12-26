@@ -4,7 +4,7 @@
         id="modal-create-product" ref="product-form-modal" size="lg"
         @hidden="onReset" cancel-title="បោះបង់"
         @ok="handleSubmit" ok-title="រក្សាទុក" title="បង្កើតទំនិញថ្មី"
-        :ok-disabled="!product.brand || !product.category || !product.sale_price"
+        :ok-disabled="modalDataInputIsOk"
         no-close-on-backdrop
       >
         <b-form enctype="multipart/form-data" @submit.stop.prevent="onSubmit">
@@ -17,13 +17,6 @@
             </div>
           </div>
           <div class="full-content">
-            <b-row>
-              <b-col sm="12">
-                <div v-if="errors.length">
-                  <b class="text-danger">បញ្ចូលទិន្នន័យទាំងអស់!!!!!:</b>
-                </div>
-              </b-col>
-            </b-row>
             <b-row class="my-1">
               <b-col sm="4"><label :for="'input-enname'" class="label-input">ឈ្មោះទំនិញជាអង់គ្លេស</label></b-col>
               <b-col sm="8">
@@ -47,7 +40,10 @@
               <b-col sm="8">
                 <b-form-select
                   :id="'input-category'" class="form-control input-content"
-                  v-model="product.category" :options="categories" required></b-form-select>
+                  v-model="product.category" :options="categories"
+                  v-on:change="checkingInputData()"
+                  required
+                ></b-form-select>
               </b-col>
             </b-row>
             <b-row class="my-1">
@@ -64,14 +60,17 @@
             <b-row class="my-1">
               <b-col sm="4"><label :for="'input-brand'" class="label-input">ឃ្លាំងទំនិញ</label></b-col>
               <b-col sm="8">
-                <b-form-select class="form-control input-content input-select-warehouse" v-model="product.warehouse" :options="warehouseOption"
+                <b-form-select
+                  class="form-control input-content input-select-warehouse"
+                  v-model="product.warehouse" :options="warehouseOption"
+                  @update="checkingInputData()"
                 ></b-form-select>
               </b-col>
             </b-row>
             <b-row class="my-1">
               <b-col sm="4"><label :for="'input-sale_price'" class="label-input">តម្លៃលក់ ($)</label></b-col>
               <b-col sm="8">
-                <b-form-input :id="'input-sale_price'" type="number" class="input-content" v-model="product.sale_price" required></b-form-input>
+                <b-form-input :id="'input-sale_price'" type="number" class="input-content" v-model="product.sale_price" @update="checkingInputData()" required></b-form-input>
               </b-col>
             </b-row>
             <b-row class="my-1">
@@ -127,6 +126,7 @@
         categoriesList: [],
         brandList: [],
         warehouseDefault : this.$store.$cookies.get('storeItem'),
+        modalDataInputIsOk: true
       };
     },
     watch:{
@@ -135,6 +135,7 @@
          handler(value){
            if(value===true){
              this.$refs['product-form-modal'].show();
+             console.log(this.productItemSelected);
              this.getBrands();
              this.getCategories();
            }
@@ -151,33 +152,6 @@
     mounted(){
     },
     methods: {
-      checkForm: function (e) {
-        this.errors = [];
-
-        if (!this.product.category) {
-          this.errors.push("categor required.");
-        }
-        if (!this.product.en_name) {
-          this.errors.push('English name required.');
-        }
-        if (!this.product.kh_name) {
-          this.errors.push('Khmer name required.');
-        }
-        if (!this.product.kh_name) {
-          this.errors.push('Khmer name required.');
-        }
-        if (!this.product.sale_price) {
-          this.errors.push('Selling price required.');
-        }
-        if (!this.product.description) {
-          this.errors.push('Description required.');
-        }
-
-        if (!this.errors.length) {
-          return true;
-        }
-        e.preventDefault();
-      },
       async getBrands(){
         let vm = this;
         vm.brands = [];
@@ -275,6 +249,7 @@
           await vm.$axios.post('/api/product/' + vm.product.id, formData)
             .then(function (response) {
               if(response){
+                vm.modalDataInputIsOk = true;
                 vm.$toast.success("Submit data successfully").goAway(2000);
                if(response.hasOwnProperty("data") && response.data){
                  let Brands = vm.cloneObject(response.data["Brands"]);
@@ -316,6 +291,7 @@
           if(responseProduct){
             vm.$toast.success("Submit data successfully").goAway(2000);
             if(responseProduct.hasOwnProperty("data")){
+              vm.modalDataInputIsOk = true;
               let brandList = responseProduct.data.hasOwnProperty("Brands") ? responseProduct.data.Brands : [];
               let itemProduct = vm.cloneObject(responseProduct.data.product);
 
@@ -412,6 +388,9 @@
       cloneObject(obj) {
         return JSON.parse(JSON.stringify(obj));
       },
+      checkingInputData(){
+        this.modalDataInputIsOk = (!this.product.brand || (this.product.brand && this.product.brand.length === 0) || !this.product.category || !this.product.sale_price || !this.product.warehouse);
+      }
     },
   }
 </script>
